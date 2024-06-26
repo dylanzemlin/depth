@@ -39,6 +39,9 @@ export default function Navbar() {
                         <li>
                             <a href="/accounts/abc123" className="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-violet-100">Discover Credit</a>
                         </li>
+                        <li>
+                            <a href="/accounts/abc123" className="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-violet-100">Amazon Credit</a>
+                        </li>
                     </ul>
                     <li className="w-full">
                         <a href="/transactions" className="py-2 w-full hover:bg-violet-100 flex items-center px-4 gap-4 rounded-md">
