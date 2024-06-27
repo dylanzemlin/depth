@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Script from "next/script";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -16,10 +15,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${inter.className} flex flex-row`}>
+    <html lang="en light" style={{ colorScheme: "light" }}>
+      <body className={`${inter.className} flex flex-col xl:flex-row overflow-y-auto scroll-auto antialiased`}>
         {children}
-        <Script src="https://unpkg.com/flowbite@1.5.1/dist/flowbite.js" />
+        <script src="/3rd/flowbite.min.js" />
       </body>
     </html>
   );

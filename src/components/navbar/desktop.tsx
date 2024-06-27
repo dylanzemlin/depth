@@ -1,9 +1,9 @@
 import { FaFolder, FaHome, FaMoneyBill } from "react-icons/fa";
 import { FaArrowsLeftRight, FaVectorSquare } from "react-icons/fa6";
 
-export default function Navbar() {
+export default function DesktopNav() {
     return (
-        <nav className="border-gray-200 border flex flex-col items-center min-w-56 p-2 px-4">
+        <div className="hidden lg:flex flex-col h-full items-center">
             {/* Header */}
             <div className="py-3 flex flex-row gap-4">
                 <span className="text-3xl font-semibold self-center">
@@ -22,6 +22,12 @@ export default function Navbar() {
                             Home
                         </a>
                     </li>
+                    <li className="w-full">
+                        <a href="/transactions" className="py-2 w-full hover:bg-violet-100 flex items-center px-4 gap-4 rounded-md">
+                            <FaArrowsLeftRight className="inline-block w-6 h-6" />
+                            Transactions
+                        </a>
+                    </li>
                     <button type="button" className="py-2 w-full hover:bg-violet-100 flex items-center px-4 gap-4 rounded-md" aria-controls="accounts_dropdown" data-collapse-toggle="accounts_dropdown">
                         <FaFolder className="inline-block w-6 h-6" />
                         <span className="flex-1 text-left rtl:text-right whitespace-nowrap">Accounts</span>
@@ -31,7 +37,7 @@ export default function Navbar() {
                     </button>
                     <ul id="accounts_dropdown" className="-my-2">
                         <li>
-                            <a href="/accounts/abc123" className="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-violet-100">USAA</a>
+                            <a href="/accounts/abc123" className="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-violet-100">USAA Debit</a>
                         </li>
                         <li>
                             <a href="/accounts/abc123" className="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-violet-100">Discover Savings</a>
@@ -43,12 +49,6 @@ export default function Navbar() {
                             <a href="/accounts/abc123" className="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-violet-100">Amazon Credit</a>
                         </li>
                     </ul>
-                    <li className="w-full">
-                        <a href="/transactions" className="py-2 w-full hover:bg-violet-100 flex items-center px-4 gap-4 rounded-md">
-                            <FaArrowsLeftRight className="inline-block w-6 h-6" />
-                            Transactions
-                        </a>
-                    </li>
                 </ul>
             </div>
 
@@ -101,6 +101,6 @@ export default function Navbar() {
                     </div>
                 </div>
             </div>
-        </nav>
+        </div>
     )
 }

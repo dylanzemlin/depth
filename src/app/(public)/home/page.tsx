@@ -1,3 +1,4 @@
+import { Card, LineChart } from "@tremor/react";
 import { useId } from "react";
 
 type ProgressTestProps = {
@@ -42,14 +43,120 @@ const ProgressTest = (props: ProgressTestProps) => {
     )
 }
 
+const chartdata = [
+    {
+        date: 'Jan 22',
+        Expenses: 2890,
+        Deposits: 2338,
+    },
+    {
+        date: 'Feb 22',
+        Expenses: 2756,
+        Deposits: 2103,
+    },
+    {
+        date: 'Mar 22',
+        Expenses: 3322,
+        Deposits: 2194,
+    },
+    {
+        date: 'Apr 22',
+        Expenses: 3470,
+        Deposits: 2108,
+    },
+    {
+        date: 'May 22',
+        Expenses: 3475,
+        Deposits: 1812,
+    },
+    {
+        date: 'Jun 22',
+        Expenses: 3129,
+        Deposits: 1726,
+    },
+    {
+        date: 'Jul 22',
+        Expenses: 3490,
+        Deposits: 1982,
+    },
+    {
+        date: 'Aug 22',
+        Expenses: 2903,
+        Deposits: 2012,
+    },
+    {
+        date: 'Sep 22',
+        Expenses: 2643,
+        Deposits: 2342,
+    },
+    {
+        date: 'Oct 22',
+        Expenses: 2837,
+        Deposits: 2473,
+    },
+    {
+        date: 'Nov 22',
+        Expenses: 2954,
+        Deposits: 3848,
+    },
+    {
+        date: 'Dec 22',
+        Expenses: 3239,
+        Deposits: 3736,
+    },
+]
+
 export default function Home() {
     return (
-        <main className="flex min-h-screen flex-col items-center justify-between p-12">
+        <main className="flex min-h-screen w-full flex-col gap-4 p-4 md:p-12 overflow-hidden overflow-y-auto">
             <section aria-labelledby="current-budget">
-                <h1 className="scroll-mt-10 text-3xl font-semiboldsm:text-xl">
+                <h1 className="scroll-mt-10 text-3xl mb-2">
+                    Overview
+                </h1>
+                <div className="flex gap-4 flex-wrap">
+                    <Card className="max-w-sm">
+                        <h4 className="text-tremor-default text-tremor-content">
+                            Total Balance
+                        </h4>
+                        <p className="font-semibold text-2xl">
+                            $71,465
+                        </p>
+                    </Card>
+                    <Card className="max-w-sm">
+                        <h4 className="text-tremor-default text-tremor-content">
+                            Income (Month)
+                        </h4>
+                        <p className="font-semibold text-2xl">
+                            $71,465
+                        </p>
+                    </Card>
+                    <Card className="max-w-sm">
+                        <h4 className="text-tremor-default text-tremor-content">
+                            Expenses (Month)
+                        </h4>
+                        <p className="font-semibold text-2xl">
+                            $71,465
+                        </p>
+                    </Card>
+                </div>
+
+                <div className="scroll-mt-10 text-xl">
+                    <LineChart
+                        className="h-72"
+                        data={chartdata}
+                        index="date"
+                        yAxisWidth={65}
+                        categories={['Expenses', 'Deposits']}
+                        colors={['indigo', 'cyan']}
+                    />
+                </div>
+            </section>
+
+            <section aria-labelledby="current-budget" className="max-w-xl md:max-w-4xl">
+                <h1 className="scroll-mt-10 text-3xl">
                     Budget
                 </h1>
-                <ul role="list" className="mt-4 space-5 min-w-48 flex flex-col gap-8 max-h-28 w-full flex-wrap">
+                <ul role="list" className="mt-4 space-5 min-w-48 flex flex-col gap-8 max-h-full md:max-h-28 w-full flex-wrap">
                     <li>
                         <ProgressTest title="Dates" value={492.15} max={1000.00} />
                     </li>
