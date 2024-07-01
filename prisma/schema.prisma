@@ -30,6 +30,9 @@ model User {
 model Account {
     id String @id @default(cuid())
     type AccountType
+    name String
+    balance Float
+    archived Boolean @default(false)
 
     // Attachments
     userId String
@@ -49,6 +52,7 @@ enum AccountType {
 model Category {
     id String @id @default(cuid())
     name String
+    archived Boolean @default(false)
 
     // Attachments
     userId String
