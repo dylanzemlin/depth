@@ -3,7 +3,7 @@
 import { useAuth } from "@/lib/auth";
 import Image from "next/image";
 import { FaFolder, FaHome, FaMoneyBill } from "react-icons/fa";
-import { FaArrowsLeftRight, FaVectorSquare } from "react-icons/fa6";
+import { FaArrowsLeftRight, FaCalendar, FaVectorSquare } from "react-icons/fa6";
 
 export default function DesktopNav() {
     const auth = useAuth();
@@ -32,6 +32,12 @@ export default function DesktopNav() {
                         <a href="/transactions" className="py-2 w-full hover:bg-violet-100 flex items-center px-4 gap-4 rounded-md">
                             <FaArrowsLeftRight className="inline-block w-6 h-6" />
                             Transactions
+                        </a>
+                    </li>
+                    <li className="w-full">
+                        <a href="/subscriptions" className="py-2 w-full hover:bg-violet-100 flex items-center px-4 gap-4 rounded-md">
+                            <FaCalendar className="inline-block w-6 h-6" />
+                            Subscriptions
                         </a>
                     </li>
                     <li className="w-full">
