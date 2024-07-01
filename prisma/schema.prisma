@@ -18,4 +18,106 @@ model User {
     passwordResetToken String?
     passwordResetTokenExpiresAt DateTime?
     authTechnique String // email | google | github
+
+    // Attachments
+    accounts Account[]
+    categories Category[]
+    transactions Transaction[]
+    subscriptions Subscription[]
+    budgets Budget[]
+}
+
+model Account {
+    id String @id @default(cuid())
+    type AccountType
+
+    // Attachments
+    userId String
+    user User @relation(fields: [userId], references: [id])
+
+    transactions Transaction[]
+    subscriptions Subscription[]
+}
+
+enum AccountType {
+    SAVINGS
+    CHECKINGS
+    CREDIT
+    OTHER
+}
+
+model Category {
+    id String @id @default(cuid())
+    name String
+
+    // Attachments
+    userId String
+    user User @relation(fields: [userId], references: [id])
+
+    transactions Transaction[]
+    subscriptions Subscription[]
+    budgets Budget[]
+}
+
+model Transaction {
+    id String @id @default(cuid())
+    amount Float
+    description String
+    date DateTime
+    type TransactionType
+
+    // Attachments
+    userId String
+    user User @relation(fields: [userId], references: [id])
+
+    accountId String
+    account Account @relation(fields: [accountId], references: [id])
+
+    categoryId String
+    category Category @relation(fields: [categoryId], references: [id])
+}
+
+enum TransactionType {
+    INCOME
+    EXPENSE
+}
+
+model Subscription {
+    id String @id @default(cuid())
+    description String
+    startDate DateTime
+    endDate DateTime?
+    amount Float
+    frequency SubscriptionFrequency
+
+    // Attachments
+    userId String
+    user User @relation(fields: [userId], references: [id])
+
+    categoryId String
+    category Category @relation(fields: [categoryId], references: [id])
+
+    accountId String
+    account Account @relation(fields: [accountId], references: [id])
+}
+
+enum SubscriptionFrequency {
+    DAILY
+    WEEKLY
+    BIWEEKLY
+    MONTHLY
+    YEARLY
+}
+
+model Budget {
+    id String @id @default(cuid())
+    amount Float
+    startDate DateTime
+    endDate DateTime?
+
+    // Attachments
+    userId String
+    user User @relation(fields: [userId], references: [id])
+
+    categories Category[]
 }
