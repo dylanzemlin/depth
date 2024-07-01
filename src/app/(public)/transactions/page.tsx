@@ -36,7 +36,7 @@ export default function Transactions() {
 
                 <div className="space-y-2">
                     {/* Header */}
-                    <div className="md:text-xs">
+                    <div className="md:text-xs mt-4">
                         <ul className="flex flex-col xl:flex-row gap-2 bg-white xl:bg-none" id="dropdown_filters">
                             <li>
                                 <button data-dropdown-toggle="dateRangeDropdown" className="rounded-md border border-gray-300 px-2 py-1.5 hover:bg-gray-50 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-violet-500 flex gap-1 items-center min-w-full xl:min-w-fit">
