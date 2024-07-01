@@ -1,12 +1,29 @@
 "use client";
 
 import { TextInput } from "@tremor/react";
-import { FaGithub, FaGoogle, FaLinkedin } from "react-icons/fa6";
-import { useState } from "react";
+import { FaGithub, FaGoogle } from "react-icons/fa6";
+import { useEffect, useState } from "react";
+import { useAuth } from "@/lib/auth";
+import { usePathname, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 export default function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const pathName = usePathname();
+    const auth = useAuth();
+
+    useEffect(() => {
+        if (searchParams.has("error")) {
+            console.log("Error:", searchParams.get("error"));
+        }
+
+        if (Array.from(searchParams.entries()).length > 0) {
+            router.replace(pathName);
+        }
+    }, [searchParams]);
 
     return (
         <main className="flex items-center justify-center min-h-screen w-full gap-4 p-12 bg-slate-100 flex-col">
@@ -19,7 +36,10 @@ export default function Login() {
                 <div className="flex flex-col gap-2">
                     <TextInput placeholder="Email" value={email} onValueChange={setEmail} />
                     <TextInput placeholder="Password" type="password" value={password} onValueChange={setPassword} />
-                    <button className="text-white p-2 rounded-lg shadow-md bg-violet-500 border w-full hover:bg-violet-600/90 transition-colors mt-2">
+                    <button
+                        disabled={auth.loading || email.length <= 3 || password.length <= 0}
+                        onClick={() => auth.loginWithEmailAndPassword(email, password)}
+                        className="text-white p-2 rounded-lg shadow-md bg-violet-500 border w-full hover:bg-violet-600/90 transition-colors mt-2 disabled:opacity-50">
                         Login
                     </button>
                     <a href="/forgot" className="text-gray-500 text-sm cursor-pointer">Forgot password?</a>
@@ -34,14 +54,14 @@ export default function Login() {
 
                 {/* Google */}
                 <div className="w-full flex flex-col mt-4 gap-2">
-                    <a href="/login/google" className="flex items-center gap-2 bg-white p-2 rounded-lg shadow-md border-gray-2300 border w-full justify-center hover:bg-gray-100 transition-colors">
+                    <button onClick={auth.loginWithGoogle} className="flex items-center gap-2 bg-white p-2 rounded-lg shadow-md border-gray-2300 border w-full justify-center hover:bg-gray-100 transition-colors">
                         <FaGoogle size={24} color="#4285F4" />
                         <span>Google</span>
-                    </a>
-                    <a href="/login/github" className="flex items-center gap-2 bg-white p-2 rounded-lg shadow-md border-gray-2300 border w-full justify-center hover:bg-gray-100 transition-colors">
+                    </button>
+                    <button onClick={auth.loginWithGithub} className="flex items-center gap-2 bg-white p-2 rounded-lg shadow-md border-gray-2300 border w-full justify-center hover:bg-gray-100 transition-colors">
                         <FaGithub size={24} color="#333" />
                         <span>Github</span>
-                    </a>
+                    </button>
                 </div>
             </div>
             <div>

@@ -1,7 +1,13 @@
+"use client";
+
+import { useAuth } from "@/lib/auth";
+import Image from "next/image";
 import { FaFolder, FaHome, FaMoneyBill } from "react-icons/fa";
 import { FaArrowsLeftRight, FaVectorSquare } from "react-icons/fa6";
 
 export default function DesktopNav() {
+    const auth = useAuth();
+
     return (
         <div className="hidden lg:flex flex-col h-full items-center">
             {/* Header */}
@@ -76,8 +82,8 @@ export default function DesktopNav() {
             <div className="mt-auto pb-2">
                 <button id="dropdownAvatarNameButton" data-dropdown-toggle="dropdownAvatarName" className="flex items-center text-sm pe-1 font-medium text-gray-900 rounded-full md:me-0 focus:ring-4 focus:ring-gray-100" type="button">
                     <span className="sr-only">Open user menu</span>
-                    <img className="w-8 h-8 me-2 rounded-full" src="https://ui-avatars.com/api/?rounded=true&name=Dylan%20Zemlin&size=51" alt="user photo" />
-                    Dylan Zemlin
+                    <Image width={64} height={64} className="w-8 h-8 me-2 rounded-full" src={auth.user?.avatarUrl || ""} alt="user photo" />
+                    {auth.user?.name}
                     <svg className="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
                         <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
                     </svg>
@@ -85,8 +91,8 @@ export default function DesktopNav() {
 
                 <div id="dropdownAvatarName" className="z-10 hidden rounded-lg shadow w-44">
                     <div className="px-4 py-3 text-sm text-gray-900">
-                        <div className="font-medium ">Dylan Zemlin</div>
-                        <div className="truncate">dylansmrw@gmail.com</div>
+                        <div className="font-medium ">{auth.user?.name}</div>
+                        <div className="truncate">{auth.user?.email}</div>
                     </div>
                     <ul className="py-2 text-sm text-gray-700" aria-labelledby="dropdownInformdropdownAvatarNameButtonationButton">
                         <li>
@@ -97,7 +103,7 @@ export default function DesktopNav() {
                         </li>
                     </ul>
                     <div className="py-2">
-                        <a href="/signout" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sign out</a>
+                        <button onClick={() => auth.logout()} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sign out</button>
                     </div>
                 </div>
             </div>

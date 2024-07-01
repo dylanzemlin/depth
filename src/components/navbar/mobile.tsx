@@ -1,11 +1,13 @@
 'use client';
 
+import { useAuth } from "@/lib/auth";
 import { useState } from "react";
 import { FaFolder, FaHome, FaMoneyBill } from "react-icons/fa";
 import { FaArrowsLeftRight, FaVectorSquare } from "react-icons/fa6";
 
 export default function MobileNav() {
     const [isOpened, setIsOpened] = useState(false);
+    const auth = useAuth();
 
     return (
         <div className="flex lg:hidden flex-row w-full">
@@ -17,7 +19,7 @@ export default function MobileNav() {
                 <div className="ml-auto flex gap-3">
                     <button id="dropdownMobileAvatarButton" data-dropdown-toggle="dropdownMobileAvatar" data-dropdown-placement="bottom-end" className="p-1 flex items-center text-sm font-medium text-gray-900 rounded-md outline outline-offset-2 outline-0 focus-visible:outline-2 outline-violet-500 shadow-none border-transparent hover:bg-gray-100 data-[state=open]:bg-gray-400/10" type="button">
                         <span className="sr-only">Open user menu</span>
-                        <img className="w-8 h-8 rounded-full" src="https://ui-avatars.com/api/?rounded=true&name=Dylan%20Zemlin&size=51" alt="user photo" />
+                        <img className="w-8 h-8 rounded-full" src={auth.user?.avatarUrl} alt="user photo" />
                     </button>
                     <button type="button" onClick={() => setIsOpened(!isOpened)}>
                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-6 shrink-0 sm:size-5">
@@ -27,8 +29,8 @@ export default function MobileNav() {
                 </div>
                 <div id="dropdownMobileAvatar" className="z-10 hidden rounded-lg shadow-xl border border-gray-200 w-44 bg-white">
                     <div className="px-4 py-3 text-sm text-gray-900">
-                        <div className="font-medium ">Dylan Zemlin</div>
-                        <div className="truncate">dylansmrw@gmail.com</div>
+                        <div className="font-medium ">{auth.user?.name}</div>
+                        <div className="truncate">{auth.user?.email}</div>
                     </div>
                     <ul className="py-2 text-sm text-gray-700" aria-labelledby="dropdownInformdropdownAvatarNameButtonationButton">
                         <li>
@@ -39,7 +41,7 @@ export default function MobileNav() {
                         </li>
                     </ul>
                     <div className="py-2">
-                        <a href="/signout" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sign out</a>
+                        <button onClick={() => auth.logout()} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sign out</button>
                     </div>
                 </div>
             </div>

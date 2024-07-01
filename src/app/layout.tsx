@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import AuthProvider from "@/lib/auth";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -17,8 +18,11 @@ export default function RootLayout({
   return (
     <html lang="en light" style={{ colorScheme: "light" }}>
       <body className={`${inter.className} flex flex-col xl:flex-row overflow-y-auto scroll-auto antialiased`}>
-        {children}
-        <script src="/3rd/flowbite.min.js" />
+        <AuthProvider>
+          {children}
+
+          <script src="/3rd/flowbite.min.js" />
+        </AuthProvider>
       </body>
     </html>
   );
