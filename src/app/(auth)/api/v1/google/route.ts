@@ -58,7 +58,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     const exists = await prisma.user.findFirst({
         where: {
-            email
+            email,
+            NOT: {
+                authTechnique: "google"
+            }
         }
     });
 
@@ -67,8 +70,14 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     }
 
     const urlEncodedName = encodeURIComponent(name);
-    const user = await prisma.user.create({
-        data: {
+    const user = await prisma.user.upsert({
+        where: { email },
+        update: {
+            name,
+            avatarUrl: picture ?? `https://ui-avatars.com/api/?rounded=true&name=${urlEncodedName}&size=51`,
+            authTechnique: "google"
+        },
+        create: {
             email,
             name,
             avatarUrl: picture ?? `https://ui-avatars.com/api/?rounded=true&name=${urlEncodedName}&size=51`,

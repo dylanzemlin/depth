@@ -61,7 +61,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     const exists = await prisma.user.findFirst({
         where: {
-            email: profile.data.email
+            email: profile.data.email,
+            NOT: {
+                authTechnique: "github"
+            }
         }
     });
 
@@ -70,8 +73,14 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     }
 
     const urlEncodedName = encodeURIComponent(profile.data.name);
-    const user = await prisma.user.create({
-        data: {
+    const user = await prisma.user.upsert({
+        where: { email: profile.data.email },
+        update: {
+            name: profile.data.name,
+            avatarUrl: profile.data.avatar_url ?? `https://ui-avatars.com/api/?rounded=true&name=${urlEncodedName}&size=51`,
+            authTechnique: "github"
+        },
+        create: {
             email: profile.data.email,
             name: profile.data.name,
             avatarUrl: profile.data.avatar_url ?? `https://ui-avatars.com/api/?rounded=true&name=${urlEncodedName}&size=51`,
