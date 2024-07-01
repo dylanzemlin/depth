@@ -1,9 +1,25 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { withSessionRoute } from './lib/iron/wrappers';
 
-export function middleware(request: NextRequest) {
+const unauthenticatedPaths = [
+    "/login",
+    "/register"
+]
+
+export async function middleware(request: NextRequest) {
+    const session = await withSessionRoute();
+    if (session.user && unauthenticatedPaths.includes(request.nextUrl.pathname)) {
+        return NextResponse.redirect(new URL("/home", request.nextUrl));
+    }
+
+    // In the future everyone will be allowed to "/", but for now redirect everyone to /login
     if (request.nextUrl.pathname === "/") {
-        return NextResponse.redirect(new URL('/login', request.url))
+        return NextResponse.redirect(new URL("/login", request.nextUrl));
+    }
+
+    if (!session.user && !unauthenticatedPaths.includes(request.nextUrl.pathname)) {
+        return NextResponse.error();
     }
 
     return NextResponse.next();
