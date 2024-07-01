@@ -34,6 +34,18 @@ export default function DesktopNav() {
                             Transactions
                         </a>
                     </li>
+                    <li className="w-full">
+                        <a href="/budgets" className="py-2 w-full hover:bg-violet-100 flex items-center px-4 gap-4 rounded-md">
+                            <FaMoneyBill className="inline-block w-6 h-6" />
+                            Budgets
+                        </a>
+                    </li>
+                    <li className="w-full">
+                        <a href="/categories" className="py-2 w-full hover:bg-violet-100 flex items-center px-4 gap-4 rounded-md">
+                            <FaVectorSquare className="inline-block w-6 h-6" />
+                            Categories
+                        </a>
+                    </li>
                     <button type="button" className="py-2 w-full hover:bg-violet-100 flex items-center px-4 gap-4 rounded-md" aria-controls="accounts_dropdown" data-collapse-toggle="accounts_dropdown">
                         <FaFolder className="inline-block w-6 h-6" />
                         <span className="flex-1 text-left rtl:text-right whitespace-nowrap">Accounts</span>
@@ -55,26 +67,6 @@ export default function DesktopNav() {
                             <a href="/accounts/abc123" className="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-violet-100">Amazon Credit</a>
                         </li>
                     </ul>
-                </ul>
-            </div>
-
-            <div className="h-[1px] w-full bg-gray-200 my-3"></div>
-
-            {/* Seperations */}
-            <div className="w-full">
-                <ul className="w-full flex flex-col gap-4">
-                    <li className="w-full">
-                        <a href="/budgets" className="py-2 w-full hover:bg-violet-100 flex items-center px-4 gap-4 rounded-md">
-                            <FaMoneyBill className="inline-block w-6 h-6" />
-                            Budgets
-                        </a>
-                    </li>
-                    <li className="w-full">
-                        <a href="/categories" className="py-2 w-full hover:bg-violet-100 flex items-center px-4 gap-4 rounded-md">
-                            <FaVectorSquare className="inline-block w-6 h-6" />
-                            Categories
-                        </a>
-                    </li>
                 </ul>
             </div>
 
