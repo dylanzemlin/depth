@@ -1,40 +1,27 @@
 "use client";
 
-import { DateRangePicker, NumberInput, Select, SelectItem, TextInput } from "@tremor/react";
+import { DateRangePicker, NumberInput, Select, SelectItem } from "@tremor/react";
 import { useState } from "react";
-import { FaAnglesLeft, FaAnglesRight, FaArrowsLeftRight, FaEquals, FaGreaterThan, FaLessThan, FaAngleLeft, FaAngleRight, FaWandMagic, FaTrashCan } from "react-icons/fa6";
-
-type TransactionEntry = {
-    id: string;
-    date: string;
-    description: string;
-    amount: number;
-    status: string;
-    account: string;
-}
+import { FaAnglesLeft, FaAnglesRight, FaArrowsLeftRight, FaEquals, FaGreaterThan, FaLessThan, FaAngleLeft, FaAngleRight, FaCircleExclamation, FaCross, FaTrashCan, FaX, FaWandMagic } from "react-icons/fa6";
 
 type FilterDate = {
     from?: Date;
     to?: Date;
 }
 
-export default function Transactions() {
+export default function Budgets() {
     const [filterDate, setFilterDate] = useState<FilterDate>({
         from: undefined,
         to: undefined
     });
     const [filterCondition, setFilterCondition] = useState<string | undefined>(undefined);
-    const [filterCostRange, setFilterCostRange] = useState<(number | undefined)[]>([undefined, undefined]);
-    const [filterStatus, setFilterStatus] = useState<string | undefined>(undefined);
-
-    const [newDescription, setDescription] = useState<string>("");
-    const [newCost, setCost] = useState<number | undefined>(undefined);
+    const [filterGoalRange, setFilterGoalRange] = useState<(number | undefined)[]>([undefined, undefined]);
 
     return (
         <main className="w-full min-h-screen p-2 md:p-12">
             <section aria-labelledby="current-budget">
                 <h1 className="scroll-mt-10 text-3xl">
-                    Transactions
+                    Budgets
                 </h1>
 
                 <div className="space-y-2">
@@ -72,47 +59,10 @@ export default function Transactions() {
                                             <path d="M11 11V5H13V11H19V13H13V19H11V13H5V11H11Z"></path>
                                         </svg>
                                     </span>
-                                    Account
-                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-5 shrink-0 text-gray-500 sm:size-4">
-                                        <path d="M11.9999 13.1714L16.9497 8.22168L18.3639 9.63589L11.9999 15.9999L5.63599 9.63589L7.0502 8.22168L11.9999 13.1714Z"></path>
-                                    </svg>
-                                </button>
-                            </li>
-                            <li>
-                                <button className="rounded-md border border-gray-300 px-2 py-1.5 hover:bg-gray-50 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-violet-500 flex gap-1 items-center min-w-full xl:min-w-fit">
-                                    <span aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-5 -ml-px shrink-0 transition sm:size-4">
-                                            <path d="M11 11V5H13V11H19V13H13V19H11V13H5V11H11Z"></path>
-                                        </svg>
-                                    </span>
                                     Category
                                     <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-5 shrink-0 text-gray-500 sm:size-4">
                                         <path d="M11.9999 13.1714L16.9497 8.22168L18.3639 9.63589L11.9999 15.9999L5.63599 9.63589L7.0502 8.22168L11.9999 13.1714Z"></path>
                                     </svg>
-                                </button>
-                            </li>
-                            <li>
-                                <button data-dropdown-toggle="statusDropdown" className="rounded-md border border-gray-300 px-2 py-1.5 hover:bg-gray-50 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-violet-500 flex gap-1 items-center min-w-full xl:min-w-fit">
-                                    <span aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-5 -ml-px shrink-0 transition sm:size-4">
-                                            <path d="M11 11V5H13V11H19V13H13V19H11V13H5V11H11Z"></path>
-                                        </svg>
-                                    </span>
-                                    Status
-                                    {
-                                        filterStatus ? (
-                                            <>
-                                                <div className="w-[1px] h-4 bg-gray-300"></div>
-                                                <span className="text-violet-600 font-medium">
-                                                    {filterStatus}
-                                                </span>
-                                            </>
-                                        ) : (
-                                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-5 shrink-0 text-gray-500 sm:size-4">
-                                                <path d="M11.9999 13.1714L16.9497 8.22168L18.3639 9.63589L11.9999 15.9999L5.63599 9.63589L7.0502 8.22168L11.9999 13.1714Z"></path>
-                                            </svg>
-                                        )
-                                    }
                                 </button>
                             </li>
                             <li>
@@ -122,7 +72,7 @@ export default function Transactions() {
                                             <path d="M11 11V5H13V11H19V13H13V19H11V13H5V11H11Z"></path>
                                         </svg>
                                     </span>
-                                    Cost
+                                    Goal
                                     {
                                         filterCondition ? (
                                             <>
@@ -130,11 +80,11 @@ export default function Transactions() {
                                                 {
                                                     filterCondition != "is between" ? (
                                                         <span className="text-violet-600 font-medium">
-                                                            {filterCondition} ${filterCostRange[0] ?? 0}
+                                                            {filterCondition} ${filterGoalRange[0] ?? 0}
                                                         </span>
                                                     ) : (
                                                         <span className="text-violet-600 font-medium">
-                                                            {filterCondition} ${filterCostRange[0] ?? 0} and ${filterCostRange[1] ?? 0}
+                                                            {filterCondition} ${filterGoalRange[0] ?? 0} and ${filterGoalRange[1] ?? 0}
                                                         </span>
                                                     )
                                                 }
@@ -156,7 +106,7 @@ export default function Transactions() {
                                 </div>
                             </li>
                             <li className="ml-auto hidden xl:flex">
-                                <button data-modal-target="create_transaction_modal" data-modal-toggle="create_transaction_modal" className="rounded-md border border-gray-300 px-2 py-1.5 hover:bg-gray-50 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-violet-500 flex gap-1 items-center">
+                                <button className="rounded-md border border-gray-300 px-2 py-1.5 hover:bg-gray-50 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-violet-500 flex gap-1 items-center">
                                     <span aria-hidden="true">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-5 -ml-px shrink-0 transition sm:size-4">
                                             <path d="M11 11V5H13V11H19V13H13V19H11V13H5V11H11Z"></path>
@@ -174,22 +124,19 @@ export default function Transactions() {
                             <thead>
                                 <tr className="[&_td:last-child]:pr-4 [&_th:last-child]:pr-4 [&_td:first-child]:pl-4 [&_th:first-child]:pl-4 border-y border-gray-200">
                                     <th className="border-b px-4 text-left font-semibold text-gray-900 border-gray-200 whitespace-nowrap py-1 text-sm">
-                                        Account
+                                        Description
                                     </th>
                                     <th className="border-b px-4 text-left font-semibold text-gray-900 border-gray-200 whitespace-nowrap py-1 text-sm">
                                         Category
                                     </th>
                                     <th className="border-b px-4 text-left font-semibold text-gray-900 border-gray-200 whitespace-nowrap py-1 text-sm">
-                                        Status
+                                        Goal
                                     </th>
                                     <th className="border-b px-4 text-left font-semibold text-gray-900 border-gray-200 whitespace-nowrap py-1 text-sm">
-                                        Description
+                                        Start Date
                                     </th>
                                     <th className="border-b px-4 text-left font-semibold text-gray-900 border-gray-200 whitespace-nowrap py-1 text-sm">
-                                        Amount
-                                    </th>
-                                    <th className="border-b px-4 text-left font-semibold text-gray-900 border-gray-200 whitespace-nowrap py-1 text-sm">
-                                        Date
+                                        End Date
                                     </th>
                                     <th className="border-b px-4 text-left font-semibold text-gray-900 border-gray-200 whitespace-nowrap py-1 text-sm max-w-5">
                                         Edit
@@ -200,31 +147,20 @@ export default function Transactions() {
                                 {
                                     Array.from({ length: 20 }).map((_, index) => (
                                         <tr className="border-b border-gray-200" key={index}>
-                                            <td className="px-4 py-2 text-xs md:text-sm text-blue-500">
-                                                <a href="/accounts/1">USAA</a>
+                                            <td className="px-4 py-2 text-xs md:text-sm">
+                                                General entertainment stuff
                                             </td>
                                             <td className="px-4 py-2 text-xs md:text-sm">
-                                                Groceries
+                                                Entertainment
                                             </td>
                                             <td className="px-4 py-2 text-xs md:text-sm">
-                                                {index % 2 == 0 ? (
-                                                    <span className="whitespace-nowrap rounded text-xs ring-1 bg-emerald-50 text-emerald-800 px-1.5 py-0.5 ring-emerald-600/30">
-                                                        Confirmed
-                                                    </span>
-                                                ) : (
-                                                    <span className="whitespace-nowrap rounded text-xs ring-1 bg-yellow-50 text-yellow-800 ring-yellow-600/30 px-1.5 py-0.5">
-                                                        Pending
-                                                    </span>
-                                                )}
+                                                $500.00
                                             </td>
                                             <td className="px-4 py-2 text-xs md:text-sm">
-                                                Payment for groceries
+                                                2024-07-05
                                             </td>
                                             <td className="px-4 py-2 text-xs md:text-sm">
-                                                $50.00
-                                            </td>
-                                            <td className="px-4 py-2 text-xs md:text-sm">
-                                                2021-12-01
+                                                Never
                                             </td>
                                             <td className="px-4 py-2 text-xs md:text-sm max-w-5">
                                                 <button className="rounded-md whitespace-nowrap text-center transition-all duration-200 ease-in-out focus-visible:outline-2 outline-violet-500 border-gray-300 p-1.5 border hover:bg-gray-100 border-opacity-0 hover:border-opacity-100" data-dropdown-toggle={`row_dropdown_${index}`}>
@@ -234,10 +170,16 @@ export default function Transactions() {
                                                 </button>
                                                 <div id={`row_dropdown_${index}`} className="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700">
                                                     <ul className="p-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownDefaultButton">
-                                                    <li>
+                                                        <li>
                                                             <button className="px-4 py-2 hover:bg-gray-100 rounded-lg w-full text-left font-semibold flex gap-2 items-center">
                                                                 <FaWandMagic />
                                                                 Edit
+                                                            </button>
+                                                        </li>
+                                                        <li>
+                                                            <button className="px-4 py-2 hover:bg-gray-100 text-orange-600 rounded-lg w-full text-left font-semibold flex gap-2 items-center">
+                                                                <FaX />
+                                                                End
                                                             </button>
                                                         </li>
                                                         <li>
@@ -324,60 +266,14 @@ export default function Transactions() {
                             {
                                 filterCondition == "is between" ? (
                                     <div className="flex items-center gap-2">
-                                        <NumberInput placeholder="$0" className="max-w-12" enableStepper={false} onValueChange={(e) => setFilterCostRange([e, filterCostRange[1]])} />
+                                        <NumberInput placeholder="$0" className="max-w-12" enableStepper={false} onValueChange={(e) => setFilterGoalRange([e, filterGoalRange[1]])} />
                                         <span className="text-gray-500">and</span>
-                                        <NumberInput placeholder="$0" className="max-w-12" enableStepper={false} onValueChange={(e) => setFilterCostRange([filterCostRange[0], e])} />
+                                        <NumberInput placeholder="$0" className="max-w-12" enableStepper={false} onValueChange={(e) => setFilterGoalRange([filterGoalRange[0], e])} />
                                     </div>
                                 ) : (
-                                    <NumberInput placeholder="$0" className="max-w-12" enableStepper={false} onValueChange={(e) => setFilterCostRange([e, e])} />
+                                    <NumberInput placeholder="$0" className="max-w-12" enableStepper={false} onValueChange={(e) => setFilterGoalRange([e, e])} />
                                 )
                             }
-                        </div>
-                    </div>
-                </div>
-
-                <div id="statusDropdown" className="z-10 bg-white rounded-md shadow-lg p-2 border border-gray-300 hidden items-center">
-                    <label className="text-tremor-default text-tremor-content dark:text-dark-tremor-content">Select status</label>
-                    <Select className="mx-auto max-w-md bg-white" id="condition" name="condition" value={filterStatus} onValueChange={(e) => {
-                        setFilterStatus(e);
-                    }}>
-                        <SelectItem value="Confirmed" icon={FaEquals}>
-                            Confirmed
-                        </SelectItem>
-                        <SelectItem value="Pending" icon={FaEquals}>
-                            Pending
-                        </SelectItem>
-                    </Select>
-                </div>
-
-                {/* Modals */}
-                <div id="create_transaction_modal" tabIndex={-1} aria-hidden="true" className="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
-                    <div className="relative p-4 w-full max-w-2xl max-h-full">
-                        <div className="relative bg-white rounded-lg shadow">
-                            <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t">
-                                <h3 className="text-xl font-semibold text-gray-900">
-                                    Create Transaction
-                                </h3>
-                                <button type="button" className="transition-all duration-300 text-gray-400 bg-transparent hover:rotate-90 hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center" data-modal-hide="create_category_modal">
-                                    <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
-                                    </svg>
-                                    <span className="sr-only">Close modal</span>
-                                </button>
-                            </div>
-                            <div className="p-4 md:p-5 space-y-4">
-                                <TextInput placeholder="Title" value={newDescription} onValueChange={setDescription} />
-                                <NumberInput value={newCost} onValueChange={setCost} enableStepper={false} placeholder="Cost" />
-                            </div>
-                            <div className="flex items-center p-4 gap-2 md:p-5 border-t border-gray-200 rounded-b text-sm">
-                                <button 
-                                    // disabled={newTitle.length <= 0 || newDescription.length <= 0}
-                                    type="button" 
-                                    className="disabled:opacity-50 transition-all duration-100 rounded-md border border-gray-300 px-2 py-1.5 hover:bg-violet-400 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-violet-500 flex gap-1 items-center bg-violet-300">
-                                    Create
-                                </button>
-                                <button data-modal-hide="create_category_modal" type="button" className="transition-all duration-100 rounded-md border border-gray-300 px-2 py-1.5 hover:bg-gray-50 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-violet-500 flex gap-1 items-center">Cancel</button>
-                            </div>
                         </div>
                     </div>
                 </div>
