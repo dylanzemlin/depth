@@ -4,6 +4,7 @@ import { useAuth } from "@/lib/auth";
 import { useState } from "react";
 import { FaFolder, FaHome, FaMoneyBill } from "react-icons/fa";
 import { FaArrowsLeftRight, FaCalendar, FaVectorSquare } from "react-icons/fa6";
+import Image from "next/image";
 
 export default function MobileNav() {
     const [isOpened, setIsOpened] = useState(false);
@@ -19,7 +20,11 @@ export default function MobileNav() {
                 <div className="ml-auto flex gap-3">
                     <button id="dropdownMobileAvatarButton" data-dropdown-toggle="dropdownMobileAvatar" data-dropdown-placement="bottom-end" className="p-1 flex items-center text-sm font-medium text-gray-900 rounded-md outline outline-offset-2 outline-0 focus-visible:outline-2 outline-violet-500 shadow-none border-transparent hover:bg-gray-100 data-[state=open]:bg-gray-400/10" type="button">
                         <span className="sr-only">Open user menu</span>
-                        <img className="w-8 h-8 rounded-full" src={auth.user?.avatarUrl} alt="user photo" />
+                        {
+                            auth.user && (
+                                <Image width={64} height={64} className="w-8 h-8 me-2 rounded-full" src={auth.user?.avatarUrl || ""} alt="user photo" />
+                            )
+                        }
                     </button>
                     <button type="button" onClick={() => setIsOpened(!isOpened)}>
                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-6 shrink-0 sm:size-5">

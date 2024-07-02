@@ -7,25 +7,25 @@ import { Toaster } from "react-hot-toast";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Depth",
-  description: "A basic finance tool",
+    title: "Depth",
+    description: "A basic finance tool",
 };
 
 export default function RootLayout({
-  children,
+    children,
 }: Readonly<{
-  children: React.ReactNode;
+    children: React.ReactNode;
 }>) {
-  return (
-    <html lang="en light" style={{ colorScheme: "light" }}>
-      <body className={`${inter.className} flex flex-col xl:flex-row overflow-y-auto scroll-auto antialiased`}>
-        <AuthProvider>
-          {children}
+    return (
+        <html lang="en light" style={{ colorScheme: "light" }}>
+            <body className={`${inter.className} flex flex-col xl:flex-row overflow-y-auto scroll-auto antialiased`}>
+                <AuthProvider>
+                    {children}
 
-          <script src="/3rd/flowbite.min.js" />
-          <Toaster position="top-center" />
-        </AuthProvider>
-      </body>
-    </html>
-  );
+                    <script src="/3rd/flowbite.min.js" />
+                    <Toaster position="top-center" />
+                </AuthProvider>
+            </body>
+        </html>
+    );
 }

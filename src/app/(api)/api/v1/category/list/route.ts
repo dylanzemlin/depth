@@ -10,19 +10,42 @@ export async function GET(request: NextRequest): Promise<NextResponse>
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const page = request.nextUrl.searchParams.get("page") ?? "0";
-    const pageAsNumber = parseInt(page, 10);
+    const pageStr = request.nextUrl.searchParams.get("page");
+    const page = pageStr ? parseInt(pageStr) : 0;
+    const perPage = 25;
+
+    const archived = request.nextUrl.searchParams.get("archived");
 
     try {
         const categories = await prisma.category.findMany({
             where: {
                 userId: session.user.id,
+                archived: archived == "none" ? undefined : archived === "true"
             },
-            skip: pageAsNumber * 25,
-            take: 25
+            skip: page ? page * perPage : 0,
+            take: perPage,
+            orderBy: {
+                createdAt: "desc"
+            }
         })
 
-        return NextResponse.json(categories, { status: 200 });
+        const totalCategories = await prisma.category.count({
+            where: {
+                userId: session.user.id,
+                archived: archived == "none" ? undefined : archived === "true"
+            }
+        });
+
+        return NextResponse.json({
+            data: categories,
+            pagination: {
+                nextUrl: totalCategories > (page + 1) * perPage ? `${request.nextUrl.pathname}?page=${page + 1}` : null,
+                prevUrl: page > 0 ? `${request.nextUrl.pathname}?page=${page - 1}` : null,
+                total: totalCategories,
+                current: page,
+                pageSize: perPage
+            }
+        }, { status: 200 });
     } catch (error) {
         return NextResponse.json({ error }, { status: 400 });
     }
