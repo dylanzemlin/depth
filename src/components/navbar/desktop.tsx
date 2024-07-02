@@ -100,8 +100,8 @@ export default function DesktopNav() {
                             <a href="/settings" className="block px-4 py-2 hover:bg-gray-100">Settings</a>
                         </li>
                     </ul>
-                    <div className="py-2">
-                        <button onClick={() => auth.logout()} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sign out</button>
+                    <div className="py-2 w-full">
+                        <button onClick={() => auth.logout()} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-start">Sign out</button>
                     </div>
                 </div>
             </div>
