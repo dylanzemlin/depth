@@ -20,10 +20,10 @@ export async function POST(request: NextRequest): Promise<NextResponse>
         const { title, description } = await schema.validate(await request.json());
 
         // Create category
-        // TODO: FIX
         const category = await prisma.category.create({
             data: {
-                name: title,
+                title,
+                description,
                 user: {
                     connect: {
                         id: session.user.id

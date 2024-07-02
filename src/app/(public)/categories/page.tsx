@@ -1,13 +1,62 @@
 "use client";
 
 import { Select, SelectItem, TextInput } from "@tremor/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { FaAnglesLeft, FaAnglesRight, FaAngleLeft, FaAngleRight, FaWandMagic, FaRegFolder } from "react-icons/fa6";
 
 export default function Categories() {
     const [filterArchived, setArchived] = useState<string | undefined>("Not Archived");
     const [newTitle, setTitle] = useState<string>("");
     const [newDescription, setDescription] = useState<string>("");
+    const [loading, setLoading] = useState<boolean>(false);
+    const [categories, setCategories] = useState<any[]>([]);
+
+    const loadCategories = async () => {
+        const response = await fetch("/api/v1/category/list");
+        if (response.status !== 200) {
+            toast.error("Failed to load categories.");
+            return;
+        }
+
+        const categories = await response.json();
+        setCategories(categories);
+    }
+
+    const createCategory = async () => {
+        if (newTitle.length <= 0 || newDescription.length <= 0) {
+            toast.error("Please fill in all fields.");
+            return;
+        }
+
+        setLoading(true);
+        const response = await fetch("/api/v1/category", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                title: newTitle,
+                description: newDescription
+            })
+        })
+        setLoading(false);
+
+        if (response.status !== 201) {
+            toast.error("Failed to create category.");
+            return;
+        }
+
+        toast.success(`Category "${newTitle}" created.`);
+        await loadCategories();
+        setTitle("");
+        setDescription("");
+        document.querySelector("[data-modal-hide=create_category_modal]")?.dispatchEvent(new MouseEvent("click"));
+    }
+
+    useEffect(() => {
+        loadCategories();
+    }, []);
 
     return (
         <main className="w-full min-h-screen p-2 md:p-12">
@@ -75,42 +124,45 @@ export default function Categories() {
                             </thead>
                             <tbody>
                                 {
-                                    Array.from({ length: 20 }).map((_, index) => (
-                                        <tr className="border-b border-gray-200" key={index}>
-                                            <td className="px-4 py-2 text-xs md:text-sm">
-                                                Entertainment
-                                            </td>
-                                            <td className="px-4 py-2 text-xs md:text-sm">
-                                                Spotify
-                                            </td>
-                                            <td className="px-4 py-2 text-xs md:text-sm max-w-5">
-                                                <button className="rounded-md whitespace-nowrap text-center transition-all duration-200 ease-in-out focus-visible:outline-2 outline-violet-500 border-gray-300 p-1.5 border hover:bg-gray-100 border-opacity-0 hover:border-opacity-100" data-dropdown-toggle={`row_dropdown_${index}`}>
-                                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="remixicon size-4 shrink-0 text-gray-500 group-hover:text-gray-700 group-data-[state=open]:text-gray-700">
-                                                        <path d="M5 10C3.9 10 3 10.9 3 12C3 13.1 3.9 14 5 14C6.1 14 7 13.1 7 12C7 10.9 6.1 10 5 10ZM19 10C17.9 10 17 10.9 17 12C17 13.1 17.9 14 19 14C20.1 14 21 13.1 21 12C21 10.9 20.1 10 19 10ZM12 10C10.9 10 10 10.9 10 12C10 13.1 10.9 14 12 14C13.1 14 14 13.1 14 12C14 10.9 13.1 10 12 10Z"></path>
-                                                    </svg>
-                                                </button>
-                                                <div id={`row_dropdown_${index}`} className="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700">
-                                                    <ul className="p-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownDefaultButton">
-                                                        <li>
-                                                            <button className="px-4 py-2 hover:bg-gray-100 rounded-lg w-full text-left font-semibold flex gap-2 items-center">
-                                                                <FaWandMagic />
-                                                                Edit
-                                                            </button>
-                                                        </li>
-                                                        <li>
-                                                            <button className="px-4 py-2 hover:bg-gray-100 text-red-600 rounded-lg w-full text-left font-semibold flex gap-2 items-center">
-                                                                <FaRegFolder />
-                                                                Archive
-                                                            </button>
-                                                        </li>
-                                                    </ul>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))
+                                    categories.map((category: any) => {
+                                        return (
+                                            <tr className="border-b border-gray-200" key={category.id}>
+                                                <td className="px-4 py-2 text-xs md:text-sm">
+                                                    {category.title}
+                                                </td>
+                                                <td className="px-4 py-2 text-xs md:text-sm">
+                                                    {category.description}
+                                                </td>
+                                                <td className="px-4 py-2 text-xs md:text-sm max-w-5">
+                                                    <button className="rounded-md whitespace-nowrap text-center transition-all duration-200 ease-in-out focus-visible:outline-2 outline-violet-500 border-gray-300 p-1.5 border hover:bg-gray-100 border-opacity-0 hover:border-opacity-100" data-dropdown-toggle={`category_dropdown`}>
+                                                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="remixicon size-4 shrink-0 text-gray-500 group-hover:text-gray-700 group-data-[state=open]:text-gray-700">
+                                                            <path d="M5 10C3.9 10 3 10.9 3 12C3 13.1 3.9 14 5 14C6.1 14 7 13.1 7 12C7 10.9 6.1 10 5 10ZM19 10C17.9 10 17 10.9 17 12C17 13.1 17.9 14 19 14C20.1 14 21 13.1 21 12C21 10.9 20.1 10 19 10ZM12 10C10.9 10 10 10.9 10 12C10 13.1 10.9 14 12 14C13.1 14 14 13.1 14 12C14 10.9 13.1 10 12 10Z"></path>
+                                                        </svg>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        )
+                                    })
                                 }
                             </tbody>
                         </table>
+
+                        <div id={`category_dropdown`} className="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700">
+                            <ul className="p-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownDefaultButton">
+                                <li>
+                                    <button className="px-4 py-2 hover:bg-gray-100 rounded-lg w-full text-left font-semibold flex gap-2 items-center">
+                                        <FaWandMagic />
+                                        Edit
+                                    </button>
+                                </li>
+                                <li>
+                                    <button className="px-4 py-2 hover:bg-gray-100 text-red-600 rounded-lg w-full text-left font-semibold flex gap-2 items-center">
+                                        <FaRegFolder />
+                                        Archive
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
 
                     {/* Footer */}
@@ -180,9 +232,10 @@ export default function Categories() {
                                 <TextInput placeholder="Description" value={newDescription} onValueChange={setDescription} />
                             </div>
                             <div className="flex items-center p-4 gap-2 md:p-5 border-t border-gray-200 rounded-b text-sm">
-                                <button 
-                                    disabled={newTitle.length <= 0 || newDescription.length <= 0}
-                                    type="button" 
+                                <button
+                                    onClick={createCategory}
+                                    disabled={newTitle.length <= 0 || newDescription.length <= 0 || loading}
+                                    type="button"
                                     className="disabled:opacity-50 transition-all duration-100 rounded-md border border-gray-300 px-2 py-1.5 hover:bg-violet-400 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-violet-500 flex gap-1 items-center bg-violet-300">
                                     Create
                                 </button>
