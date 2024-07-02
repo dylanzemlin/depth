@@ -80,6 +80,7 @@ model Transaction {
     description String
     date DateTime
     type TransactionType
+    status TransactionStatus
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
@@ -93,6 +94,12 @@ model Transaction {
 
     categoryId String
     category Category @relation(fields: [categoryId], references: [id])
+}
+
+enum TransactionStatus {
+    CLEARED
+    PENDING
+    CANCELLED
 }
 
 enum TransactionType {
