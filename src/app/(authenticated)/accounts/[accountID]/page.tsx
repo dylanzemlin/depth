@@ -1,7 +1,10 @@
 "use client";
 
+import Loading from "@/components/loading";
+import { Account, AccountType } from "@prisma/client";
 import { Card, DateRangePicker, LineChart, NumberInput, ProgressBar, Select, SelectItem } from "@tremor/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { FaAnglesLeft, FaAnglesRight, FaArrowsLeftRight, FaEquals, FaGreaterThan, FaLessThan, FaAngleLeft, FaAngleRight } from "react-icons/fa6";
 
 type TransactionEntry = {
@@ -85,23 +88,83 @@ const valueFormatter = function (n: number) {
     return '$ ' + new Intl.NumberFormat('us').format(n).toString();
 };
 
-export default function Transactions() {
+export default function AccountPage({ params }: { params: { accountID: string } }) {
+    const [account, setAccount] = useState<Account | null>(null);
+
+    useEffect(() => {
+        async function fetchAccount() {
+            const result = await fetch(`/api/v1/account/${params.accountID}`);
+            if (result.status !== 200) {
+                toast.error('Failed to fetch account');
+                return;
+            }
+
+            const data = await result.json();
+            setAccount(data);
+        }
+
+        fetchAccount();
+    }, []);
+
+    if (account == null) {
+        return (
+            <main className="w-full min-h-screen p-2 md:p-12">
+                <section className="flex items-center justify-center h-full w-full">
+                    <h1 className="scroll-mt-10 text-3xl w-8 h-8">
+                        <Loading />
+                    </h1>
+                </section>
+            </main>
+        )
+    }
+
+    const percentageOfLimit = account.balance / (account.creditLimit ?? 1) * 100;
+
     return (
         <main className="w-full min-h-screen p-2 md:p-12">
-            <section aria-labelledby="current-budget" className="flex flex-col gap-4">
+            <section className="flex flex-col gap-4">
                 <h1 className="scroll-mt-10 text-3xl">
-                    USAA Debit
+                    {account.name}
                 </h1>
 
                 <div className="scroll-mt-10 flex gap-4 flex-wrap">
-                    <Card className="max-w-md">
-                        <h4 className="text-tremor-default text-tremor-content">
-                            Balance
-                        </h4>
-                        <p className="font-semibold text-2xl">
-                            $71,465
-                        </p>
-                    </Card>
+                    {
+                        account.type == AccountType.CREDIT && (
+                            <Card className="max-w-md">
+                                <h4 className="text-tremor-default text-tremor-content">
+                                    Balance
+                                </h4>
+                                <div className="flex gap-2 items-center">
+                                    <p className="font-semibold text-2xl">
+                                        ${account.balance.toFixed(2)}
+                                    </p>
+                                    <span className="text-lg">
+                                        /
+                                    </span>
+                                    <p className="font-semibold text-2xl">
+                                        ${account.creditLimit?.toFixed(2)}
+                                    </p>
+                                </div>
+                                <p className="mt-4 flex items-center justify-between text-tremor-default text-tremor-content dark:text-dark-tremor-content">
+                                    <span>{percentageOfLimit.toFixed(1)}% of limit</span>
+                                    <span>${account.creditLimit?.toFixed(2)}</span>
+                                </p>
+                                <ProgressBar value={percentageOfLimit} className="mt-2" />
+                            </Card>
+                        )
+                    }
+                    {
+                        account.type !== AccountType.CREDIT && (
+                            <Card className="max-w-md">
+                                <h4 className="text-tremor-default text-tremor-content">
+                                    Balance
+                                </h4>
+                                <p className="font-semibold text-2xl">
+                                    ${account.balance.toFixed(2)}
+                                </p>
+                            </Card>
+                        )
+                    }
                     <Card className="max-w-md">
                         <h4 className="text-tremor-default text-tremor-content">
                             Income vs Expenses
@@ -117,27 +180,6 @@ export default function Transactions() {
                                 $1,465
                             </p>
                         </div>
-                    </Card>
-                    <Card className="max-w-md">
-                        <h4 className="text-tremor-default text-tremor-content">
-                            Balance
-                        </h4>
-                        <div className="flex gap-2 items-center">
-                            <p className="font-semibold text-2xl">
-                                $483.35
-                            </p>
-                            <span className="text-lg">
-                                /
-                            </span>
-                            <p className="font-semibold text-2xl">
-                                $3,0000.00
-                            </p>
-                        </div>
-                        <p className="mt-4 flex items-center justify-between text-tremor-default text-tremor-content dark:text-dark-tremor-content">
-                            <span>32% of limit</span>
-                            <span>$3000.00</span>
-                        </p>
-                        <ProgressBar value={32} className="mt-2" />
                     </Card>
                 </div>
 

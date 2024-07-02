@@ -2,11 +2,17 @@
 
 import { useAuth } from "@/lib/auth";
 import Image from "next/image";
-import { FaFolder, FaHome, FaMoneyBill } from "react-icons/fa";
+import { FaFolder, FaHome, FaLink, FaMoneyBill } from "react-icons/fa";
 import { FaArrowsLeftRight, FaCalendar, FaVectorSquare } from "react-icons/fa6";
-import Modal from "../modals/modal";
+import { Account } from "@prisma/client";
+import { accountTypeToDisplayName, accountTypeToIcon } from "./core";
 
-export default function DesktopNav() {
+type DesktopNavProps = {
+    onAccountModalOpen: () => void;
+    accounts: Account[];
+}
+
+export default function DesktopNav(props: DesktopNavProps) {
     const auth = useAuth();
 
     return (
@@ -61,20 +67,23 @@ export default function DesktopNav() {
                         </svg>
                     </button>
                     <ul id="accounts_dropdown" className="-my-2">
+                        {
+                            props.accounts.map((account) => {
+                                return (
+                                    <li key={account.id}>
+                                        <a href={`/accounts/${account.id}`} className="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-violet-100 gap-2 text-nowrap">
+                                            {accountTypeToIcon(account.type)}
+                                            {account.name} ({accountTypeToDisplayName(account.type)})
+                                        </a>
+                                    </li>
+                                )
+                            })
+                        }
                         <li>
-                            <a href="/accounts/abc123" className="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-violet-100">USAA Debit</a>
-                        </li>
-                        <li>
-                            <a href="/accounts/abc123" className="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-violet-100">Discover Savings</a>
-                        </li>
-                        <li>
-                            <a href="/accounts/abc123" className="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-violet-100">Discover Credit</a>
-                        </li>
-                        <li>
-                            <a href="/accounts/abc123" className="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-violet-100">Amazon Credit</a>
-                        </li>
-                        <li>
-                            <button className="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-violet-100">Amazon Credit</button>
+                            <button className="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-violet-100 gap-2 text-nowrap" onClick={props.onAccountModalOpen}>
+                                <FaLink />
+                                Create Account
+                            </button>
                         </li>
                     </ul>
                 </ul>
@@ -113,8 +122,6 @@ export default function DesktopNav() {
                     </div>
                 </div>
             </div>
-
-            <Modal title="Create Account" isOpen={true} />
         </div>
     )
 }
