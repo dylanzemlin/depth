@@ -4,6 +4,7 @@ import { useAuth } from "@/lib/auth";
 import Image from "next/image";
 import { FaFolder, FaHome, FaMoneyBill } from "react-icons/fa";
 import { FaArrowsLeftRight, FaCalendar, FaVectorSquare } from "react-icons/fa6";
+import Modal from "../modals/modal";
 
 export default function DesktopNav() {
     const auth = useAuth();
@@ -72,6 +73,9 @@ export default function DesktopNav() {
                         <li>
                             <a href="/accounts/abc123" className="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-violet-100">Amazon Credit</a>
                         </li>
+                        <li>
+                            <button className="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-violet-100">Amazon Credit</button>
+                        </li>
                     </ul>
                 </ul>
             </div>
@@ -109,6 +113,8 @@ export default function DesktopNav() {
                     </div>
                 </div>
             </div>
+
+            <Modal title="Create Account" isOpen={true} />
         </div>
     )
 }
