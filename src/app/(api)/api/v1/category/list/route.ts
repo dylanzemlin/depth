@@ -25,7 +25,7 @@ export async function GET(request: NextRequest): Promise<NextResponse>
             skip: page ? page * perPage : 0,
             take: perPage,
             orderBy: {
-                createdAt: "desc"
+                title: "asc"
             }
         })
 

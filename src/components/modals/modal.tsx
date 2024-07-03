@@ -31,7 +31,7 @@ export default function Modal(props: ModalProps) {
                 )
             }
 
-            <div className={`relative w-full max-w-${props.size ?? '2xl'} max-h-full z-50`}>
+            <div className={`relative w-full !max-w-2xl max-h-full z-50`}>
                 <div className="bg-white rounded-lg shadow-lg">
                     {/* Header */}
                     <div className="flex items-center justify-between p-5 border-b rounded-t">

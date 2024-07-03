@@ -119,6 +119,8 @@ export default function AccountPage({ params }: { params: { accountID: string } 
     }
 
     const percentageOfLimit = account.balance / (account.creditLimit ?? 1) * 100;
+    const incomePercentage = 1252 / (1252 + 1465) * 100;
+    const expensesPercentage = 1465 / (1252 + 1465) * 100;
 
     return (
         <main className="w-full min-h-screen p-2 md:p-12">
@@ -171,7 +173,7 @@ export default function AccountPage({ params }: { params: { accountID: string } 
                         </h4>
                         <div className="flex gap-2 items-center">
                             <p className="font-semibold text-2xl">
-                                $1,465
+                                $1,252
                             </p>
                             <span className="text-lg">
                                 vs
@@ -179,6 +181,18 @@ export default function AccountPage({ params }: { params: { accountID: string } 
                             <p className="font-semibold text-2xl">
                                 $1,465
                             </p>
+                        </div>
+                        <p className="mt-4 flex items-center justify-between text-tremor-default text-tremor-content dark:text-dark-tremor-content">
+                            <span>{incomePercentage.toFixed(1)}%</span>
+                            <span>{expensesPercentage.toFixed(1)}%</span>
+                        </p>
+                        <div className="flex relative">
+                            <ProgressBar color="blue" value={100} className={`mt-2 [&>*>*]:!rounded-r-none [&>*]:!rounded-r-none`} style={{
+                                width: `${incomePercentage}%`
+                            }} />
+                            <ProgressBar color="red" value={100} className={`mt-2 [&>*>*]:!rounded-l-none [&>*]:!rounded-l-none`} style={{
+                                width: `${expensesPercentage}%`
+                            }} />
                         </div>
                     </Card>
                 </div>

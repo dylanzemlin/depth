@@ -14,7 +14,7 @@ export async function GET(): Promise<NextResponse> {
                 userId: session.user.id
             },
             orderBy: {
-                type: "asc"
+                name: "asc"
             }
         })
 

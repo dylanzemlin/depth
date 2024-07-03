@@ -25,6 +25,17 @@ export async function POST(request: NextRequest): Promise<NextResponse>
     try {
         const { description, amount, type, accountId, categoryId, date, status } = await schema.validate(await request.json());
 
+        const account = await prisma.account.findUnique({
+            where: {
+                id: accountId
+            }
+        })
+
+        if (account == null)
+        {
+            return NextResponse.json({ error: "Account not found" }, { status: 404 });
+        }
+
         // Create transaction
         const transaction = await prisma.transaction.create({
             data: {
@@ -50,6 +61,19 @@ export async function POST(request: NextRequest): Promise<NextResponse>
                 }
             }
         })
+
+        // Update the account if date has occurred or is today and the status is cleared
+        if (status == "cleared" && date <= new Date())
+        {
+            await prisma.account.update({
+                where: {
+                    id: accountId
+                },
+                data: {
+                    balance: account.balance + (type == "income" ? amount : -amount)
+                }
+            })
+        }
 
         return NextResponse.json(transaction, { status: 201 });
     } catch (error) {

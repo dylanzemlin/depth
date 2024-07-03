@@ -132,6 +132,11 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 setUser(data.user);
             }
 
+            if (response.status === 401)
+            {
+                setUser(null);
+            }
+
             setLoading(false);
         }
 
