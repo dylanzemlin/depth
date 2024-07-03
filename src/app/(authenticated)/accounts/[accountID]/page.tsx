@@ -1,88 +1,19 @@
 "use client";
 
 import Loading from "@/components/loading";
-import { Account, AccountType } from "@prisma/client";
-import { Card, DateRangePicker, LineChart, NumberInput, ProgressBar, Select, SelectItem } from "@tremor/react";
+import { Account, AccountType, Transaction } from "@prisma/client";
+import { Card, LineChart, ProgressBar } from "@tremor/react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { FaAnglesLeft, FaAnglesRight, FaArrowsLeftRight, FaEquals, FaGreaterThan, FaLessThan, FaAngleLeft, FaAngleRight } from "react-icons/fa6";
+import dayjs from "dayjs";  
 
-type TransactionEntry = {
-    id: string;
-    date: string;
-    description: string;
-    amount: number;
-    status: string;
-    account: string;
+type AccountDashboardData = {
+    income: number;
+    expenses: number;
+    incomeMapByDay: Record<number, number>;
+    expenseMapByDay: Record<number, number>;
+    recentTransactions: Transaction[];
 }
-
-type FilterDate = {
-    from?: Date;
-    to?: Date;
-}
-
-const chartdata = [
-    {
-        date: 'Jan 22',
-        Expenses: 2890,
-        Deposits: 2338,
-    },
-    {
-        date: 'Feb 22',
-        Expenses: 2756,
-        Deposits: 2103,
-    },
-    {
-        date: 'Mar 22',
-        Expenses: 3322,
-        Deposits: 2194,
-    },
-    {
-        date: 'Apr 22',
-        Expenses: 3470,
-        Deposits: 2108,
-    },
-    {
-        date: 'May 22',
-        Expenses: 3475,
-        Deposits: 1812,
-    },
-    {
-        date: 'Jun 22',
-        Expenses: 3129,
-        Deposits: 1726,
-    },
-    {
-        date: 'Jul 22',
-        Expenses: 3490,
-        Deposits: 1982,
-    },
-    {
-        date: 'Aug 22',
-        Expenses: 2903,
-        Deposits: 2012,
-    },
-    {
-        date: 'Sep 22',
-        Expenses: 2643,
-        Deposits: 2342,
-    },
-    {
-        date: 'Oct 22',
-        Expenses: 2837,
-        Deposits: 2473,
-    },
-    {
-        date: 'Nov 22',
-        Expenses: 2954,
-        Deposits: 3848,
-    },
-    {
-        date: 'Dec 22',
-        Expenses: 3239,
-        Deposits: 3736,
-    },
-]
 
 const valueFormatter = function (n: number) {
     return '$ ' + new Intl.NumberFormat('us').format(n).toString();
@@ -90,6 +21,7 @@ const valueFormatter = function (n: number) {
 
 export default function AccountPage({ params }: { params: { accountID: string } }) {
     const [account, setAccount] = useState<Account | null>(null);
+    const [dashboardData, setDashboardData] = useState<AccountDashboardData | null>(null);
 
     useEffect(() => {
         async function fetchAccount() {
@@ -106,7 +38,24 @@ export default function AccountPage({ params }: { params: { accountID: string } 
         fetchAccount();
     }, []);
 
-    if (account == null) {
+    useEffect(() => {
+        async function fetchDashboardData() {
+            const result = await fetch(`/api/v1/account/${params.accountID}/dashboard`, {
+                method: 'GET'
+            });
+            if (result.status !== 200) {
+                toast.error('Failed to fetch account dashboard data');
+                return;
+            }
+
+            const data = await result.json();
+            setDashboardData(data);
+        }
+
+        fetchDashboardData();
+    }, []);
+
+    if (account == null || dashboardData == null) {
         return (
             <main className="w-full min-h-screen p-2 md:p-12">
                 <section className="flex items-center justify-center h-full w-full">
@@ -118,9 +67,41 @@ export default function AccountPage({ params }: { params: { accountID: string } 
         )
     }
 
-    const percentageOfLimit = account.balance / (account.creditLimit ?? 1) * 100;
-    const incomePercentage = 1252 / (1252 + 1465) * 100;
-    const expensesPercentage = 1465 / (1252 + 1465) * 100;
+    const balance = Math.abs(account.balance);
+    const percentageOfLimit = balance / (account.creditLimit ?? 1) * 100;
+    const incomePercentage = dashboardData?.income / (dashboardData?.income + dashboardData?.expenses) * 100;
+    const expensesPercentage = dashboardData?.expenses / (dashboardData?.income + dashboardData?.expenses) * 100;
+
+    const dayNumToDisplayDate = (dayNum: number) => {
+        return dayjs(new Date(new Date().getFullYear(), new Date().getMonth(), dayNum)).format('MMMM DD');
+    }
+
+    const graphData = Array.from(new Set([
+        ...Object.keys(dashboardData.incomeMapByDay),
+        ...Object.keys(dashboardData.expenseMapByDay)
+    ]))
+    .map((key: any) => {
+        return {
+            date: dayNumToDisplayDate(key),
+            Expenses: dashboardData.expenseMapByDay[key] ?? 0,
+            Deposits: dashboardData.incomeMapByDay[key] ?? 0
+        }
+    });
+
+    const today = new Date().getDate();
+    for (let i = 1; i <= today; i++) {
+        if (graphData.findIndex((d: any) => d.date === dayNumToDisplayDate(i)) === -1) {
+            graphData.push({
+                date: dayNumToDisplayDate(i),
+                Expenses: 0,
+                Deposits: 0
+            });
+        }
+    }
+
+    graphData.sort((a, b) => {
+        return dayjs(a.date).unix() - dayjs(b.date).unix();
+    });
 
     return (
         <main className="w-full min-h-screen p-2 md:p-12">
@@ -138,7 +119,7 @@ export default function AccountPage({ params }: { params: { accountID: string } 
                                 </h4>
                                 <div className="flex gap-2 items-center">
                                     <p className="font-semibold text-2xl">
-                                        ${account.balance.toFixed(2)}
+                                        ${balance.toFixed(2)}
                                     </p>
                                     <span className="text-lg">
                                         /
@@ -173,13 +154,13 @@ export default function AccountPage({ params }: { params: { accountID: string } 
                         </h4>
                         <div className="flex gap-2 items-center">
                             <p className="font-semibold text-2xl">
-                                $1,252
+                                ${dashboardData?.income.toFixed(2) ?? 0}
                             </p>
                             <span className="text-lg">
                                 vs
                             </span>
                             <p className="font-semibold text-2xl">
-                                $1,465
+                                ${dashboardData?.expenses.toFixed(2) ?? 0}
                             </p>
                         </div>
                         <p className="mt-4 flex items-center justify-between text-tremor-default text-tremor-content dark:text-dark-tremor-content">
@@ -204,11 +185,12 @@ export default function AccountPage({ params }: { params: { accountID: string } 
 
                     <LineChart
                         className="h-72"
-                        data={chartdata}
+                        data={graphData}
                         index="date"
                         yAxisWidth={65}
                         categories={['Expenses', 'Deposits']}
                         colors={['indigo', 'cyan']}
+                        curveType={"step"}
                         valueFormatter={valueFormatter}
                     />
                 </div>
@@ -237,22 +219,19 @@ export default function AccountPage({ params }: { params: { accountID: string } 
                                     <th className="border-b px-4 text-left font-semibold text-gray-900 border-gray-200 whitespace-nowrap py-1 text-sm">
                                         Date
                                     </th>
-                                    <th className="border-b px-4 text-left font-semibold text-gray-900 border-gray-200 whitespace-nowrap py-1 text-sm max-w-5">
-                                        Edit
-                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {
-                                    Array.from({ length: 5 }).map((_, index) => (
+                                    dashboardData.recentTransactions.map((transaction, index) => (
                                         <tr className="border-b border-gray-200" key={index}>
                                             <td className="px-4 py-2 text-xs md:text-sm">
-                                                Groceries
+                                                {transaction.categoryId}
                                             </td>
                                             <td className="px-4 py-2 text-xs md:text-sm">
-                                                {index % 2 == 0 ? (
+                                                {transaction.status === 'CLEARED' ? (
                                                     <span className="whitespace-nowrap rounded text-xs ring-1 bg-emerald-50 text-emerald-800 px-1.5 py-0.5 ring-emerald-600/30">
-                                                        Confirmed
+                                                        Cleared
                                                     </span>
                                                 ) : (
                                                     <span className="whitespace-nowrap rounded text-xs ring-1 bg-yellow-50 text-yellow-800 ring-yellow-600/30 px-1.5 py-0.5">
@@ -261,30 +240,13 @@ export default function AccountPage({ params }: { params: { accountID: string } 
                                                 )}
                                             </td>
                                             <td className="px-4 py-2 text-xs md:text-sm">
-                                                Payment for groceries
+                                                {transaction.description}
                                             </td>
                                             <td className="px-4 py-2 text-xs md:text-sm">
-                                                $50.00
+                                                ${transaction.amount.toFixed(2)}
                                             </td>
                                             <td className="px-4 py-2 text-xs md:text-sm">
-                                                2021-12-01
-                                            </td>
-                                            <td className="px-4 py-2 text-xs md:text-sm max-w-5">
-                                                <button className="rounded-md whitespace-nowrap text-center transition-all duration-200 ease-in-out focus-visible:outline-2 outline-violet-500 border-gray-300 p-1.5 border hover:bg-gray-100 border-opacity-0 hover:border-opacity-100" data-dropdown-toggle={`row_dropdown_${index}`}>
-                                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="remixicon size-4 shrink-0 text-gray-500 group-hover:text-gray-700 group-data-[state=open]:text-gray-700">
-                                                        <path d="M5 10C3.9 10 3 10.9 3 12C3 13.1 3.9 14 5 14C6.1 14 7 13.1 7 12C7 10.9 6.1 10 5 10ZM19 10C17.9 10 17 10.9 17 12C17 13.1 17.9 14 19 14C20.1 14 21 13.1 21 12C21 10.9 20.1 10 19 10ZM12 10C10.9 10 10 10.9 10 12C10 13.1 10.9 14 12 14C13.1 14 14 13.1 14 12C14 10.9 13.1 10 12 10Z"></path>
-                                                    </svg>
-                                                </button>
-                                                <div id={`row_dropdown_${index}`} className="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700">
-                                                    <ul className="p-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownDefaultButton">
-                                                        <li>
-                                                            <button className="block px-4 py-2 hover:bg-gray-100 rounded-lg w-full text-left">Edit</button>
-                                                        </li>
-                                                        <li>
-                                                            <button className="block px-4 py-2 hover:bg-gray-100 text-red-600 rounded-lg w-full text-left">Delete</button>
-                                                        </li>
-                                                    </ul>
-                                                </div>
+                                                {dayjs(transaction.date).format('YYYY-MM-DD')}
                                             </td>
                                         </tr>
                                     ))

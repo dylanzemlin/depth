@@ -62,17 +62,18 @@ export async function POST(request: NextRequest): Promise<NextResponse>
             }
         })
 
-        // Update the account if date has occurred or is today and the status is cleared
-        if (status == "cleared" && date <= new Date())
-        {
-            await prisma.account.update({
-                where: {
-                    id: accountId
-                },
-                data: {
-                    balance: account.balance + (type == "income" ? amount : -amount)
+        // Update account data as needed
+        try {
+            const url = request.nextUrl.clone();
+            url.pathname = "/api/sushi/update";
+            url.searchParams.set("target_account", accountId);
+            await fetch(url.toString(), {
+                headers: {
+                    Authorization: `Bearer ${process.env.SUSHI_SECRET}`
                 }
-            })
+            });
+        } catch (error) {
+            console.error("Failed to update account balance", error);
         }
 
         return NextResponse.json(transaction, { status: 201 });
