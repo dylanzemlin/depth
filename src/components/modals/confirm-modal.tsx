@@ -21,14 +21,14 @@ export default function ConfirmModal(props: ModalProps) {
     const closeClasses = 'hidden'
 
     return (
-        <div className={`${props.isOpen ? openClasses : closeClasses} flex overflow-y-auto overflow-x-hidden fixed top-0 right-0 justify-center items-center h-full w-full`} aria-modal={true} role="dialog">
+        <div className={`${props.isOpen ? openClasses : closeClasses} overflow-y-auto overflow-x-hidden fixed top-0 right-0 justify-center items-center h-full w-full z-40`} aria-modal={true} role="dialog">
             {
                 (props.backdrop ?? true) && (
                     <div onClick={props.onClose} className="fixed top-0 right-0 z-40 w-full h-full bg-black backdrop-blur-sm bg-opacity-50" />
                 )
             }
 
-            <div className={`relative w-full max-w-${props.size || '2xl'} max-h-full z-50`}>
+            <div className={`relative w-full !max-w-2xl max-h-full z-50`}>
                 <div className="bg-white rounded-lg shadow-lg">
                     {/* Header */}
                     <div className="flex items-center justify-between p-5 border-b rounded-t">

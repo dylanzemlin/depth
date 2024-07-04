@@ -1,8 +1,11 @@
 "use client";
 
 import Button from "@/components/buttons/button";
+import ConfirmModal from "@/components/modals/confirm-modal";
 import Modal from "@/components/modals/modal";
+import { classNames } from "@/lib/classnames";
 import useSwitch from "@/lib/hooks/useSwitch";
+import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { Account, Category, Transaction, TransactionStatus } from "@prisma/client";
 import { DatePicker, DateRangePicker, NumberInput, Select, SelectItem, TextInput } from "@tremor/react";
 import Link from "next/link";
@@ -39,10 +42,13 @@ export default function Transactions() {
     const [categories, setCategories] = useState<Category[]>([]);
     const [accounts, setAccounts] = useState<Account[]>([]);
     const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+    const [modifiedTransaction, setModifiedTransaction] = useState<Transaction | null>(null);
     const [page, setPage] = useState(0);
 
     const [loading, setLoading] = useState(false);
     const createModalSwitch = useSwitch(false);
+    const editModalSwitch = useSwitch(false);
+    const deleteModalSwitch = useSwitch(false);
     const [createData, setCreateData] = useState({
         accountId: "",
         categoryId: "",
@@ -125,6 +131,48 @@ export default function Transactions() {
         } catch (error) {
             console.error(error);
             toast.error("Failed to fetch transactions, see console for more information");
+        }
+    }
+
+    const deleteTransaction = async () => {
+        try {
+            const response = await fetch(`/api/v1/transaction/${selectedTransaction?.id}`, {
+                method: "DELETE"
+            });
+
+            if (response.status !== 200) {
+                toast.error("Failed to delete transaction");
+                return;
+            }
+
+            toast.success("Transaction deleted successfully");
+            fetchTransactions();
+        } catch (error) {
+            console.error(error);
+            toast.error("Failed to delete transaction, see console for more information");
+        }
+    }
+
+    const editTransaction = async () => {
+        try {
+            const response = await fetch(`/api/v1/transaction/${selectedTransaction?.id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(modifiedTransaction)
+            });
+
+            if (response.status !== 200) {
+                toast.error("Failed to edit transaction");
+                return;
+            }
+
+            toast.success("Transaction edited successfully");
+            fetchTransactions();
+        } catch (error) {
+            console.error(error);
+            toast.error("Failed to edit transaction, see console for more information");
         }
     }
 
@@ -336,14 +384,36 @@ export default function Transactions() {
                                                 <td className="px-4 py-2 text-xs md:text-sm">
                                                     {new Date(transaction.date).toLocaleDateString()}
                                                 </td>
-                                                <td className="px-4 py-2 text-xs md:text-sm max-w-5">
-                                                    <button id={`btn_${transaction.id}`} className="rounded-md whitespace-nowrap text-center transition-all duration-200 ease-in-out focus-visible:outline-2 outline-violet-500 border-gray-300 p-1.5 border hover:bg-gray-100 border-opacity-0 hover:border-opacity-100" onClick={() => {
-                                                        setSelectedTransaction(transaction);
-                                                    }}>
-                                                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="remixicon size-4 shrink-0 text-gray-500 group-hover:text-gray-700 group-data-[state=open]:text-gray-700">
-                                                            <path d="M5 10C3.9 10 3 10.9 3 12C3 13.1 3.9 14 5 14C6.1 14 7 13.1 7 12C7 10.9 6.1 10 5 10ZM19 10C17.9 10 17 10.9 17 12C17 13.1 17.9 14 19 14C20.1 14 21 13.1 21 12C21 10.9 20.1 10 19 10ZM12 10C10.9 10 10 10.9 10 12C10 13.1 10.9 14 12 14C13.1 14 14 13.1 14 12C14 10.9 13.1 10 12 10Z"></path>
-                                                        </svg>
-                                                    </button>
+                                                <td className="px-4 py-2 text-xs md:text-sm max-w-2">
+                                                    <Menu>
+                                                        <div>
+                                                            <MenuButton onClick={() => {
+                                                                setSelectedTransaction(transaction)
+                                                                setModifiedTransaction(transaction)
+                                                            }} className="rounded-md whitespace-nowrap text-center transition-all duration-200 ease-in-out focus-visible:outline-2 outline-violet-500 border-gray-300 p-1.5 border hover:bg-gray-100 border-opacity-0 hover:border-opacity-100">
+                                                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="remixicon size-4 shrink-0 text-gray-500 group-hover:text-gray-700 group-data-[state=open]:text-gray-700">
+                                                                    <path d="M5 10C3.9 10 3 10.9 3 12C3 13.1 3.9 14 5 14C6.1 14 7 13.1 7 12C7 10.9 6.1 10 5 10ZM19 10C17.9 10 17 10.9 17 12C17 13.1 17.9 14 19 14C20.1 14 21 13.1 21 12C21 10.9 20.1 10 19 10ZM12 10C10.9 10 10 10.9 10 12C10 13.1 10.9 14 12 14C13.1 14 14 13.1 14 12C14 10.9 13.1 10 12 10Z"></path>
+                                                                </svg>
+                                                            </MenuButton>
+                                                        </div>
+
+                                                        <MenuItems anchor="bottom" transition className="absolute p-2 right-0 z-10 mt-2 w-32 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in">
+                                                            <MenuItem>
+                                                                {({ focus }) => (
+                                                                    <button onClick={editModalSwitch.setTrue} className={classNames(focus ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block px-4 py-2 text-sm w-full rounded-md text-left')}>
+                                                                        Edit
+                                                                    </button>
+                                                                )}
+                                                            </MenuItem>
+                                                            <MenuItem>
+                                                                {({ focus }) => (
+                                                                    <button onClick={deleteModalSwitch.setTrue} className={classNames(focus ? 'bg-gray-100 text-red-900' : 'text-red-700', 'block px-4 py-2 text-sm w-full rounded-md text-left')}>
+                                                                        Delete
+                                                                    </button>
+                                                                )}
+                                                            </MenuItem>
+                                                        </MenuItems>
+                                                    </Menu>
                                                 </td>
                                             </tr>
                                         )
@@ -461,91 +531,184 @@ export default function Transactions() {
                 </div>
 
                 <Modal isOpen={createModalSwitch.state} onClose={createModalSwitch.setFalse} title="Create Transaction" footer={
-                        <div className="flex justify-start gap-2">
-                            <Button color="violet" size="sm" title="Create" onClick={createTransaction} loading={loading} disabled={loading} />
-                            <Button color="slate" size="sm" title="Cancel" onClick={createModalSwitch.setFalse} disabled={loading} />
-                        </div>
-                    }>
-                        <div>
-                            <label htmlFor="account" className="block text-sm font-medium text-gray-700">
-                                Account
-                            </label>
-                            <Select id="account" name="account" value={createData.accountId} onValueChange={(e) => setCreateData({ ...createData, accountId: e })}>
-                                {
-                                    accounts.map((account) => {
-                                        return (
-                                            <SelectItem key={account.id} value={account.id}>
-                                                {account.name} ({account.type})
-                                            </SelectItem>
-                                        )
-                                    })
-                                }
-                            </Select>
-                        </div>
-                        <div>
-                            <label htmlFor="category" className="block text-sm font-medium text-gray-700">
-                                Category
-                            </label>
-                            <Select id="category" name="category" value={createData.categoryId} onValueChange={(e) => setCreateData({ ...createData, categoryId: e })}>
-                                {
-                                    categories.map((category) => {
-                                        return (
-                                            <SelectItem key={category.id} value={category.id}>
-                                                {category.title}
-                                            </SelectItem>
-                                        )
-                                    })
-                                }
-                            </Select>
-                        </div>
-                        <div>
-                            <label htmlFor="status" className="block text-sm font-medium text-gray-700">
-                                Status
-                            </label>
-                            <Select id="status" name="status" value={createData.status} onValueChange={(e) => setCreateData({ ...createData, status: e })}>
-                                <SelectItem value="cleared">
-                                    Cleared
-                                </SelectItem>
-                                <SelectItem value="pending">
-                                    Pending
-                                </SelectItem>
-                                <SelectItem value="cancelled">
-                                    Cancelled
-                                </SelectItem>
-                            </Select>
-                        </div>
-                        <div>
-                            <label htmlFor="type" className="block text-sm font-medium text-gray-700">
-                                Type
-                            </label>
-                            <Select id="type" name="type" value={createData.type} onValueChange={(e) => setCreateData({ ...createData, type: e })}>
-                                <SelectItem value="income">
-                                    Income
-                                </SelectItem>
-                                <SelectItem value="expense">
-                                    Expense
-                                </SelectItem>
-                            </Select>
-                        </div>
-                        <div>
-                            <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-                                Description
-                            </label>
-                            <TextInput id="description" name="description" placeholder="Description" value={createData.description} onValueChange={(e) => setCreateData({ ...createData, description: e })} />
-                        </div>
-                        <div>
-                            <label htmlFor="amount" className="block text-sm font-medium text-gray-700">
-                                Amount
-                            </label>
-                            <NumberInput id="amount" name="amount" value={createData.amount} onValueChange={(e) => setCreateData({ ...createData, amount: e })} enableStepper={false} />
-                        </div>
-                        <div>
-                            <label htmlFor="Date" className="block text-sm font-medium text-gray-700">
-                                Date
-                            </label>
-                            <DatePicker id="date" value={createData.date} onValueChange={(e) => setCreateData({ ...createData, date: new Date(e?.toUTCString() ?? new Date().toUTCString()) })} />
-                        </div>
-                    </Modal>
+                    <div className="flex justify-start gap-2">
+                        <Button color="violet" size="sm" title="Create" onClick={createTransaction} loading={loading} disabled={loading} />
+                        <Button color="slate" size="sm" title="Cancel" onClick={createModalSwitch.setFalse} disabled={loading} />
+                    </div>
+                }>
+                    <div>
+                        <label htmlFor="account" className="block text-sm font-medium text-gray-700">
+                            Account
+                        </label>
+                        <Select id="account" name="account" value={createData.accountId} onValueChange={(e) => setCreateData({ ...createData, accountId: e })}>
+                            {
+                                accounts.map((account) => {
+                                    return (
+                                        <SelectItem key={account.id} value={account.id}>
+                                            {account.name} ({account.type})
+                                        </SelectItem>
+                                    )
+                                })
+                            }
+                        </Select>
+                    </div>
+                    <div>
+                        <label htmlFor="category" className="block text-sm font-medium text-gray-700">
+                            Category
+                        </label>
+                        <Select id="category" name="category" value={createData.categoryId} onValueChange={(e) => setCreateData({ ...createData, categoryId: e })}>
+                            {
+                                categories.map((category) => {
+                                    return (
+                                        <SelectItem key={category.id} value={category.id}>
+                                            {category.title}
+                                        </SelectItem>
+                                    )
+                                })
+                            }
+                        </Select>
+                    </div>
+                    <div>
+                        <label htmlFor="status" className="block text-sm font-medium text-gray-700">
+                            Status
+                        </label>
+                        <Select id="status" name="status" value={createData.status} onValueChange={(e) => setCreateData({ ...createData, status: e })}>
+                            <SelectItem value="cleared">
+                                Cleared
+                            </SelectItem>
+                            <SelectItem value="pending">
+                                Pending
+                            </SelectItem>
+                            <SelectItem value="cancelled">
+                                Cancelled
+                            </SelectItem>
+                        </Select>
+                    </div>
+                    <div>
+                        <label htmlFor="type" className="block text-sm font-medium text-gray-700">
+                            Type
+                        </label>
+                        <Select id="type" name="type" value={createData.type} onValueChange={(e) => setCreateData({ ...createData, type: e })}>
+                            <SelectItem value="income">
+                                Income
+                            </SelectItem>
+                            <SelectItem value="expense">
+                                Expense
+                            </SelectItem>
+                        </Select>
+                    </div>
+                    <div>
+                        <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                            Description
+                        </label>
+                        <TextInput id="description" name="description" placeholder="Description" value={createData.description} onValueChange={(e) => setCreateData({ ...createData, description: e })} />
+                    </div>
+                    <div>
+                        <label htmlFor="amount" className="block text-sm font-medium text-gray-700">
+                            Amount
+                        </label>
+                        <NumberInput id="amount" name="amount" value={createData.amount} onValueChange={(e) => setCreateData({ ...createData, amount: e })} enableStepper={false} />
+                    </div>
+                    <div>
+                        <label htmlFor="Date" className="block text-sm font-medium text-gray-700">
+                            Date
+                        </label>
+                        <DatePicker id="date" value={createData.date} onValueChange={(e) => setCreateData({ ...createData, date: new Date(e?.toUTCString() ?? new Date().toUTCString()) })} />
+                    </div>
+                </Modal>
+                
+                <Modal isOpen={editModalSwitch.state} onClose={editModalSwitch.setFalse} title="Edit Transaction" footer={
+                    <div className="flex justify-start gap-2">
+                        <Button color="violet" size="sm" title="Save" onClick={editTransaction} loading={loading} disabled={loading || selectedTransaction == modifiedTransaction} />
+                        <Button color="slate" size="sm" title="Cancel" onClick={editModalSwitch.setFalse} disabled={loading} />
+                    </div>
+                }>
+                    <div>
+                        <label htmlFor="account" className="block text-sm font-medium text-gray-700">
+                            Account
+                        </label>
+                        <Select id="account" name="account" value={modifiedTransaction?.accountId} onValueChange={(e) => setModifiedTransaction({ ...modifiedTransaction, accountId: e } as Transaction)}>
+                            {
+                                accounts.map((account) => {
+                                    return (
+                                        <SelectItem key={account.id} value={account.id}>
+                                            {account.name} ({account.type})
+                                        </SelectItem>
+                                    )
+                                })
+                            }
+                        </Select>
+                    </div>
+                    <div>
+                        <label htmlFor="category" className="block text-sm font-medium text-gray-700">
+                            Category
+                        </label>
+                        <Select id="category" name="category" value={modifiedTransaction?.categoryId} onValueChange={(e) => setModifiedTransaction({ ...modifiedTransaction, categoryId: e } as Transaction)}>
+                            {
+                                categories.map((category) => {
+                                    return (
+                                        <SelectItem key={category.id} value={category.id}>
+                                            {category.title}
+                                        </SelectItem>
+                                    )
+                                })
+                            }
+                        </Select>
+                    </div>
+                    <div>
+                        <label htmlFor="status" className="block text-sm font-medium text-gray-700">
+                            Status
+                        </label>
+                        <Select id="status" name="status" value={modifiedTransaction?.status} onValueChange={(e) => setModifiedTransaction({ ...modifiedTransaction, status: e } as Transaction)}>
+                            <SelectItem value="CLEARED">
+                                Cleared
+                            </SelectItem>
+                            <SelectItem value="PENDING">
+                                Pending
+                            </SelectItem>
+                            <SelectItem value="CANCELLED">
+                                Cancelled
+                            </SelectItem>
+                        </Select>
+                    </div>
+                    <div>
+                        <label htmlFor="type" className="block text-sm font-medium text-gray-700">
+                            Type
+                        </label>
+                        <Select id="type" name="type" value={modifiedTransaction?.type} onValueChange={(e) => setModifiedTransaction({ ...modifiedTransaction, type: e } as Transaction)}>
+                            <SelectItem value="INCOME">
+                                Income
+                            </SelectItem>
+                            <SelectItem value="EXPENSE">
+                                Expense
+                            </SelectItem>
+                        </Select>
+                    </div>
+                    <div>
+                        <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                            Description
+                        </label>
+                        <TextInput id="description" name="description" placeholder="Description" value={modifiedTransaction?.description} onValueChange={(e) => setModifiedTransaction({ ...modifiedTransaction, description: e } as Transaction)} />
+                    </div>
+                    <div>
+                        <label htmlFor="amount" className="block text-sm font-medium text-gray-700">
+                            Amount
+                        </label>
+                        <NumberInput id="amount" name="amount" value={modifiedTransaction?.amount} onValueChange={(e) => setModifiedTransaction({ ...modifiedTransaction, amount: e } as Transaction)} enableStepper={false} />
+                    </div>
+                    <div>
+                        <label htmlFor="Date" className="block text-sm font-medium text-gray-700">
+                            Date
+                        </label>
+                        <DatePicker id="date" value={createData.date} onValueChange={(e) => setCreateData({ ...createData, date: new Date(e?.toUTCString() ?? new Date().toUTCString()) })} />
+                    </div>
+                </Modal>
+
+                <ConfirmModal isOpen={deleteModalSwitch.state} onClose={deleteModalSwitch.setFalse} title="Delete Transaction" onConfirm={deleteTransaction}>
+                    <p>
+                        Are you sure you want to delete this transaction?
+                    </p>
+                </ConfirmModal>
             </section>
         </main>
     );
