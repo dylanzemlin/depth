@@ -2,17 +2,16 @@ import { withSessionRoute } from "@/lib/iron/wrappers";
 import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(request: NextRequest): Promise<NextResponse>
-{
+export async function GET(request: NextRequest): Promise<NextResponse> {
     const session = await withSessionRoute();
-    if (session.user == null)
-    {
+    if (session.user == null) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const pageStr = request.nextUrl.searchParams.get("page");
+    const pageSizeStr = request.nextUrl.searchParams.get("pageSize");
     const page = pageStr ? parseInt(pageStr) : 0;
-    const perPage = 25;
+    const perPage = pageSizeStr ? parseInt(pageSizeStr) : 5;
 
     const archived = request.nextUrl.searchParams.get("archived");
 
@@ -20,7 +19,22 @@ export async function GET(request: NextRequest): Promise<NextResponse>
         const categories = await prisma.category.findMany({
             where: {
                 userId: session.user.id,
-                archived: archived == "none" ? undefined : archived === "true"
+                archived: archived == "none" ? undefined : archived === "true",
+                OR: [
+                    {
+                        title: {
+                            contains: request.nextUrl.searchParams.get("search") ?? "",
+                            mode: "insensitive"
+                        }
+                    },
+                    {
+
+                        description: {
+                            contains: request.nextUrl.searchParams.get("search") ?? "",
+                            mode: "insensitive"
+                        }
+                    }
+                ]
             },
             skip: page ? page * perPage : 0,
             take: perPage,

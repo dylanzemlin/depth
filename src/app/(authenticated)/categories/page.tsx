@@ -4,6 +4,7 @@ import FlowbiteReinit from "@/components/FlowbiteReinit";
 import Button from "@/components/buttons/button";
 import ConfirmModal from "@/components/modals/confirm-modal";
 import Modal from "@/components/modals/modal";
+import useCategories from "@/lib/hooks/useCategories";
 import useSwitch from "@/lib/hooks/useSwitch";
 import { Category } from "@prisma/client";
 import { Select, SelectItem, TextInput } from "@tremor/react";
@@ -28,7 +29,6 @@ export default function Categories() {
     const [newTitle, setTitle] = useState<string>("");
     const [newDescription, setDescription] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
-    const [categoryList, setCategoryList] = useState<CategoryList | undefined>(undefined);
     const [page, setPage] = useState<number>(0);
     const [selectedCategory, setSelectedCategory] = useState<Category | undefined>(undefined);
 
@@ -36,20 +36,10 @@ export default function Categories() {
     const editModalSwitch = useSwitch(false);
     const archiveModalSwitch = useSwitch(false);
 
-    const loadCategories = async () => {
-        const params = new URLSearchParams({
-            archived: filterArchived == null ? "none" : filterArchived == "Archived" ? "true" : "false",
-            page: page.toString()
-        })
-        const response = await fetch(`/api/v1/category/list?${params.toString()}`);
-        if (response.status !== 200) {
-            toast.error("Failed to load categories.");
-            return;
-        }
-
-        const json = await response.json();
-        setCategoryList(json);
-    }
+    const categories = useCategories({
+        page,
+        filter: { archived: filterArchived === "Archived" }
+    })
 
     const createCategory = async () => {
         if (newTitle.length <= 0 || newDescription.length <= 0) {
@@ -75,7 +65,6 @@ export default function Categories() {
             return;
         }
 
-        await loadCategories();
         toast.success(`Category "${newTitle}" created.`);
         setTitle("");
         setDescription("");
@@ -106,17 +95,12 @@ export default function Categories() {
             return;
         }
 
-        await loadCategories();
         toast.success(`Category "${selectedCategory.title}" ${toggle ? (selectedCategory.archived ? "unarchived" : "archived") : "updated"}.`);
         setSelectedCategory(undefined);
 
         archiveModalSwitch.setFalse();
         editModalSwitch.setFalse();
     }
-
-    useEffect(() => {
-        loadCategories();
-    }, [filterArchived, page]);
 
     useEffect(() => {
         if (selectedCategory == null) {
@@ -145,8 +129,12 @@ export default function Categories() {
         dropdown.hide();
     }, [editModalSwitch.state, archiveModalSwitch.state])
 
-    const pageSize = categoryList?.pagination.pageSize || 0;
+    if (categories.loading || categories.pagination == null || categories.categories == null)
+    {
+        return <h1>loading...</h1>;
+    }
 
+    const pageSize = categories.pagination.pageSize;
     return (
         <FlowbiteReinit>
             <main className="w-full min-h-screen p-2 md:p-12">
@@ -221,7 +209,7 @@ export default function Categories() {
                                 </thead>
                                 <tbody>
                                     {
-                                        categoryList?.data.map((category: any) => {
+                                        categories.categories.map((category: any) => {
                                             return (
                                                 <tr className="border-b border-gray-200" key={category.id}>
                                                     <td className="px-4 py-2 text-xs md:text-sm">
@@ -262,36 +250,36 @@ export default function Categories() {
                         </div>
 
                         {/* Footer */}
-                        <div className={`w-full flex-row justify-between sm:justify-end items-center gap-8 ${categoryList ? 'flex' : 'hidden'}`}>
+                        <div className={`w-full flex-row justify-between sm:justify-end items-center gap-8 ${categories.categories ? 'flex' : 'hidden'}`}>
                             <p className="flex text-sm tabular-nums text-gray-500 gap-1">
                                 Showing
                                 <span className="font-medium text-gray-900">
-                                    {(categoryList?.pagination.current || 0) * pageSize + 1}-{Math.min((categoryList?.pagination.current || 0) * pageSize + pageSize, categoryList?.pagination.total || 0)}
+                                    {(categories.pagination.current || 0) * pageSize + 1}-{Math.min((categories.pagination.current || 0) * pageSize + pageSize, categories?.pagination.total || 0)}
                                 </span>
                                 of
                                 <span className="font-medium text-gray-900">
-                                    {categoryList?.pagination.total || 0}
+                                    {categories.pagination.total || 0}
                                 </span>
                             </p>
                             <div className="flex items-center gap-x-1.5">
                                 <button
                                     onClick={() => setPage(0)}
-                                    className="rounded-md whitespace-nowrap text-center transition-all duration-200 ease-in-out focus-visible:outline-2 outline-violet-500 border-gray-300 p-1.5 border hover:bg-gray-100 disabled:opacity-50 disabled:hover:bg-transparent" disabled={categoryList?.pagination.prevUrl == null}>
+                                    className="rounded-md whitespace-nowrap text-center transition-all duration-200 ease-in-out focus-visible:outline-2 outline-violet-500 border-gray-300 p-1.5 border hover:bg-gray-100 disabled:opacity-50 disabled:hover:bg-transparent" disabled={categories.pagination.prevUrl == null}>
                                     <FaAnglesLeft />
                                 </button>
                                 <button
                                     onClick={() => setPage(page - 1)}
-                                    className="rounded-md whitespace-nowrap text-center transition-all duration-200 ease-in-out focus-visible:outline-2 outline-violet-500 border-gray-300 p-1.5 border hover:bg-gray-100 disabled:opacity-50 disabled:hover:bg-transparent" disabled={categoryList?.pagination.prevUrl == null}>
+                                    className="rounded-md whitespace-nowrap text-center transition-all duration-200 ease-in-out focus-visible:outline-2 outline-violet-500 border-gray-300 p-1.5 border hover:bg-gray-100 disabled:opacity-50 disabled:hover:bg-transparent" disabled={categories.pagination.prevUrl == null}>
                                     <FaAngleLeft />
                                 </button>
                                 <button
                                     onClick={() => setPage(page + 1)}
-                                    className="rounded-md whitespace-nowrap text-center transition-all duration-200 ease-in-out focus-visible:outline-2 outline-violet-500 border-gray-300 p-1.5 border hover:bg-gray-100 disabled:opacity-50 disabled:hover:bg-transparent" disabled={categoryList?.pagination.nextUrl == null}>
+                                    className="rounded-md whitespace-nowrap text-center transition-all duration-200 ease-in-out focus-visible:outline-2 outline-violet-500 border-gray-300 p-1.5 border hover:bg-gray-100 disabled:opacity-50 disabled:hover:bg-transparent" disabled={categories.pagination.nextUrl == null}>
                                     <FaAngleRight />
                                 </button>
                                 <button
-                                    onClick={() => setPage(Math.floor((categoryList?.pagination.total || 0) / Math.max(pageSize, 1)))}
-                                    className="rounded-md whitespace-nowrap text-center transition-all duration-200 ease-in-out focus-visible:outline-2 outline-violet-500 border-gray-300 p-1.5 border hover:bg-gray-100 disabled:opacity-50 disabled:hover:bg-transparent" disabled={categoryList?.pagination.nextUrl == null}>
+                                    onClick={() => setPage(Math.floor((categories.pagination?.total || 0) / Math.max(pageSize, 1)))}
+                                    className="rounded-md whitespace-nowrap text-center transition-all duration-200 ease-in-out focus-visible:outline-2 outline-violet-500 border-gray-300 p-1.5 border hover:bg-gray-100 disabled:opacity-50 disabled:hover:bg-transparent" disabled={categories.pagination.nextUrl == null}>
                                     <FaAnglesRight />
                                 </button>
                             </div>

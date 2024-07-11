@@ -218,7 +218,14 @@ export default function Transactions() {
                             <li>
                                 <button data-dropdown-toggle="dateRangeDropdown" className="rounded-md border border-gray-300 px-2 py-1.5 hover:bg-gray-50 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-violet-500 flex gap-1 items-center min-w-full xl:min-w-fit">
                                     <span aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-5 -ml-px shrink-0 transition sm:size-4">
+                                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-5 -ml-px shrink-0 transition-all duration-300 sm:size-4" style={{
+                                            rotate: (filterDate.to || filterDate.from) ? "45deg" : "0deg"
+                                        }} onClick={() => {
+                                            setFilterDate({
+                                                from: undefined,
+                                                to: undefined
+                                            })
+                                        }}>
                                             <path d="M11 11V5H13V11H19V13H13V19H11V13H5V11H11Z"></path>
                                         </svg>
                                     </span>
@@ -242,7 +249,11 @@ export default function Transactions() {
                             <li>
                                 <button data-dropdown-toggle="accountDropdown" className="rounded-md border border-gray-300 px-2 py-1.5 hover:bg-gray-50 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-violet-500 flex gap-1 items-center min-w-full xl:min-w-fit">
                                     <span aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-5 -ml-px shrink-0 transition sm:size-4">
+                                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-5 -ml-px shrink-0 transition-all duration-300 sm:size-4" style={{
+                                            rotate: filterAccount ? "45deg" : "0deg"
+                                        }} onClick={() => {
+                                            setFilterAccount(undefined)
+                                        }}>
                                             <path d="M11 11V5H13V11H19V13H13V19H11V13H5V11H11Z"></path>
                                         </svg>
                                     </span>
@@ -294,7 +305,11 @@ export default function Transactions() {
                             <li>
                                 <button data-dropdown-toggle="statusDropdown" className="rounded-md border border-gray-300 px-2 py-1.5 hover:bg-gray-50 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-violet-500 flex gap-1 items-center min-w-full xl:min-w-fit">
                                     <span aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-5 -ml-px shrink-0 transition sm:size-4">
+                                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-5 -ml-px shrink-0 transition-all duration-300 sm:size-4" style={{
+                                            rotate: filterStatus ? "45deg" : "0deg"
+                                        }} onClick={() => {
+                                            setFilterStatus(undefined)
+                                        }}>
                                             <path d="M11 11V5H13V11H19V13H13V19H11V13H5V11H11Z"></path>
                                         </svg>
                                     </span>
@@ -318,13 +333,17 @@ export default function Transactions() {
                             <li>
                                 <button data-dropdown-toggle="costDropdown" className="rounded-md border border-gray-300 px-2 py-1.5 hover:bg-gray-50 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-violet-500 flex gap-1 items-center min-w-full xl:min-w-fit">
                                     <span aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-5 -ml-px shrink-0 transition sm:size-4">
+                                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-5 -ml-px shrink-0 transition-all duration-300 sm:size-4" style={{
+                                            rotate: (filterCondition && (filterCondition != 'is between' ? (filterCostRange[0] || filterCostRange[1]) : (filterCostRange[0] && filterCostRange[1]))) ? "45deg" : "0deg"
+                                        }} onClick={() => {
+                                            setFilterCostRange([undefined, undefined])
+                                        }}>
                                             <path d="M11 11V5H13V11H19V13H13V19H11V13H5V11H11Z"></path>
                                         </svg>
                                     </span>
                                     Cost
                                     {
-                                        filterCondition ? (
+                                        (filterCondition && (filterCondition != 'is between' ? (filterCostRange[0] || filterCostRange[1]) : (filterCostRange[0] && filterCostRange[1]))) ? (
                                             <>
                                                 <div className="w-[1px] h-4 bg-gray-300"></div>
                                                 {

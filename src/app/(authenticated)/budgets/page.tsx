@@ -1,5 +1,9 @@
 "use client";
 
+import useBudgets from "@/lib/hooks/useBudgets";
+import useCategories from "@/lib/hooks/useCategories";
+import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
+import { Budget } from "@prisma/client";
 import { DateRangePicker, NumberInput, Select, SelectItem } from "@tremor/react";
 import { useState } from "react";
 import { FaAnglesLeft, FaAnglesRight, FaArrowsLeftRight, FaEquals, FaGreaterThan, FaLessThan, FaAngleLeft, FaAngleRight, FaCircleExclamation, FaCross, FaTrashCan, FaX, FaWandMagic } from "react-icons/fa6";
@@ -10,12 +14,26 @@ type FilterDate = {
 }
 
 export default function Budgets() {
-    const [filterDate, setFilterDate] = useState<FilterDate>({
-        from: undefined,
-        to: undefined
-    });
     const [filterCondition, setFilterCondition] = useState<string | undefined>(undefined);
     const [filterGoalRange, setFilterGoalRange] = useState<(number | undefined)[]>([undefined, undefined]);
+    const [filterCategory, setFilterCategory] = useState<string | undefined>(undefined);
+    const [filterDescription, setFilterDescription] = useState<string | undefined>(undefined);
+    const [page, setPage] = useState<number>(0);
+
+    const budgets = useBudgets({
+        page, filter: {
+            categoryId: filterCategory,
+            condition: filterCondition as any,
+            goal_1: filterGoalRange[0],
+            goal_2: filterGoalRange[1],
+            description: filterDescription
+        }
+    });
+    const categories = useCategories({ pageSize: 100 });
+
+    if (budgets.loading || categories.loading) {
+        return <h1>Loading...</h1>;
+    }
 
     return (
         <main className="w-full min-h-screen p-2 md:p-12">
@@ -29,41 +47,52 @@ export default function Budgets() {
                     <div className="md:text-xs mt-4">
                         <ul className="flex flex-col xl:flex-row gap-2 bg-white xl:bg-none" id="dropdown_filters">
                             <li>
-                                <button data-dropdown-toggle="dateRangeDropdown" className="rounded-md border border-gray-300 px-2 py-1.5 hover:bg-gray-50 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-violet-500 flex gap-1 items-center min-w-full xl:min-w-fit">
-                                    <span aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-5 -ml-px shrink-0 transition sm:size-4">
-                                            <path d="M11 11V5H13V11H19V13H13V19H11V13H5V11H11Z"></path>
-                                        </svg>
-                                    </span>
-                                    Date
-                                    {
-                                        filterDate.from && filterDate.to ? (
-                                            <>
-                                                <div className="w-[1px] h-4 bg-gray-300"></div>
-                                                <span className="text-violet-600 font-medium">
-                                                    {filterDate.from.toLocaleDateString()} - {filterDate.to.toLocaleDateString()}
-                                                </span>
-                                            </>
-                                        ) : (
-                                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-5 shrink-0 text-gray-500 sm:size-4">
-                                                <path d="M11.9999 13.1714L16.9497 8.22168L18.3639 9.63589L11.9999 15.9999L5.63599 9.63589L7.0502 8.22168L11.9999 13.1714Z"></path>
+                                <Menu>
+                                    <MenuButton className="rounded-md border border-gray-300 px-2 py-1.5 hover:bg-gray-50 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-violet-500 flex gap-1 items-center min-w-full xl:min-w-fit">
+                                        <span aria-hidden="true">
+                                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-5 -ml-px shrink-0 transition-all duration-300 sm:size-4" style={{
+                                                rotate: filterCategory ? "45deg" : "0deg"
+                                            }} onClick={(e) => {
+                                                if (filterCategory)
+                                                {
+                                                    setFilterCategory(undefined)
+                                                    e.preventDefault();
+                                                }
+                                            }}>
+                                                <path d="M11 11V5H13V11H19V13H13V19H11V13H5V11H11Z"></path>
                                             </svg>
-                                        )
-                                    }
-                                </button>
-                            </li>
-                            <li>
-                                <button className="rounded-md border border-gray-300 px-2 py-1.5 hover:bg-gray-50 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-violet-500 flex gap-1 items-center min-w-full xl:min-w-fit">
-                                    <span aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-5 -ml-px shrink-0 transition sm:size-4">
-                                            <path d="M11 11V5H13V11H19V13H13V19H11V13H5V11H11Z"></path>
-                                        </svg>
-                                    </span>
-                                    Category
-                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-5 shrink-0 text-gray-500 sm:size-4">
-                                        <path d="M11.9999 13.1714L16.9497 8.22168L18.3639 9.63589L11.9999 15.9999L5.63599 9.63589L7.0502 8.22168L11.9999 13.1714Z"></path>
-                                    </svg>
-                                </button>
+                                        </span>
+                                        Category
+                                        {
+                                            filterCategory ? (
+                                                <>
+                                                    <div className="w-[1px] h-4 bg-gray-300"></div>
+                                                    <span className="text-violet-600 font-medium">
+                                                        {categories.categories?.find((category) => category.id == filterCategory)?.title ?? "N/A"}
+                                                    </span>
+                                                </>
+                                            ) : (
+                                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-5 shrink-0 text-gray-500 sm:size-4">
+                                                    <path d="M11.9999 13.1714L16.9497 8.22168L18.3639 9.63589L11.9999 15.9999L5.63599 9.63589L7.0502 8.22168L11.9999 13.1714Z"></path>
+                                                </svg>
+                                            )
+                                        }
+                                    </MenuButton>
+
+                                    <MenuItems anchor="bottom" transition className="absolute p-2 right-0 z-10 mt-2 w-fit origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in">
+                                        {
+                                            categories.categories?.map((category) => {
+                                                return (
+                                                    <MenuItem key={category.id}>
+                                                        <button onClick={() => setFilterCategory(category.id)} className="w-full text-left px-2 py-1.5 hover:bg-gray-50 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-violet-500 flex gap-1 items-center">
+                                                            {category.title}
+                                                        </button>
+                                                    </MenuItem>
+                                                );
+                                            })
+                                        }
+                                    </MenuItems>
+                                </Menu>
                             </li>
                             <li>
                                 <button data-dropdown-toggle="costDropdown" className="rounded-md border border-gray-300 px-2 py-1.5 hover:bg-gray-50 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-violet-500 flex gap-1 items-center min-w-full xl:min-w-fit">
@@ -145,54 +174,34 @@ export default function Budgets() {
                             </thead>
                             <tbody>
                                 {
-                                    Array.from({ length: 20 }).map((_, index) => (
-                                        <tr className="border-b border-gray-200" key={index}>
-                                            <td className="px-4 py-2 text-xs md:text-sm">
-                                                General entertainment stuff
-                                            </td>
-                                            <td className="px-4 py-2 text-xs md:text-sm">
-                                                Entertainment
-                                            </td>
-                                            <td className="px-4 py-2 text-xs md:text-sm">
-                                                $500.00
-                                            </td>
-                                            <td className="px-4 py-2 text-xs md:text-sm">
-                                                2024-07-05
-                                            </td>
-                                            <td className="px-4 py-2 text-xs md:text-sm">
-                                                Never
-                                            </td>
-                                            <td className="px-4 py-2 text-xs md:text-sm max-w-5">
-                                                <button className="rounded-md whitespace-nowrap text-center transition-all duration-200 ease-in-out focus-visible:outline-2 outline-violet-500 border-gray-300 p-1.5 border hover:bg-gray-100 border-opacity-0 hover:border-opacity-100" data-dropdown-toggle={`row_dropdown_${index}`}>
-                                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="remixicon size-4 shrink-0 text-gray-500 group-hover:text-gray-700 group-data-[state=open]:text-gray-700">
-                                                        <path d="M5 10C3.9 10 3 10.9 3 12C3 13.1 3.9 14 5 14C6.1 14 7 13.1 7 12C7 10.9 6.1 10 5 10ZM19 10C17.9 10 17 10.9 17 12C17 13.1 17.9 14 19 14C20.1 14 21 13.1 21 12C21 10.9 20.1 10 19 10ZM12 10C10.9 10 10 10.9 10 12C10 13.1 10.9 14 12 14C13.1 14 14 13.1 14 12C14 10.9 13.1 10 12 10Z"></path>
-                                                    </svg>
-                                                </button>
-                                                <div id={`row_dropdown_${index}`} className="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700">
-                                                    <ul className="p-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownDefaultButton">
-                                                        <li>
-                                                            <button className="px-4 py-2 hover:bg-gray-100 rounded-lg w-full text-left font-semibold flex gap-2 items-center">
-                                                                <FaWandMagic />
-                                                                Edit
-                                                            </button>
-                                                        </li>
-                                                        <li>
-                                                            <button className="px-4 py-2 hover:bg-gray-100 text-orange-600 rounded-lg w-full text-left font-semibold flex gap-2 items-center">
-                                                                <FaX />
-                                                                End
-                                                            </button>
-                                                        </li>
-                                                        <li>
-                                                            <button className="px-4 py-2 hover:bg-gray-100 text-red-600 rounded-lg w-full text-left font-semibold flex gap-2 items-center">
-                                                                <FaTrashCan />
-                                                                Delete
-                                                            </button>
-                                                        </li>
-                                                    </ul>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))
+                                    budgets.budgets?.map((budget) => {
+                                        return (
+                                            <tr className="border-b border-gray-200" key={budget.id}>
+                                                <td className="px-4 py-2 text-xs md:text-sm">
+                                                    {budget.description}
+                                                </td>
+                                                <td className="px-4 py-2 text-xs md:text-sm">
+                                                    {budget.categoryId}
+                                                </td>
+                                                <td className="px-4 py-2 text-xs md:text-sm">
+                                                    ${budget.amount}
+                                                </td>
+                                                <td className="px-4 py-2 text-xs md:text-sm">
+                                                    {budget.startDate.toString()}
+                                                </td>
+                                                <td className="px-4 py-2 text-xs md:text-sm">
+                                                    {budget.endDate?.toString() ?? "N/A"}
+                                                </td>
+                                                <td className="px-4 py-2 text-xs md:text-sm max-w-5">
+                                                    <button className="rounded-md whitespace-nowrap text-center transition-all duration-200 ease-in-out focus-visible:outline-2 outline-violet-500 border-gray-300 p-1.5 border hover:bg-gray-100 border-opacity-0 hover:border-opacity-100" data-dropdown-toggle={`row_dropdown_${budget.id}`}>
+                                                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="remixicon size-4 shrink-0 text-gray-500 group-hover:text-gray-700 group-data-[state=open]:text-gray-700">
+                                                            <path d="M5 10C3.9 10 3 10.9 3 12C3 13.1 3.9 14 5 14C6.1 14 7 13.1 7 12C7 10.9 6.1 10 5 10ZM19 10C17.9 10 17 10.9 17 12C17 13.1 17.9 14 19 14C20.1 14 21 13.1 21 12C21 10.9 20.1 10 19 10ZM12 10C10.9 10 10 10.9 10 12C10 13.1 10.9 14 12 14C13.1 14 14 13.1 14 12C14 10.9 13.1 10 12 10Z"></path>
+                                                        </svg>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        )
+                                    })
                                 }
                             </tbody>
                         </table>
@@ -225,17 +234,6 @@ export default function Budgets() {
                             </button>
                         </div>
                     </div>
-                </div>
-
-                {/* Dropdowns */}
-                <div id="dateRangeDropdown" className="z-10 bg-white rounded-md shadow-lg p-2 border border-gray-300 hidden items-center">
-                    <label className="text-tremor-default text-tremor-content dark:text-dark-tremor-content">Select date range</label>
-                    <DateRangePicker className="mx-auto max-w-md bg-white" enableSelect={false} enableClear={true} value={filterDate} onValueChange={(e) => {
-                        setFilterDate({
-                            from: e.from,
-                            to: e.to
-                        })
-                    }} />
                 </div>
 
                 <div id="costDropdown" className="z-10 bg-white rounded-md shadow-lg p-2 border border-gray-300 hidden items-center">
