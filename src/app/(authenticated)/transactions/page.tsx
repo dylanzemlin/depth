@@ -38,6 +38,9 @@ export default function Transactions() {
     const [filterCondition, setFilterCondition] = useState<string | undefined>(undefined);
     const [filterCostRange, setFilterCostRange] = useState<(number | undefined)[]>([undefined, undefined]);
     const [filterStatus, setFilterStatus] = useState<string | undefined>(undefined);
+    const [filterDescription, setFilterDescription] = useState<string | undefined>(undefined);
+    const [filterCategory, setFilterCategory] = useState<string | undefined>(undefined);
+    const [filterAccount, setFilterAccount] = useState<string | undefined>(undefined);
 
     const [transactionData, setTransactionData] = useState<TransactionData | null>(null);
     const [categories, setCategories] = useState<Category[]>([]);
@@ -53,7 +56,7 @@ export default function Transactions() {
     const [createData, setCreateData] = useState({
         accountId: "",
         categoryId: "",
-        status: "cleared",
+        status: "CLEARED",
         description: "",
         type: "expense",
         amount: 0,
@@ -121,7 +124,19 @@ export default function Transactions() {
 
     const fetchTransactions = async () => {
         try {
-            const response = await fetch(`/api/v1/transaction/list?page=${page}`);
+            const filters = new URLSearchParams();
+            if (filterDate.from) filters.append("from", filterDate.from.toISOString());
+            if (filterDate.to) filters.append("to", filterDate.to.toISOString());
+            if (filterCondition) filters.append("condition", filterCondition);
+            if (filterCostRange[0]) filters.append("cost_1", filterCostRange[0].toString());
+            if (filterCostRange[1]) filters.append("cost_2", filterCostRange[1].toString());
+            if (filterStatus) filters.append("status", filterStatus);
+            if (filterDescription) filters.append("description", filterDescription);
+            if (filterCategory) filters.append("category", filterCategory);
+            if (filterAccount) filters.append("account", filterAccount);
+            filters.append("page", page.toString());
+
+            const response = await fetch(`/api/v1/transaction/list?${filters.toString()}`);
             if (response.status !== 200) {
                 toast.error("Failed to fetch transactions");
                 return;
@@ -183,6 +198,11 @@ export default function Transactions() {
         fetchAccounts();
     }, [page]);
 
+    useEffect(() => {
+        setPage(0);
+        fetchTransactions();
+    }, [filterDate, filterCondition, filterCostRange, filterStatus, filterDescription, filterCategory, filterAccount]);
+
     const pageSize = transactionData?.pagination.pageSize || 0;
     return (
         <main className="w-full min-h-screen p-2 md:p-12">
@@ -220,29 +240,55 @@ export default function Transactions() {
                                 </button>
                             </li>
                             <li>
-                                <button className="rounded-md border border-gray-300 px-2 py-1.5 hover:bg-gray-50 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-violet-500 flex gap-1 items-center min-w-full xl:min-w-fit">
+                                <button data-dropdown-toggle="accountDropdown" className="rounded-md border border-gray-300 px-2 py-1.5 hover:bg-gray-50 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-violet-500 flex gap-1 items-center min-w-full xl:min-w-fit">
                                     <span aria-hidden="true">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-5 -ml-px shrink-0 transition sm:size-4">
                                             <path d="M11 11V5H13V11H19V13H13V19H11V13H5V11H11Z"></path>
                                         </svg>
                                     </span>
                                     Account
-                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-5 shrink-0 text-gray-500 sm:size-4">
-                                        <path d="M11.9999 13.1714L16.9497 8.22168L18.3639 9.63589L11.9999 15.9999L5.63599 9.63589L7.0502 8.22168L11.9999 13.1714Z"></path>
-                                    </svg>
+                                    {
+                                        filterAccount ? (
+                                            <>
+                                                <div className="w-[1px] h-4 bg-gray-300"></div>
+                                                <span className="text-violet-600 font-medium">
+                                                    {accounts.find(x => x.id == filterAccount)?.name} ({accounts.find(x => x.id == filterAccount)?.type})
+                                                </span>
+                                            </>
+                                        ) : (
+                                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-5 shrink-0 text-gray-500 sm:size-4">
+                                                <path d="M11.9999 13.1714L16.9497 8.22168L18.3639 9.63589L11.9999 15.9999L5.63599 9.63589L7.0502 8.22168L11.9999 13.1714Z"></path>
+                                            </svg>
+                                        )
+                                    }
                                 </button>
                             </li>
                             <li>
-                                <button className="rounded-md border border-gray-300 px-2 py-1.5 hover:bg-gray-50 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-violet-500 flex gap-1 items-center min-w-full xl:min-w-fit">
+                                <button data-dropdown-toggle="categoryDropdown" className="rounded-md border border-gray-300 px-2 py-1.5 hover:bg-gray-50 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-violet-500 flex gap-1 items-center min-w-full xl:min-w-fit">
                                     <span aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-5 -ml-px shrink-0 transition sm:size-4">
+                                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-5 -ml-px shrink-0 transition-all duration-300 sm:size-4" style={{
+                                            rotate: filterCategory ? "45deg" : "0deg"
+                                        }} onClick={() => {
+                                            setFilterCategory(undefined)
+                                        }}>
                                             <path d="M11 11V5H13V11H19V13H13V19H11V13H5V11H11Z"></path>
                                         </svg>
                                     </span>
                                     Category
-                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-5 shrink-0 text-gray-500 sm:size-4">
-                                        <path d="M11.9999 13.1714L16.9497 8.22168L18.3639 9.63589L11.9999 15.9999L5.63599 9.63589L7.0502 8.22168L11.9999 13.1714Z"></path>
-                                    </svg>
+                                    {
+                                        filterCategory ? (
+                                            <>
+                                                <div className="w-[1px] h-4 bg-gray-300"></div>
+                                                <span className="text-violet-600 font-medium">
+                                                    {categories.find(x => x.id == filterCategory)?.title}
+                                                </span>
+                                            </>
+                                        ) : (
+                                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-5 shrink-0 text-gray-500 sm:size-4">
+                                                <path d="M11.9999 13.1714L16.9497 8.22168L18.3639 9.63589L11.9999 15.9999L5.63599 9.63589L7.0502 8.22168L11.9999 13.1714Z"></path>
+                                            </svg>
+                                        )
+                                    }
                                 </button>
                             </li>
                             <li>
@@ -302,7 +348,7 @@ export default function Transactions() {
                                 </button>
                             </li>
                             <li className="relative z-10">
-                                <input type="search" className="block w-full appearance-none rounded-md border px-2.5 py-1 outline-none transition sm:text-sm border-transparent text-gray-900 placeholder-gray-400 bg-gray-100 focus:ring-2 focus:ring-violet-200 focus:border-violet-500 [&::--webkit-search-cancel-button]:hidden [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden pl-8" placeholder="Search by description" />
+                                <input type="search" className="block w-full appearance-none rounded-md border px-2.5 py-1 outline-none transition sm:text-sm border-transparent text-gray-900 placeholder-gray-400 bg-gray-100 focus:ring-2 focus:ring-violet-200 focus:border-violet-500 [&::--webkit-search-cancel-button]:hidden [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden pl-8" placeholder="Search by description" value={filterDescription} onChange={(e) => setFilterDescription(e.target.value)} />
                                 <div className="pointer-events-none absolute bottom-0 left-2 flex h-full items-center justify-center text-gray-400">
                                     <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" aria-hidden="true" className="size-[1.125rem] shrink-0">
                                         <path d="M18.031 16.6168L22.3137 20.8995L20.8995 22.3137L16.6168 18.031C15.0769 19.263 13.124 20 11 20C6.032 20 2 15.968 2 11C2 6.032 6.032 2 11 2C15.968 2 20 6.032 20 11C20 13.124 19.263 15.0769 18.031 16.6168ZM16.0247 15.8748C17.2475 14.6146 18 12.8956 18 11C18 7.1325 14.8675 4 11 4C7.1325 4 4 7.1325 4 11C4 14.8675 7.1325 18 11 18C12.8956 18 14.6146 17.2475 15.8748 16.0247L16.0247 15.8748Z"></path>
@@ -526,15 +572,49 @@ export default function Transactions() {
                     <Select className="mx-auto max-w-md bg-white" id="condition" name="condition" value={filterStatus} onValueChange={(e) => {
                         setFilterStatus(e);
                     }}>
-                        <SelectItem value="cleared" icon={FaEquals}>
+                        <SelectItem value="CLEARED" icon={FaEquals}>
                             Cleared
                         </SelectItem>
-                        <SelectItem value="pending" icon={FaEquals}>
+                        <SelectItem value="PENDING" icon={FaEquals}>
                             Pending
                         </SelectItem>
-                        <SelectItem value="cancelled" icon={FaEquals}>
+                        <SelectItem value="CANCELLED" icon={FaEquals}>
                             Cancelled
                         </SelectItem>
+                    </Select>
+                </div>
+
+                <div id="categoryDropdown" className="z-10 bg-white rounded-md shadow-lg p-2 border border-gray-300 hidden items-center">
+                    <label className="text-tremor-default text-tremor-content dark:text-dark-tremor-content">Select category</label>
+                    <Select className="mx-auto max-w-md bg-white" id="category" name="category" value={filterCategory} onValueChange={(e) => {
+                        setFilterCategory(e);
+                    }}>
+                        {
+                            categories.map((category) => {
+                                return (
+                                    <SelectItem key={category.id} value={category.id}>
+                                        {category.title}
+                                    </SelectItem>
+                                )
+                            })
+                        }
+                    </Select>
+                </div>
+
+                <div id="accountDropdown" className="z-10 bg-white rounded-md shadow-lg p-2 border border-gray-300 hidden items-center">
+                    <label className="text-tremor-default text-tremor-content dark:text-dark-tremor-content">Select account</label>
+                    <Select className="mx-auto max-w-md bg-white" id="account" name="account" value={filterAccount} onValueChange={(e) => {
+                        setFilterAccount(e);
+                    }}>
+                        {
+                            accounts.map((account) => {
+                                return (
+                                    <SelectItem key={account.id} value={account.id}>
+                                        {account.name} ({account.type})
+                                    </SelectItem>
+                                )
+                            })
+                        }
                     </Select>
                 </div>
 
