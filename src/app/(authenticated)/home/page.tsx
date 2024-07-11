@@ -1,5 +1,9 @@
-import { Card, LineChart } from "@tremor/react";
-import { useId } from "react";
+"use client";
+
+import Loading from "@/components/loading";
+import { Card, LineChart, ProgressBar } from "@tremor/react";
+import dayjs from "dayjs";
+import { useEffect, useId, useState } from "react";
 
 type ProgressTestProps = {
     value: number;
@@ -43,70 +47,55 @@ const ProgressTest = (props: ProgressTestProps) => {
     )
 }
 
-const chartdata = [
-    {
-        date: 'Jan 22',
-        Expenses: 2890,
-        Deposits: 2338,
-    },
-    {
-        date: 'Feb 22',
-        Expenses: 2756,
-        Deposits: 2103,
-    },
-    {
-        date: 'Mar 22',
-        Expenses: 3322,
-        Deposits: 2194,
-    },
-    {
-        date: 'Apr 22',
-        Expenses: 3470,
-        Deposits: 2108,
-    },
-    {
-        date: 'May 22',
-        Expenses: 3475,
-        Deposits: 1812,
-    },
-    {
-        date: 'Jun 22',
-        Expenses: 3129,
-        Deposits: 1726,
-    },
-    {
-        date: 'Jul 22',
-        Expenses: 3490,
-        Deposits: 1982,
-    },
-    {
-        date: 'Aug 22',
-        Expenses: 2903,
-        Deposits: 2012,
-    },
-    {
-        date: 'Sep 22',
-        Expenses: 2643,
-        Deposits: 2342,
-    },
-    {
-        date: 'Oct 22',
-        Expenses: 2837,
-        Deposits: 2473,
-    },
-    {
-        date: 'Nov 22',
-        Expenses: 2954,
-        Deposits: 3848,
-    },
-    {
-        date: 'Dec 22',
-        Expenses: 3239,
-        Deposits: 3736,
-    },
-]
+type HomeData = {
+    totalBalance: number;
+    income: number;
+    expenses: number;
+    incomeMapByDay: Record<number, number>;
+    expenseMapByDay: Record<number, number>;
+}
 
 export default function Home() {
+    const [homeData, setHomeData] = useState<HomeData | null>(null);
+
+    const fetchHomeData = async () => {
+        const response = await fetch("/api/v1/home");
+        const data = await response.json();
+        setHomeData(data);
+    }
+
+    useEffect(() => {
+        fetchHomeData();
+    }, []);
+
+    if (homeData == null) {
+        return (
+            <main className="w-full min-h-screen p-2 md:p-12">
+                <section className="flex items-center justify-center h-full w-full">
+                    <h1 className="scroll-mt-10 text-3xl w-8 h-8">
+                        <Loading />
+                    </h1>
+                </section>
+            </main>
+        )
+    }
+
+    const incomePercentage = homeData?.income / (homeData?.income + homeData?.expenses) * 100;
+    const expensesPercentage = homeData?.expenses / (homeData?.income + homeData?.expenses) * 100;
+
+    const dayNumToDisplayDate = (dayNum: number) => {
+        return dayjs(new Date(new Date().getFullYear(), new Date().getMonth(), dayNum)).format('MMMM DD');
+    }
+
+    const graphData = Array.from({ length: dayjs().date() }, (_, i) => {
+        const date = i + 1;
+        return {
+            date: dayNumToDisplayDate(date),
+            Expenses: homeData?.expenseMapByDay[date] ?? 0,
+            Deposits: homeData?.incomeMapByDay[date] ?? 0
+        }
+    });
+
     return (
         <main className="flex min-h-screen w-full flex-col gap-4 p-4 md:p-12 overflow-hidden overflow-y-auto">
             <section aria-labelledby="current-budget">
@@ -119,31 +108,43 @@ export default function Home() {
                             Total Balance
                         </h4>
                         <p className="font-semibold text-2xl">
-                            $71,465
+                            ${homeData?.totalBalance.toFixed(2) ?? 0}
                         </p>
                     </Card>
-                    <Card className="max-w-sm">
+                    <Card className="max-w-md">
                         <h4 className="text-tremor-default text-tremor-content">
-                            Income (Month)
+                            Income vs Expenses
                         </h4>
-                        <p className="font-semibold text-2xl">
-                            $71,465
+                        <div className="flex gap-2 items-center">
+                            <p className="font-semibold text-2xl">
+                                ${homeData?.income.toFixed(2) ?? 0}
+                            </p>
+                            <span className="text-lg">
+                                vs
+                            </span>
+                            <p className="font-semibold text-2xl">
+                                ${homeData?.expenses.toFixed(2) ?? 0}
+                            </p>
+                        </div>
+                        <p className="mt-4 flex items-center justify-between text-tremor-default text-tremor-content dark:text-dark-tremor-content">
+                            <span>{incomePercentage.toFixed(1)}%</span>
+                            <span>{expensesPercentage.toFixed(1)}%</span>
                         </p>
-                    </Card>
-                    <Card className="max-w-sm">
-                        <h4 className="text-tremor-default text-tremor-content">
-                            Expenses (Month)
-                        </h4>
-                        <p className="font-semibold text-2xl">
-                            $71,465
-                        </p>
+                        <div className="flex relative">
+                            <ProgressBar color="blue" value={100} className={`mt-2 [&>*>*]:!rounded-r-none [&>*]:!rounded-r-none`} style={{
+                                width: `${incomePercentage}%`
+                            }} />
+                            <ProgressBar color="red" value={100} className={`mt-2 [&>*>*]:!rounded-l-none [&>*]:!rounded-l-none`} style={{
+                                width: `${expensesPercentage}%`
+                            }} />
+                        </div>
                     </Card>
                 </div>
 
                 <div className="scroll-mt-10 text-xl">
                     <LineChart
                         className="h-72"
-                        data={chartdata}
+                        data={graphData}
                         index="date"
                         yAxisWidth={65}
                         categories={['Expenses', 'Deposits']}

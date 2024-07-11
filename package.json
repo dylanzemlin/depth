@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "prisma:migrate": "dotenv -e .env.local prisma migrate dev",
-    "prisma:reset": "dotenv -e .env.local prisma db push --force-reset",
+    "prisma:reset": "dotenv -e .env.local prisma migrate reset --force",
     "prisma:generate": "dotenv -e .env.local prisma generate",
     "prisma:studio": "dotenv -e .env.local prisma studio",
     "prisma:push": "dotenv -e .env.local prisma db push",

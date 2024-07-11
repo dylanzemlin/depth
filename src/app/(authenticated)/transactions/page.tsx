@@ -3,6 +3,7 @@
 import Button from "@/components/buttons/button";
 import ConfirmModal from "@/components/modals/confirm-modal";
 import Modal from "@/components/modals/modal";
+import ImportTransactionsModal from "@/components/modals/transactions/importTransactionsModal";
 import { classNames } from "@/lib/classnames";
 import useSwitch from "@/lib/hooks/useSwitch";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
@@ -54,7 +55,7 @@ export default function Transactions() {
         categoryId: "",
         status: "cleared",
         description: "",
-        type: "income",
+        type: "expense",
         amount: 0,
         date: new Date()
     });
@@ -156,7 +157,7 @@ export default function Transactions() {
     const editTransaction = async () => {
         try {
             const response = await fetch(`/api/v1/transaction/${selectedTransaction?.id}`, {
-                method: "PUT",
+                method: "PATCH",
                 headers: {
                     "Content-Type": "application/json"
                 },
@@ -309,6 +310,13 @@ export default function Transactions() {
                                 </div>
                             </li>
                             <li className="ml-auto hidden xl:flex">
+                                {
+                                    (accounts.length > 0 && categories.length > 0) && (
+                                        <ImportTransactionsModal accounts={accounts} categories={categories} />
+                                    )
+                                }
+                            </li>
+                            <li className="hidden xl:flex">
                                 <button disabled={categories.length <= 0} className="rounded-md border border-gray-300 px-2 py-1.5 hover:bg-gray-50 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-violet-500 flex gap-1 items-center disabled:opacity-50" onClick={createModalSwitch.setTrue}>
                                     <span aria-hidden="true">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-5 -ml-px shrink-0 transition sm:size-4">
@@ -616,7 +624,7 @@ export default function Transactions() {
                         <DatePicker id="date" value={createData.date} onValueChange={(e) => setCreateData({ ...createData, date: new Date(e?.toUTCString() ?? new Date().toUTCString()) })} />
                     </div>
                 </Modal>
-                
+
                 <Modal isOpen={editModalSwitch.state} onClose={editModalSwitch.setFalse} title="Edit Transaction" footer={
                     <div className="flex justify-start gap-2">
                         <Button color="violet" size="sm" title="Save" onClick={editTransaction} loading={loading} disabled={loading || selectedTransaction == modifiedTransaction} />

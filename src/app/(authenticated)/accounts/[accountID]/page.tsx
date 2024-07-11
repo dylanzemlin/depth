@@ -76,15 +76,12 @@ export default function AccountPage({ params }: { params: { accountID: string } 
         return dayjs(new Date(new Date().getFullYear(), new Date().getMonth(), dayNum)).format('MMMM DD');
     }
 
-    const graphData = Array.from(new Set([
-        ...Object.keys(dashboardData.incomeMapByDay),
-        ...Object.keys(dashboardData.expenseMapByDay)
-    ]))
-    .map((key: any) => {
+    const graphData = Array.from({ length: dayjs().date() }, (_, i) => {
+        const date = i + 1;
         return {
-            date: dayNumToDisplayDate(key),
-            Expenses: dashboardData.expenseMapByDay[key] ?? 0,
-            Deposits: dashboardData.incomeMapByDay[key] ?? 0
+            date: dayNumToDisplayDate(date),
+            Expenses: dashboardData?.expenseMapByDay[date] ?? 0,
+            Deposits: dashboardData?.incomeMapByDay[date] ?? 0
         }
     });
 
@@ -190,7 +187,6 @@ export default function AccountPage({ params }: { params: { accountID: string } 
                         yAxisWidth={65}
                         categories={['Expenses', 'Deposits']}
                         colors={['indigo', 'cyan']}
-                        curveType={"step"}
                         valueFormatter={valueFormatter}
                     />
                 </div>

@@ -12,7 +12,7 @@ export async function GET(request: NextRequest): Promise<NextResponse>
 
     const pageStr = request.nextUrl.searchParams.get("page");
     const page = pageStr ? parseInt(pageStr) : 0;
-    const perPage = 25;
+    const perPage = 20;
 
     try {
         const transactions = await prisma.transaction.findMany({
@@ -22,7 +22,7 @@ export async function GET(request: NextRequest): Promise<NextResponse>
             skip: page ? page * perPage : 0,
             take: perPage,
             orderBy: {
-                createdAt: "desc"
+                date: "desc"
             }
         })
 

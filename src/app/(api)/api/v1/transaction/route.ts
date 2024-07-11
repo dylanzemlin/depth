@@ -40,7 +40,7 @@ export async function POST(request: NextRequest): Promise<NextResponse>
         const transaction = await prisma.transaction.create({
             data: {
                 description,
-                amount,
+                amount: Math.abs(amount),
                 type: type == "income" ? TransactionType.INCOME : TransactionType.EXPENSE,
                 status: status == "pending" ? "PENDING" : status == "cleared" ? "CLEARED" : "CANCELLED",
                 date,
