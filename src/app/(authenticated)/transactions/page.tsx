@@ -92,7 +92,7 @@ export default function Transactions() {
 
     const fetchCategories = async () => {
         try {
-            const response = await fetch(`/api/v1/category/list`);
+            const response = await fetch(`/api/v1/category/list?pageSize=100`);
             if (response.status !== 200) {
                 toast.error("Failed to fetch categories");
                 return;

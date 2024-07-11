@@ -3,10 +3,9 @@
 import useBudgets from "@/lib/hooks/useBudgets";
 import useCategories from "@/lib/hooks/useCategories";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
-import { Budget } from "@prisma/client";
-import { DateRangePicker, NumberInput, Select, SelectItem } from "@tremor/react";
+import { NumberInput, Select, SelectItem } from "@tremor/react";
 import { useState } from "react";
-import { FaAnglesLeft, FaAnglesRight, FaArrowsLeftRight, FaEquals, FaGreaterThan, FaLessThan, FaAngleLeft, FaAngleRight, FaCircleExclamation, FaCross, FaTrashCan, FaX, FaWandMagic } from "react-icons/fa6";
+import { FaAnglesLeft, FaAnglesRight, FaArrowsLeftRight, FaEquals, FaGreaterThan, FaLessThan, FaAngleLeft, FaAngleRight } from "react-icons/fa6";
 
 type FilterDate = {
     from?: Date;
