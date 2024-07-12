@@ -18,6 +18,7 @@
   "dependencies": {
     "@headlessui/react": "^2.1.1",
     "@headlessui/tailwindcss": "^0.2.1",
+    "@material-tailwind/react": "^2.1.9",
     "@octokit/rest": "^21.0.0",
     "@prisma/client": "^5.16.1",
     "@remixicon/react": "^4.2.0",
