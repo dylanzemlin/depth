@@ -100,6 +100,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
             take: perPage,
             orderBy: {
                 startDate: "desc"
+            },
+            include: {
+                category: true
             }
         })
 

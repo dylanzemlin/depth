@@ -1,10 +1,14 @@
 "use client";
 
+import Button from "@/components/buttons/button";
+import Modal from "@/components/modals/modal";
 import useBudgets from "@/lib/hooks/useBudgets";
 import useCategories from "@/lib/hooks/useCategories";
+import useSwitch from "@/lib/hooks/useSwitch";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
-import { NumberInput, Select, SelectItem } from "@tremor/react";
+import { DatePicker, NumberInput, Select, SelectItem, TextInput } from "@tremor/react";
 import { useState } from "react";
+import toast from "react-hot-toast";
 import { FaAnglesLeft, FaAnglesRight, FaArrowsLeftRight, FaEquals, FaGreaterThan, FaLessThan, FaAngleLeft, FaAngleRight } from "react-icons/fa6";
 
 type FilterDate = {
@@ -18,6 +22,13 @@ export default function Budgets() {
     const [filterCategory, setFilterCategory] = useState<string | undefined>(undefined);
     const [filterDescription, setFilterDescription] = useState<string | undefined>(undefined);
     const [page, setPage] = useState<number>(0);
+    const createSwitch = useSwitch(false);
+
+    const [newBudgetDescription, setNewBudgetDescription] = useState<string | undefined>(undefined);
+    const [newBudgetGoal, setNewBudgetGoal] = useState<number | undefined>(undefined);
+    const [newBudgetCategory, setNewBudgetCategory] = useState<string | undefined>(undefined);
+    const [newBudgetStartDate, setNewBudgetStartDate] = useState<Date>(new Date());
+    const [newBudgetEndDate, setNewBudgetEndDate] = useState<Date | undefined>(undefined);
 
     const budgets = useBudgets({
         page, filter: {
@@ -30,10 +41,33 @@ export default function Budgets() {
     });
     const categories = useCategories({ pageSize: 100 });
 
-    if (budgets.loading || categories.loading) {
+    const createBudget = async () => {
+        if (newBudgetDescription == null || newBudgetGoal == null || newBudgetCategory == null) {
+            return;
+        }
+
+        const created = await budgets.createBudget({
+            description: newBudgetDescription,
+            goal: newBudgetGoal,
+            categoryId: newBudgetCategory,
+            startDate: newBudgetStartDate,
+            endDate: newBudgetEndDate
+        });
+
+        if (created) {
+            toast.success("Budget created successfully");
+        } else {
+            toast.error("Failed to create budget");
+        }
+
+        createSwitch.setFalse();
+    }
+
+    if (budgets.loading || categories.loading || budgets.budgets == null || categories.categories == null) {
         return <h1>Loading...</h1>;
     }
 
+    const pageSize = budgets?.pagination?.pageSize ?? 0;
     return (
         <main className="w-full min-h-screen p-2 md:p-12">
             <section aria-labelledby="current-budget">
@@ -52,8 +86,7 @@ export default function Budgets() {
                                             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-5 -ml-px shrink-0 transition-all duration-300 sm:size-4" style={{
                                                 rotate: filterCategory ? "45deg" : "0deg"
                                             }} onClick={(e) => {
-                                                if (filterCategory)
-                                                {
+                                                if (filterCategory) {
                                                     setFilterCategory(undefined)
                                                     e.preventDefault();
                                                 }
@@ -134,7 +167,7 @@ export default function Budgets() {
                                 </div>
                             </li>
                             <li className="ml-auto hidden xl:flex">
-                                <button className="rounded-md border border-gray-300 px-2 py-1.5 hover:bg-gray-50 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-violet-500 flex gap-1 items-center">
+                                <button className="rounded-md border border-gray-300 px-2 py-1.5 hover:bg-gray-50 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-violet-500 flex gap-1 items-center" onClick={createSwitch.setTrue}>
                                     <span aria-hidden="true">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-5 -ml-px shrink-0 transition sm:size-4">
                                             <path d="M11 11V5H13V11H19V13H13V19H11V13H5V11H11Z"></path>
@@ -180,7 +213,7 @@ export default function Budgets() {
                                                     {budget.description}
                                                 </td>
                                                 <td className="px-4 py-2 text-xs md:text-sm">
-                                                    {budget.categoryId}
+                                                    {budget.category.title}
                                                 </td>
                                                 <td className="px-4 py-2 text-xs md:text-sm">
                                                     ${budget.amount}
@@ -211,11 +244,13 @@ export default function Budgets() {
                         <p className="flex text-sm tabular-nums text-gray-500 gap-1">
                             Showing
                             <span className="font-medium text-gray-900">
-                                1-20
+                                {
+                                    ((budgets?.pagination?.total || 0) > 0 ? (budgets?.pagination?.current || 0) * pageSize + 1 : 0)
+                                }-{Math.min((budgets?.pagination?.current || 0) * pageSize + pageSize, budgets?.pagination?.total || 0)}
                             </span>
                             of
                             <span className="font-medium text-gray-900">
-                                52
+                                {budgets?.pagination?.total || 0}
                             </span>
                         </p>
                         <div className="flex items-center gap-x-1.5">
@@ -275,6 +310,54 @@ export default function Budgets() {
                     </div>
                 </div>
             </section>
+
+            <Modal isOpen={createSwitch.state} onClose={createSwitch.toggle} title="Create Budget" backdrop footer={
+                <div className="flex justify-start gap-2">
+                    <Button color="violet" size="sm" title="Create" onClick={createBudget} disabled={newBudgetDescription == null || newBudgetGoal == null || newBudgetCategory == null} />
+                    <Button color="slate" size="sm" title="Cancel" onClick={createSwitch.setFalse} />
+                </div>
+            }>
+                <div>
+                    <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                        Description
+                    </label>
+                    <TextInput id="description" name="description" placeholder="Description" value={newBudgetDescription} onValueChange={(e) => setNewBudgetDescription(e)} />
+                </div>
+                <div>
+                    <label htmlFor="amount" className="block text-sm font-medium text-gray-700">
+                        Amount
+                    </label>
+                    <NumberInput id="amount" name="amount" value={newBudgetGoal} onValueChange={(e) => setNewBudgetGoal(e)} enableStepper={false} min={0} placeholder="Amount" />
+                </div>
+                <div>
+                    <label htmlFor="category" className="block text-sm font-medium text-gray-700">
+                        Category
+                    </label>
+                    <Select id="category" name="category" value={newBudgetCategory} onValueChange={(e) => setNewBudgetCategory(e)}>
+                        {
+                            categories.categories?.map((category) => {
+                                return (
+                                    <SelectItem key={category.id} value={category.id}>
+                                        {category.title}
+                                    </SelectItem>
+                                )
+                            })
+                        }
+                    </Select>
+                </div>
+                <div>
+                    <label htmlFor="start_date" className="block text-sm font-medium text-gray-700">
+                        Start Date
+                    </label>
+                    <DatePicker id="start_date" value={newBudgetStartDate} onValueChange={(e) => setNewBudgetStartDate(new Date(e?.toUTCString() ?? new Date().toUTCString()))}  />
+                </div>
+                <div>
+                    <label htmlFor="end_date" className="block text-sm font-medium text-gray-700">
+                        End Date
+                    </label>
+                    <DatePicker id="end_date" value={newBudgetEndDate} onValueChange={(e) => setNewBudgetEndDate(new Date(e?.toUTCString() ?? new Date().toUTCString()))} />
+                </div>
+            </Modal>
         </main>
     );
 }
