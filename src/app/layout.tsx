@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
+import { Roboto } from "next/font/google";
 import AuthProvider from "@/lib/auth";
 import { Toaster } from "react-hot-toast";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-const inter = Inter({ subsets: ["latin"] });
+const robot = Roboto({
+    weight: ["400", "500", "700"],
+});
+import "./globals.css";
 
 export const metadata: Metadata = {
     title: "Depth",
@@ -27,7 +29,7 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en light" style={{ colorScheme: "light" }}>
-            <body className={`${inter.className} flex flex-col xl:flex-row overflow-y-auto scroll-auto antialiased`}>
+            <body className={`${robot.className} flex flex-col xl:flex-row overflow-y-auto scroll-auto antialiased`}>
                 <QueryClientProvider client={queryClient}>
                     <AuthProvider>
                         {children}
