@@ -1,3 +1,4 @@
+import { updateAccountData } from "@/lib/api/sushi";
 import { withSessionRoute } from "@/lib/iron/wrappers";
 import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
@@ -27,7 +28,8 @@ export async function POST(request: NextRequest): Promise<NextResponse>
         const budget = await prisma.budget.create({
             data: {
                 description,
-                amount: goal,
+                amount: 0,
+                goal,
                 startDate,
                 endDate,
                 category: {
@@ -43,6 +45,7 @@ export async function POST(request: NextRequest): Promise<NextResponse>
             }
         })
 
+        await updateAccountData(request);
         return NextResponse.json(budget, { status: 201 });
     } catch (error) {
         return NextResponse.json({ error }, { status: 400 });

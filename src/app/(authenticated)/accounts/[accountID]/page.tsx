@@ -1,11 +1,12 @@
 "use client";
 
-import Loading from "@/components/loading";
 import { Account, AccountType, Transaction } from "@prisma/client";
 import { Card, LineChart, ProgressBar } from "@tremor/react";
-import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
 import dayjs from "dayjs";  
+import { useQuery } from "@tanstack/react-query";
+import { getAccountDashboardData, getAccountData } from "@/lib/api/account";
+import FullLoading from "@/components/feedback/FullLoading";
+import FullError from "@/components/feedback/FullError";
 
 type AccountDashboardData = {
     income: number;
@@ -20,52 +21,20 @@ const valueFormatter = function (n: number) {
 };
 
 export default function AccountPage({ params }: { params: { accountID: string } }) {
-    const [account, setAccount] = useState<Account | null>(null);
-    const [dashboardData, setDashboardData] = useState<AccountDashboardData | null>(null);
+    const accountQuery = useQuery({ queryKey: ["account", { accountId: params.accountID }], queryFn: getAccountData });
+    const dashboardQuery = useQuery({ queryKey: ["accountDashboard", { accountId: params.accountID }], queryFn: getAccountDashboardData });
 
-    useEffect(() => {
-        async function fetchAccount() {
-            const result = await fetch(`/api/v1/account/${params.accountID}`);
-            if (result.status !== 200) {
-                toast.error('Failed to fetch account');
-                return;
-            }
-
-            const data = await result.json();
-            setAccount(data);
-        }
-
-        fetchAccount();
-    }, []);
-
-    useEffect(() => {
-        async function fetchDashboardData() {
-            const result = await fetch(`/api/v1/account/${params.accountID}/dashboard`, {
-                method: 'GET'
-            });
-            if (result.status !== 200) {
-                toast.error('Failed to fetch account dashboard data');
-                return;
-            }
-
-            const data = await result.json();
-            setDashboardData(data);
-        }
-
-        fetchDashboardData();
-    }, []);
-
-    if (account == null || dashboardData == null) {
-        return (
-            <main className="w-full min-h-screen p-2 md:p-12">
-                <section className="flex items-center justify-center h-full w-full">
-                    <h1 className="scroll-mt-10 text-3xl w-8 h-8">
-                        <Loading />
-                    </h1>
-                </section>
-            </main>
-        )
+    if (accountQuery.isPending || dashboardQuery.isPending) {
+        return <FullLoading injectMain />;
     }
+
+    if (accountQuery.isError || dashboardQuery.isError)
+    {
+        return <FullError injectMain error={accountQuery.error ?? dashboardQuery.error} />;
+    }
+
+    const account = accountQuery.data as Account;
+    const dashboardData = dashboardQuery.data as AccountDashboardData;
 
     const balance = Math.abs(account.balance);
     const percentageOfLimit = balance / (account.creditLimit ?? 1) * 100;

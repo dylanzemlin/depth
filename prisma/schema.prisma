@@ -140,6 +140,7 @@ enum SubscriptionFrequency {
 
 model Budget {
     id String @id @default(cuid())
+    goal Float
     amount Float
     startDate DateTime
     endDate DateTime?

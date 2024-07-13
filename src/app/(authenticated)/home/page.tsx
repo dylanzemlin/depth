@@ -1,9 +1,12 @@
 "use client";
 
-import Loading from "@/components/loading";
+import FullError from "@/components/feedback/FullError";
+import FullLoading from "@/components/feedback/FullLoading";
+import { getHomeData } from "@/lib/api/home";
+import { useQuery } from "@tanstack/react-query";
 import { Card, LineChart, ProgressBar } from "@tremor/react";
 import dayjs from "dayjs";
-import { useEffect, useId, useState } from "react";
+import { useId } from "react";
 
 type ProgressTestProps = {
     value: number;
@@ -56,30 +59,18 @@ type HomeData = {
 }
 
 export default function Home() {
-    const [homeData, setHomeData] = useState<HomeData | null>(null);
+    const homeQuery = useQuery({ queryKey: ["home"], queryFn: getHomeData });
 
-    const fetchHomeData = async () => {
-        const response = await fetch("/api/v1/home");
-        const data = await response.json();
-        setHomeData(data);
+    if (homeQuery.isPending) {
+        return <FullLoading injectMain />
     }
 
-    useEffect(() => {
-        fetchHomeData();
-    }, []);
-
-    if (homeData == null) {
-        return (
-            <main className="w-full min-h-screen p-2 md:p-12">
-                <section className="flex items-center justify-center h-full w-full">
-                    <h1 className="scroll-mt-10 text-3xl w-8 h-8">
-                        <Loading />
-                    </h1>
-                </section>
-            </main>
-        )
+    if (homeQuery.isError)
+    {
+        return <FullError injectMain error={homeQuery.error} />
     }
 
+    const homeData = homeQuery.data as HomeData;
     const incomePercentage = homeData?.income / (homeData?.income + homeData?.expenses) * 100;
     const expensesPercentage = homeData?.expenses / (homeData?.income + homeData?.expenses) * 100;
 

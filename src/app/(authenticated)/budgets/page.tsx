@@ -1,11 +1,15 @@
 "use client";
 
 import Button from "@/components/buttons/button";
+import FullError from "@/components/feedback/FullError";
+import FullLoading from "@/components/feedback/FullLoading";
 import Modal from "@/components/modals/modal";
+import { createBudget, getBudgets } from "@/lib/api/budget";
 import useBudgets from "@/lib/hooks/useBudgets";
 import useCategories from "@/lib/hooks/useCategories";
 import useSwitch from "@/lib/hooks/useSwitch";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { DatePicker, NumberInput, Select, SelectItem, TextInput } from "@tremor/react";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -30,44 +34,35 @@ export default function Budgets() {
     const [newBudgetStartDate, setNewBudgetStartDate] = useState<Date>(new Date());
     const [newBudgetEndDate, setNewBudgetEndDate] = useState<Date | undefined>(undefined);
 
-    const budgets = useBudgets({
-        page, filter: {
-            categoryId: filterCategory,
-            condition: filterCondition as any,
-            goal_1: filterGoalRange[0],
-            goal_2: filterGoalRange[1],
-            description: filterDescription
-        }
-    });
+    const queryClient = useQueryClient();
+
+    const budgetQuery = useQuery({ 
+        queryKey: ["budgets", { categoryId: filterCategory, condition: filterCondition, goal_1: filterGoalRange[0], goal_2: filterGoalRange[1], description: filterDescription }], 
+        queryFn: getBudgets
+    })
+    const budgetData = budgetQuery.data;
+    
+    const budgetMutation = useMutation({
+        mutationFn: createBudget,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["budgets"] });
+            createSwitch.setFalse();
+            toast.success("Budget created successfully");
+        },
+        onError: (error) => toast.error(error.message)
+    })
+    
     const categories = useCategories({ pageSize: 100 });
 
-    const createBudget = async () => {
-        if (newBudgetDescription == null || newBudgetGoal == null || newBudgetCategory == null) {
-            return;
-        }
-
-        const created = await budgets.createBudget({
-            description: newBudgetDescription,
-            goal: newBudgetGoal,
-            categoryId: newBudgetCategory,
-            startDate: newBudgetStartDate,
-            endDate: newBudgetEndDate
-        });
-
-        if (created) {
-            toast.success("Budget created successfully");
-        } else {
-            toast.error("Failed to create budget");
-        }
-
-        createSwitch.setFalse();
+    if (budgetQuery.isPending) {
+        return <FullLoading injectMain />
     }
 
-    if (budgets.loading || categories.loading || budgets.budgets == null || categories.categories == null) {
-        return <h1>Loading...</h1>;
+    if (budgetQuery.isError) {
+        return <FullError error={budgetQuery.error} injectMain />
     }
 
-    const pageSize = budgets?.pagination?.pageSize ?? 0;
+    const pageSize = budgetData?.pagination?.pageSize ?? 0;
     return (
         <main className="w-full min-h-screen p-2 md:p-12">
             <section aria-labelledby="current-budget">
@@ -194,6 +189,9 @@ export default function Budgets() {
                                         Goal
                                     </th>
                                     <th className="border-b px-4 text-left font-semibold text-gray-900 border-gray-200 whitespace-nowrap py-1 text-sm">
+                                        Current Amount
+                                    </th>
+                                    <th className="border-b px-4 text-left font-semibold text-gray-900 border-gray-200 whitespace-nowrap py-1 text-sm">
                                         Start Date
                                     </th>
                                     <th className="border-b px-4 text-left font-semibold text-gray-900 border-gray-200 whitespace-nowrap py-1 text-sm">
@@ -206,7 +204,7 @@ export default function Budgets() {
                             </thead>
                             <tbody>
                                 {
-                                    budgets.budgets?.map((budget) => {
+                                    budgetData?.data?.map((budget) => {
                                         return (
                                             <tr className="border-b border-gray-200" key={budget.id}>
                                                 <td className="px-4 py-2 text-xs md:text-sm">
@@ -214,6 +212,9 @@ export default function Budgets() {
                                                 </td>
                                                 <td className="px-4 py-2 text-xs md:text-sm">
                                                     {budget.category.title}
+                                                </td>
+                                                <td className="px-4 py-2 text-xs md:text-sm">
+                                                    ${budget.goal}
                                                 </td>
                                                 <td className="px-4 py-2 text-xs md:text-sm">
                                                     ${budget.amount}
@@ -245,12 +246,12 @@ export default function Budgets() {
                             Showing
                             <span className="font-medium text-gray-900">
                                 {
-                                    ((budgets?.pagination?.total || 0) > 0 ? (budgets?.pagination?.current || 0) * pageSize + 1 : 0)
-                                }-{Math.min((budgets?.pagination?.current || 0) * pageSize + pageSize, budgets?.pagination?.total || 0)}
+                                    ((budgetData?.pagination?.total || 0) > 0 ? (budgetData?.pagination?.current || 0) * pageSize + 1 : 0)
+                                }-{Math.min((budgetData?.pagination?.current || 0) * pageSize + pageSize, budgetData?.pagination?.total || 0)}
                             </span>
                             of
                             <span className="font-medium text-gray-900">
-                                {budgets?.pagination?.total || 0}
+                                {budgetData?.pagination?.total || 0}
                             </span>
                         </p>
                         <div className="flex items-center gap-x-1.5">
@@ -313,7 +314,18 @@ export default function Budgets() {
 
             <Modal isOpen={createSwitch.state} onClose={createSwitch.toggle} title="Create Budget" backdrop footer={
                 <div className="flex justify-start gap-2">
-                    <Button color="violet" size="sm" title="Create" onClick={createBudget} disabled={newBudgetDescription == null || newBudgetGoal == null || newBudgetCategory == null} />
+                    <Button color="violet" size="sm" title="Create" onClick={() => {
+                        if (newBudgetDescription == null || newBudgetGoal == null || newBudgetCategory == null) {
+                            return;
+                        }
+                        budgetMutation.mutate({
+                            description: newBudgetDescription,
+                            goal: newBudgetGoal,
+                            categoryId: newBudgetCategory,
+                            startDate: newBudgetStartDate,
+                            endDate: newBudgetEndDate
+                        })
+                    }} disabled={newBudgetDescription == null || newBudgetGoal == null || newBudgetCategory == null} />
                     <Button color="slate" size="sm" title="Cancel" onClick={createSwitch.setFalse} />
                 </div>
             }>
