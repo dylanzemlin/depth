@@ -27,7 +27,7 @@ export default function Register() {
                         disabled={auth.loading || email.length <= 3 || password.length == 0 || name.length == 0}
                         onClick={() => {
                             auth.signupWithEmailAndPassword(email, name, password);
-                        }} className="text-white p-2 rounded-lg shadow-md bg-violet-500 border w-full hover:bg-violet-600/90 transition-colors mt-4 disabled:opacity-50">
+                        }} className="text-white p-2 rounded-lg shadow-md bg-indigo-500 border w-full hover:bg-indigo-600/90 transition-colors mt-4 disabled:opacity-50">
                         Register
                     </button>
                 </div>
@@ -54,7 +54,7 @@ export default function Register() {
             <div>
                 <div className="text-center mt-4 flex gap-2">
                     <span className="text-black">Already have an account?</span>
-                    <a href="/login" className="text-violet-500 cursor-pointer font-semibold">Login now</a>
+                    <a href="/login" className="text-indigo-500 cursor-pointer font-semibold">Login now</a>
                 </div>
             </div>
         </main>

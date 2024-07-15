@@ -1,0 +1,24 @@
+name: Sushi Update
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Runs every day at midnight UTC
+  workflow_dispatch: # Allows manual triggering of the workflow
+
+jobs:
+  update-sushi:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: HTTP Request Action
+      id: update-sushi
+      uses: fjogeleit/http-request-action@v1.16.1
+      with:
+        url: 'https://depth.dylanzeml.in/api/sushi/update'
+        method: 'POST'
+        bearerToken: ${{ secrets.SUSHI_API_TOKEN }}
+
+    - name: Output
+      run: |
+        echo "Status Code: ${{ steps.update-sushi.outputs.status }}"
+        echo "Success: ${{ steps.update-sushi.outputs.response }}"

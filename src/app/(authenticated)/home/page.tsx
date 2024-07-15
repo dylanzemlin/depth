@@ -2,6 +2,7 @@
 
 import FullError from "@/components/feedback/FullError";
 import FullLoading from "@/components/feedback/FullLoading";
+import { getBudgets } from "@/lib/api/budget";
 import { getHomeData } from "@/lib/api/home";
 import { useQuery } from "@tanstack/react-query";
 import { Card, LineChart, ProgressBar } from "@tremor/react";
@@ -12,6 +13,7 @@ type ProgressTestProps = {
     value: number;
     max: number;
     title: string;
+    category: string;
 }
 
 const ProgressTest = (props: ProgressTestProps) => {
@@ -20,7 +22,7 @@ const ProgressTest = (props: ProgressTestProps) => {
         <>
             <p className="flex justify-between text-sm gap-8">
                 <span className="font-medium">
-                    {props.title}
+                    {props.title} <span className="text-indigo-500">({props.category})</span>
                 </span>
                 <span className="font-medium">
                     ${props.value.toFixed(2)}
@@ -60,17 +62,19 @@ type HomeData = {
 
 export default function Home() {
     const homeQuery = useQuery({ queryKey: ["home"], queryFn: getHomeData });
+    const budgetQuery = useQuery({ queryKey: ["budgets", { filter: {} }], queryFn: getBudgets });
 
-    if (homeQuery.isPending) {
+    if (homeQuery.isPending || budgetQuery.isPending) {
         return <FullLoading injectMain />
     }
 
-    if (homeQuery.isError)
+    if (homeQuery.isError || budgetQuery.isError)
     {
-        return <FullError injectMain error={homeQuery.error} />
+        return <FullError injectMain error={homeQuery.error || budgetQuery.error} />
     }
 
     const homeData = homeQuery.data as HomeData;
+    const budgets = budgetQuery.data;
     const incomePercentage = homeData?.income / (homeData?.income + homeData?.expenses) * 100;
     const expensesPercentage = homeData?.expenses / (homeData?.income + homeData?.expenses) * 100;
 
@@ -149,30 +153,13 @@ export default function Home() {
                     Budget
                 </h1>
                 <ul role="list" className="mt-4 space-5 min-w-48 flex flex-col gap-8 max-h-full md:max-h-28 w-full flex-wrap">
-                    <li>
-                        <ProgressTest title="Dates" value={492.15} max={1000.00} />
-                    </li>
-                    <li>
-                        <ProgressTest title="Fast Food" value={192.15} max={500.00} />
-                    </li>
-                    <li>
-                        <ProgressTest title="Rent" value={492.15} max={1000.00} />
-                    </li>
-                    <li>
-                        <ProgressTest title="Gas" value={492.15} max={1000.00} />
-                    </li>
-                    <li>
-                        <ProgressTest title="Groceries" value={492.15} max={1000.00} />
-                    </li>
-                    <li>
-                        <ProgressTest title="Subscriptions" value={492.15} max={1000.00} />
-                    </li>
-                    <li>
-                        <ProgressTest title="Entertainment" value={492.15} max={1000.00} />
-                    </li>
-                    <li>
-                        <ProgressTest title="Other" value={492.15} max={1000.00} />
-                    </li>
+                    {
+                        budgets.data.map((budget) => (
+                            <li key={budget.id}>
+                                <ProgressTest title={budget.description} category={budget.category.title} value={budget.amount} max={budget.goal} />
+                            </li>
+                        ))
+                    }
                 </ul>
             </section>
         </main>

@@ -89,7 +89,7 @@ export async function GET(request: NextRequest): Promise<NextResponse>
             const now = dayjs();
 
             // Check if the transaction is in the current month
-            if (date.isSame(now, "month") && date.isSame(now, "year"))
+            if (!date.isSame(now, "month") || !date.isSame(now, "year"))
             {
                 continue;
             }
@@ -99,7 +99,7 @@ export async function GET(request: NextRequest): Promise<NextResponse>
                 continue;
             }
 
-            const sign = transaction.type === TransactionType.INCOME ? 1 : -1;
+            const sign = transaction.type === TransactionType.INCOME ? -1 : 1;
             total += sign * transaction.amount;
         }
 

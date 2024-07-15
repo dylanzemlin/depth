@@ -30,36 +30,36 @@ export default function DesktopNav(props: DesktopNavProps) {
             <div className="w-full">
                 <ul className="w-full flex flex-col gap-4">
                     <li className="w-full">
-                        <a href="/home" className="py-2 w-full hover:bg-violet-100 flex items-center px-4 gap-4 rounded-md">
+                        <a href="/home" className="py-2 w-full hover:bg-indigo-100 flex items-center px-4 gap-4 rounded-md">
                             <FaHome className="inline-block w-6 h-6" />
                             Home
                         </a>
                     </li>
                     <li className="w-full">
-                        <a href="/transactions" className="py-2 w-full hover:bg-violet-100 flex items-center px-4 gap-4 rounded-md">
+                        <a href="/transactions" className="py-2 w-full hover:bg-indigo-100 flex items-center px-4 gap-4 rounded-md">
                             <FaArrowsLeftRight className="inline-block w-6 h-6" />
                             Transactions
                         </a>
                     </li>
                     <li className="w-full">
-                        <a href="/subscriptions" className="py-2 w-full hover:bg-violet-100 flex items-center px-4 gap-4 rounded-md">
+                        <a href="/subscriptions" className="py-2 w-full hover:bg-indigo-100 flex items-center px-4 gap-4 rounded-md">
                             <FaCalendar className="inline-block w-6 h-6" />
                             Subscriptions
                         </a>
                     </li>
                     <li className="w-full">
-                        <a href="/budgets" className="py-2 w-full hover:bg-violet-100 flex items-center px-4 gap-4 rounded-md">
+                        <a href="/budgets" className="py-2 w-full hover:bg-indigo-100 flex items-center px-4 gap-4 rounded-md">
                             <FaMoneyBill className="inline-block w-6 h-6" />
                             Budgets
                         </a>
                     </li>
                     <li className="w-full">
-                        <a href="/categories" className="py-2 w-full hover:bg-violet-100 flex items-center px-4 gap-4 rounded-md">
+                        <a href="/categories" className="py-2 w-full hover:bg-indigo-100 flex items-center px-4 gap-4 rounded-md">
                             <FaVectorSquare className="inline-block w-6 h-6" />
                             Categories
                         </a>
                     </li>
-                    <button type="button" className="py-2 w-full hover:bg-violet-100 flex items-center px-4 gap-4 rounded-md" aria-controls="accounts_dropdown" data-collapse-toggle="accounts_dropdown">
+                    <button type="button" className="py-2 w-full hover:bg-indigo-100 flex items-center px-4 gap-4 rounded-md" aria-controls="accounts_dropdown" data-collapse-toggle="accounts_dropdown">
                         <FaFolder className="inline-block w-6 h-6" />
                         <span className="flex-1 text-left rtl:text-right whitespace-nowrap">Accounts</span>
                         <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
@@ -71,7 +71,7 @@ export default function DesktopNav(props: DesktopNavProps) {
                             props.accounts.map((account) => {
                                 return (
                                     <li key={account.id}>
-                                        <a href={`/accounts/${account.id}`} className="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-violet-100 gap-2 text-nowrap">
+                                        <a href={`/accounts/${account.id}`} className="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-indigo-100 gap-2 text-nowrap">
                                             {accountTypeToIcon(account.type)}
                                             {account.name} ({accountTypeToDisplayName(account.type)})
                                         </a>
@@ -80,7 +80,7 @@ export default function DesktopNav(props: DesktopNavProps) {
                             })
                         }
                         <li>
-                            <button className="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-violet-100 gap-2 text-nowrap" onClick={props.onAccountModalOpen}>
+                            <button className="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-indigo-100 gap-2 text-nowrap" onClick={props.onAccountModalOpen}>
                                 <FaLink />
                                 Create Account
                             </button>

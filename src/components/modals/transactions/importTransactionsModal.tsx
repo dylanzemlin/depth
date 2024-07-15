@@ -123,7 +123,7 @@ export default function ImportTransactionsModal(props: ImportTransactionsModalPr
 
     return (
         <>
-            <button disabled={props.disabled} className="rounded-md border border-gray-300 px-2 py-1.5 hover:bg-gray-50 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-violet-500 flex gap-1 items-center disabled:opacity-50" onClick={sw.setTrue}>
+            <button disabled={props.disabled} className="rounded-md border border-gray-300 px-2 py-1.5 hover:bg-gray-50 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-indigo-500 flex gap-1 items-center disabled:opacity-50" onClick={sw.setTrue}>
                 <span aria-hidden="true">
                     <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-5 -ml-px shrink-0 transition sm:size-4">
                         <path d="M11 11V5H13V11H19V13H13V19H11V13H5V11H11Z"></path>

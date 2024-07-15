@@ -4,7 +4,7 @@ import Button from "@/components/buttons/button";
 import FullError from "@/components/feedback/FullError";
 import FullLoading from "@/components/feedback/FullLoading";
 import Modal from "@/components/modals/modal";
-import { NewBudget, createBudget, getBudgets } from "@/lib/api/budget";
+import { BudgetFilter, NewBudget, createBudget, getBudgets } from "@/lib/api/budget";
 import useCategories from "@/lib/hooks/useCategories";
 import useSwitch from "@/lib/hooks/useSwitch";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
@@ -15,18 +15,15 @@ import toast from "react-hot-toast";
 import { FaAnglesLeft, FaAnglesRight, FaArrowsLeftRight, FaEquals, FaGreaterThan, FaLessThan, FaAngleLeft, FaAngleRight } from "react-icons/fa6";
 
 export default function Budgets() {
-    const [filterCondition, setFilterCondition] = useState<string | undefined>(undefined);
-    const [filterGoalRange, setFilterGoalRange] = useState<(number | undefined)[]>([undefined, undefined]);
-    const [filterCategory, setFilterCategory] = useState<string | undefined>(undefined);
-    const [filterDescription, setFilterDescription] = useState<string | undefined>(undefined);
     const [page, setPage] = useState<number>(0);
     const createSwitch = useSwitch(false);
 
+    const [budgetFilter, setBudgetFilter] = useState<BudgetFilter>({});
     const [newBudget, setNewBudget] = useState<NewBudget>({} as NewBudget);
     const queryClient = useQueryClient();
 
     const budgetQuery = useQuery({ 
-        queryKey: ["budgets", { categoryId: filterCategory, condition: filterCondition, goal_1: filterGoalRange[0], goal_2: filterGoalRange[1], description: filterDescription }], 
+        queryKey: ["budgets", { filter: budgetFilter }], 
         queryFn: getBudgets
     })
     const budgetData = budgetQuery.data;
@@ -65,13 +62,13 @@ export default function Budgets() {
                         <ul className="flex flex-col xl:flex-row gap-2 bg-white xl:bg-none" id="dropdown_filters">
                             <li>
                                 <Menu>
-                                    <MenuButton className="rounded-md border border-gray-300 px-2 py-1.5 hover:bg-gray-50 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-violet-500 flex gap-1 items-center min-w-full xl:min-w-fit">
+                                    <MenuButton className="rounded-md border border-gray-300 px-2 py-1.5 hover:bg-gray-50 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-indigo-500 flex gap-1 items-center min-w-full xl:min-w-fit">
                                         <span aria-hidden="true">
                                             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-5 -ml-px shrink-0 transition-all duration-300 sm:size-4" style={{
-                                                rotate: filterCategory ? "45deg" : "0deg"
+                                                rotate: budgetFilter.categoryId ? "45deg" : "0deg"
                                             }} onClick={(e) => {
-                                                if (filterCategory) {
-                                                    setFilterCategory(undefined)
+                                                if (budgetFilter.categoryId) {
+                                                    setBudgetFilter({ ...budgetFilter, categoryId: undefined });
                                                     e.preventDefault();
                                                 }
                                             }}>
@@ -80,11 +77,11 @@ export default function Budgets() {
                                         </span>
                                         Category
                                         {
-                                            filterCategory ? (
+                                            budgetFilter.categoryId ? (
                                                 <>
                                                     <div className="w-[1px] h-4 bg-gray-300"></div>
-                                                    <span className="text-violet-600 font-medium">
-                                                        {categories.categories?.find((category) => category.id == filterCategory)?.title ?? "N/A"}
+                                                    <span className="text-indigo-600 font-medium">
+                                                        {categories.categories?.find((category) => category.id == budgetFilter.categoryId)?.title ?? "N/A"}
                                                     </span>
                                                 </>
                                             ) : (
@@ -100,7 +97,7 @@ export default function Budgets() {
                                             categories.categories?.map((category) => {
                                                 return (
                                                     <MenuItem key={category.id}>
-                                                        <button onClick={() => setFilterCategory(category.id)} className="w-full text-left px-2 py-1.5 hover:bg-gray-50 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-violet-500 flex gap-1 items-center">
+                                                        <button onClick={() => setBudgetFilter({ ...budgetFilter, categoryId: category.id })} className="w-full text-left px-2 py-1.5 hover:bg-gray-50 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-indigo-500 flex gap-1 items-center">
                                                             {category.title}
                                                         </button>
                                                     </MenuItem>
@@ -111,7 +108,7 @@ export default function Budgets() {
                                 </Menu>
                             </li>
                             <li>
-                                <button data-dropdown-toggle="costDropdown" className="rounded-md border border-gray-300 px-2 py-1.5 hover:bg-gray-50 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-violet-500 flex gap-1 items-center min-w-full xl:min-w-fit">
+                                <button data-dropdown-toggle="costDropdown" className="rounded-md border border-gray-300 px-2 py-1.5 hover:bg-gray-50 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-indigo-500 flex gap-1 items-center min-w-full xl:min-w-fit">
                                     <span aria-hidden="true">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-5 -ml-px shrink-0 transition sm:size-4">
                                             <path d="M11 11V5H13V11H19V13H13V19H11V13H5V11H11Z"></path>
@@ -119,17 +116,17 @@ export default function Budgets() {
                                     </span>
                                     Goal
                                     {
-                                        filterCondition ? (
+                                        budgetFilter.condition ? (
                                             <>
                                                 <div className="w-[1px] h-4 bg-gray-300"></div>
                                                 {
-                                                    filterCondition != "is between" ? (
-                                                        <span className="text-violet-600 font-medium">
-                                                            {filterCondition} ${filterGoalRange[0] ?? 0}
+                                                    budgetFilter.condition != "is between" ? (
+                                                        <span className="text-indigo-600 font-medium">
+                                                            {budgetFilter.condition} ${budgetFilter.goal_1 ?? 0}
                                                         </span>
                                                     ) : (
-                                                        <span className="text-violet-600 font-medium">
-                                                            {filterCondition} ${filterGoalRange[0] ?? 0} and ${filterGoalRange[1] ?? 0}
+                                                        <span className="text-indigo-600 font-medium">
+                                                            {budgetFilter.condition} ${budgetFilter.goal_1 ?? 0} and ${budgetFilter.goal_2 ?? 0}
                                                         </span>
                                                     )
                                                 }
@@ -143,7 +140,7 @@ export default function Budgets() {
                                 </button>
                             </li>
                             <li className="relative">
-                                <input type="search" className="block w-full appearance-none rounded-md border px-2.5 py-1 outline-none transition sm:text-sm border-transparent text-gray-900 placeholder-gray-400 bg-gray-100 focus:ring-2 focus:ring-violet-200 focus:border-violet-500 [&::--webkit-search-cancel-button]:hidden [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden pl-8" placeholder="Search by description" />
+                                <input type="search" className="block w-full appearance-none rounded-md border px-2.5 py-1 outline-none transition sm:text-sm border-transparent text-gray-900 placeholder-gray-400 bg-gray-100 focus:ring-2 focus:ring-indigo-200 focus:border-indigo-500 [&::--webkit-search-cancel-button]:hidden [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden pl-8" placeholder="Search by description" />
                                 <div className="pointer-events-none absolute bottom-0 left-2 flex h-full items-center justify-center text-gray-400">
                                     <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" aria-hidden="true" className="size-[1.125rem] shrink-0">
                                         <path d="M18.031 16.6168L22.3137 20.8995L20.8995 22.3137L16.6168 18.031C15.0769 19.263 13.124 20 11 20C6.032 20 2 15.968 2 11C2 6.032 6.032 2 11 2C15.968 2 20 6.032 20 11C20 13.124 19.263 15.0769 18.031 16.6168ZM16.0247 15.8748C17.2475 14.6146 18 12.8956 18 11C18 7.1325 14.8675 4 11 4C7.1325 4 4 7.1325 4 11C4 14.8675 7.1325 18 11 18C12.8956 18 14.6146 17.2475 15.8748 16.0247L16.0247 15.8748Z"></path>
@@ -151,7 +148,7 @@ export default function Budgets() {
                                 </div>
                             </li>
                             <li className="ml-auto hidden xl:flex">
-                                <button className="rounded-md border border-gray-300 px-2 py-1.5 hover:bg-gray-50 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-violet-500 flex gap-1 items-center" onClick={createSwitch.setTrue}>
+                                <button className="rounded-md border border-gray-300 px-2 py-1.5 hover:bg-gray-50 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-indigo-500 flex gap-1 items-center" onClick={createSwitch.setTrue}>
                                     <span aria-hidden="true">
                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-5 -ml-px shrink-0 transition sm:size-4">
                                             <path d="M11 11V5H13V11H19V13H13V19H11V13H5V11H11Z"></path>
@@ -215,7 +212,7 @@ export default function Budgets() {
                                                     {budget.endDate?.toString() ?? "N/A"}
                                                 </td>
                                                 <td className="px-4 py-2 text-xs md:text-sm max-w-5">
-                                                    <button className="rounded-md whitespace-nowrap text-center transition-all duration-200 ease-in-out focus-visible:outline-2 outline-violet-500 border-gray-300 p-1.5 border hover:bg-gray-100 border-opacity-0 hover:border-opacity-100" data-dropdown-toggle={`row_dropdown_${budget.id}`}>
+                                                    <button className="rounded-md whitespace-nowrap text-center transition-all duration-200 ease-in-out focus-visible:outline-2 outline-indigo-500 border-gray-300 p-1.5 border hover:bg-gray-100 border-opacity-0 hover:border-opacity-100" data-dropdown-toggle={`row_dropdown_${budget.id}`}>
                                                         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="remixicon size-4 shrink-0 text-gray-500 group-hover:text-gray-700 group-data-[state=open]:text-gray-700">
                                                             <path d="M5 10C3.9 10 3 10.9 3 12C3 13.1 3.9 14 5 14C6.1 14 7 13.1 7 12C7 10.9 6.1 10 5 10ZM19 10C17.9 10 17 10.9 17 12C17 13.1 17.9 14 19 14C20.1 14 21 13.1 21 12C21 10.9 20.1 10 19 10ZM12 10C10.9 10 10 10.9 10 12C10 13.1 10.9 14 12 14C13.1 14 14 13.1 14 12C14 10.9 13.1 10 12 10Z"></path>
                                                         </svg>
@@ -244,16 +241,16 @@ export default function Budgets() {
                             </span>
                         </p>
                         <div className="flex items-center gap-x-1.5">
-                            <button className="rounded-md whitespace-nowrap text-center transition-all duration-200 ease-in-out focus-visible:outline-2 outline-violet-500 border-gray-300 p-1.5 border hover:bg-gray-100">
+                            <button className="rounded-md whitespace-nowrap text-center transition-all duration-200 ease-in-out focus-visible:outline-2 outline-indigo-500 border-gray-300 p-1.5 border hover:bg-gray-100">
                                 <FaAnglesLeft />
                             </button>
-                            <button className="rounded-md whitespace-nowrap text-center transition-all duration-200 ease-in-out focus-visible:outline-2 outline-violet-500 border-gray-300 p-1.5 border hover:bg-gray-100">
+                            <button className="rounded-md whitespace-nowrap text-center transition-all duration-200 ease-in-out focus-visible:outline-2 outline-indigo-500 border-gray-300 p-1.5 border hover:bg-gray-100">
                                 <FaAngleLeft />
                             </button>
-                            <button className="rounded-md whitespace-nowrap text-center transition-all duration-200 ease-in-out focus-visible:outline-2 outline-violet-500 border-gray-300 p-1.5 border hover:bg-gray-100">
+                            <button className="rounded-md whitespace-nowrap text-center transition-all duration-200 ease-in-out focus-visible:outline-2 outline-indigo-500 border-gray-300 p-1.5 border hover:bg-gray-100">
                                 <FaAngleRight />
                             </button>
-                            <button className="rounded-md whitespace-nowrap text-center transition-all duration-200 ease-in-out focus-visible:outline-2 outline-violet-500 border-gray-300 p-1.5 border hover:bg-gray-100">
+                            <button className="rounded-md whitespace-nowrap text-center transition-all duration-200 ease-in-out focus-visible:outline-2 outline-indigo-500 border-gray-300 p-1.5 border hover:bg-gray-100">
                                 <FaAnglesRight />
                             </button>
                         </div>
@@ -264,8 +261,8 @@ export default function Budgets() {
                     <div className="flex flex-col gap-1">
                         <div>
                             <label htmlFor="distance" className="text-tremor-default text-tremor-content dark:text-dark-tremor-content">Select condition</label>
-                            <Select className="mx-auto max-w-md bg-white" id="condition" name="condition" value={filterCondition} onValueChange={(e) => {
-                                setFilterCondition(e);
+                            <Select className="mx-auto max-w-md bg-white" id="condition" name="condition" value={budgetFilter.condition} onValueChange={(e) => {
+                                setBudgetFilter({ ...budgetFilter, condition: e });
                             }}>
                                 <SelectItem value="is equal to" icon={FaEquals}>
                                     is equal to
@@ -286,14 +283,14 @@ export default function Budgets() {
                                 <path d="M4.99989 13.9999L4.99976 5L6.99976 4.99997L6.99986 11.9999L17.1717 12L13.222 8.05024L14.6362 6.63603L21.0001 13L14.6362 19.364L13.222 17.9497L17.1717 14L4.99989 13.9999Z"></path>
                             </svg>
                             {
-                                filterCondition == "is between" ? (
+                                budgetFilter.condition == "is between" ? (
                                     <div className="flex items-center gap-2">
-                                        <NumberInput placeholder="$0" className="max-w-12" enableStepper={false} onValueChange={(e) => setFilterGoalRange([e, filterGoalRange[1]])} />
+                                        <NumberInput placeholder="$0" className="max-w-12" enableStepper={false} onValueChange={(e) => setBudgetFilter({ ...budgetFilter, goal_1: e })} />
                                         <span className="text-gray-500">and</span>
-                                        <NumberInput placeholder="$0" className="max-w-12" enableStepper={false} onValueChange={(e) => setFilterGoalRange([filterGoalRange[0], e])} />
+                                        <NumberInput placeholder="$0" className="max-w-12" enableStepper={false} onValueChange={(e) => setBudgetFilter({ ...budgetFilter, goal_2: e })} />
                                     </div>
                                 ) : (
-                                    <NumberInput placeholder="$0" className="max-w-12" enableStepper={false} onValueChange={(e) => setFilterGoalRange([e, e])} />
+                                    <NumberInput placeholder="$0" className="max-w-12" enableStepper={false} onValueChange={(e) => setBudgetFilter({ ...budgetFilter, goal_1: e })} />
                                 )
                             }
                         </div>

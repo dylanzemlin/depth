@@ -39,7 +39,7 @@ export default function Login() {
                     <button
                         disabled={auth.loading || email.length <= 3 || password.length <= 0}
                         onClick={() => auth.loginWithEmailAndPassword(email, password)}
-                        className="text-white p-2 rounded-lg shadow-md bg-violet-500 border w-full hover:bg-violet-600/90 transition-colors mt-2 disabled:opacity-50">
+                        className="text-white p-2 rounded-lg shadow-md bg-indigo-500 border w-full hover:bg-indigo-600/90 transition-colors mt-2 disabled:opacity-50">
                         Login
                     </button>
                     <a href="/forgot" className="text-gray-500 text-sm cursor-pointer">Forgot password?</a>
@@ -67,7 +67,7 @@ export default function Login() {
             <div>
                 <div className="text-center mt-4 flex gap-2">
                     <span className="text-black">Don't have an account?</span>
-                    <a href="/register" className="text-violet-500 cursor-pointer font-semibold">Register now</a>
+                    <a href="/register" className="text-indigo-500 cursor-pointer font-semibold">Register now</a>
                 </div>
             </div>
         </main>

@@ -1,30 +1,38 @@
 import { Budget } from "@prisma/client";
 import { Pagination } from "./pagination";
 
-type BudgetType = Budget & {
+export type BudgetType = Budget & {
     category: {
         title: string;
     }
 }
 
+export type BudgetFilter = {
+    categoryId?: string;
+    condition?: string;
+    goal_1?: number;
+    goal_2?: number;
+    description?: string;
+}
+
 export async function getBudgets({ queryKey }: { queryKey: any }): Promise<Pagination<BudgetType[]>> {
-    const [_key, { categoryId, condition, goal_1, goal_2, description }] = queryKey;
+    const [_key, { filter }]: ["budgets", { filter: BudgetFilter }] = queryKey;
 
     const params = new URLSearchParams();
-    if (categoryId) {
-        params.append("categoryId", categoryId.toString());
+    if (filter.categoryId) {
+        params.append("categoryId", filter.categoryId.toString());
     }
-    if (condition) {
-        params.append("condition", condition);
+    if (filter.condition) {
+        params.append("condition", filter.condition);
     }
-    if (goal_1) {
-        params.append("goal_1", goal_1.toString());
+    if (filter.goal_1) {
+        params.append("goal_1", filter.goal_1.toString());
     }
-    if (goal_2) {
-        params.append("goal_2", goal_2.toString());
+    if (filter.goal_2) {
+        params.append("goal_2", filter.goal_2.toString());
     }
-    if (description) {
-        params.append("description", description);
+    if (filter.description) {
+        params.append("description", filter.description);
     }
 
     const response = await fetch(`/api/v1/budget/list?${params.toString()}`);

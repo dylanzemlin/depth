@@ -25,14 +25,14 @@ export default function Forgot() {
                 <div className="flex flex-col gap-2">
                     <TextInput placeholder="Email" value={email} onValueChange={setEmail} />
                     <TextInput placeholder="2FA Code" value={email} onValueChange={setEmail} />
-                    <button className="text-white p-2 rounded-lg shadow-md bg-violet-500 border w-full hover:bg-violet-600/90 transition-colors mt-4">
+                    <button className="text-white p-2 rounded-lg shadow-md bg-indigo-500 border w-full hover:bg-indigo-600/90 transition-colors mt-4">
                         Submit
                     </button>
                 </div>
             </div>
             <div>
                 <div className="text-center mt-4 flex gap-2">
-                    <a href="/login" className="text-violet-500 cursor-pointer font-semibold">Back to login</a>
+                    <a href="/login" className="text-indigo-500 cursor-pointer font-semibold">Back to login</a>
                 </div>
             </div>
         </main>

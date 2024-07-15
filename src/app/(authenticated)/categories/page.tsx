@@ -148,9 +148,9 @@ export default function Categories() {
                         <div className="md:text-xs mt-4">
                             <ul className="flex flex-col xl:flex-row gap-2 bg-white xl:bg-none" id="dropdown_filters">
                                 <li>
-                                    <button data-dropdown-toggle="archiveDropdown" className="rounded-md border border-gray-300 px-2 py-1.5 hover:bg-gray-50 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-violet-500 flex gap-1 items-center min-w-full xl:min-w-fit">
+                                    <button data-dropdown-toggle="archiveDropdown" className="rounded-md border border-gray-300 px-2 py-1.5 hover:bg-gray-50 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-indigo-500 flex gap-1 items-center min-w-full xl:min-w-fit">
                                         <span aria-hidden="true">
-                                            <svg onClick={() => setArchived(undefined)} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className={`size-5 -ml-px shrink-0 transition sm:size-4 ${filterArchived != undefined ? 'rotate-45' : ''} hover:text-violet-600`}>
+                                            <svg onClick={() => setArchived(undefined)} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className={`size-5 -ml-px shrink-0 transition sm:size-4 ${filterArchived != undefined ? 'rotate-45' : ''} hover:text-indigo-600`}>
                                                 <path d="M11 11V5H13V11H19V13H13V19H11V13H5V11H11Z"></path>
                                             </svg>
                                         </span>
@@ -159,7 +159,7 @@ export default function Categories() {
                                             filterArchived ? (
                                                 <>
                                                     <div className="w-[1px] h-4 bg-gray-300"></div>
-                                                    <span className="text-violet-600 font-medium">
+                                                    <span className="text-indigo-600 font-medium">
                                                         {filterArchived}
                                                     </span>
                                                 </>
@@ -172,7 +172,7 @@ export default function Categories() {
                                     </button>
                                 </li>
                                 <li className="ml-auto hidden xl:flex">
-                                    <button className="rounded-md border border-gray-300 px-2 py-1.5 hover:bg-gray-50 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-violet-500 flex gap-1 items-center" onClick={createModalSwitch.setTrue}>
+                                    <button className="rounded-md border border-gray-300 px-2 py-1.5 hover:bg-gray-50 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-indigo-500 flex gap-1 items-center" onClick={createModalSwitch.setTrue}>
                                         <span aria-hidden="true">
                                             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-5 -ml-px shrink-0 transition sm:size-4">
                                                 <path d="M11 11V5H13V11H19V13H13V19H11V13H5V11H11Z"></path>
@@ -233,7 +233,7 @@ export default function Categories() {
                                                         )
                                                     }
                                                     <td className="px-4 py-2 text-xs md:text-sm max-w-5">
-                                                        <button id={`btn_${category.id}`} className="rounded-md whitespace-nowrap text-center transition-all duration-200 ease-in-out focus-visible:outline-2 outline-violet-500 border-gray-300 p-1.5 border hover:bg-gray-100 border-opacity-0 hover:border-opacity-100" onClick={() => {
+                                                        <button id={`btn_${category.id}`} className="rounded-md whitespace-nowrap text-center transition-all duration-200 ease-in-out focus-visible:outline-2 outline-indigo-500 border-gray-300 p-1.5 border hover:bg-gray-100 border-opacity-0 hover:border-opacity-100" onClick={() => {
                                                             setSelectedCategory(category);
                                                         }}>
                                                             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="remixicon size-4 shrink-0 text-gray-500 group-hover:text-gray-700 group-data-[state=open]:text-gray-700">
@@ -264,22 +264,22 @@ export default function Categories() {
                             <div className="flex items-center gap-x-1.5">
                                 <button
                                     onClick={() => setPage(0)}
-                                    className="rounded-md whitespace-nowrap text-center transition-all duration-200 ease-in-out focus-visible:outline-2 outline-violet-500 border-gray-300 p-1.5 border hover:bg-gray-100 disabled:opacity-50 disabled:hover:bg-transparent" disabled={categories.pagination.prevUrl == null}>
+                                    className="rounded-md whitespace-nowrap text-center transition-all duration-200 ease-in-out focus-visible:outline-2 outline-indigo-500 border-gray-300 p-1.5 border hover:bg-gray-100 disabled:opacity-50 disabled:hover:bg-transparent" disabled={categories.pagination.prevUrl == null}>
                                     <FaAnglesLeft />
                                 </button>
                                 <button
                                     onClick={() => setPage(page - 1)}
-                                    className="rounded-md whitespace-nowrap text-center transition-all duration-200 ease-in-out focus-visible:outline-2 outline-violet-500 border-gray-300 p-1.5 border hover:bg-gray-100 disabled:opacity-50 disabled:hover:bg-transparent" disabled={categories.pagination.prevUrl == null}>
+                                    className="rounded-md whitespace-nowrap text-center transition-all duration-200 ease-in-out focus-visible:outline-2 outline-indigo-500 border-gray-300 p-1.5 border hover:bg-gray-100 disabled:opacity-50 disabled:hover:bg-transparent" disabled={categories.pagination.prevUrl == null}>
                                     <FaAngleLeft />
                                 </button>
                                 <button
                                     onClick={() => setPage(page + 1)}
-                                    className="rounded-md whitespace-nowrap text-center transition-all duration-200 ease-in-out focus-visible:outline-2 outline-violet-500 border-gray-300 p-1.5 border hover:bg-gray-100 disabled:opacity-50 disabled:hover:bg-transparent" disabled={categories.pagination.nextUrl == null}>
+                                    className="rounded-md whitespace-nowrap text-center transition-all duration-200 ease-in-out focus-visible:outline-2 outline-indigo-500 border-gray-300 p-1.5 border hover:bg-gray-100 disabled:opacity-50 disabled:hover:bg-transparent" disabled={categories.pagination.nextUrl == null}>
                                     <FaAngleRight />
                                 </button>
                                 <button
                                     onClick={() => setPage(Math.floor((categories.pagination?.total || 0) / Math.max(pageSize, 1)))}
-                                    className="rounded-md whitespace-nowrap text-center transition-all duration-200 ease-in-out focus-visible:outline-2 outline-violet-500 border-gray-300 p-1.5 border hover:bg-gray-100 disabled:opacity-50 disabled:hover:bg-transparent" disabled={categories.pagination.nextUrl == null}>
+                                    className="rounded-md whitespace-nowrap text-center transition-all duration-200 ease-in-out focus-visible:outline-2 outline-indigo-500 border-gray-300 p-1.5 border hover:bg-gray-100 disabled:opacity-50 disabled:hover:bg-transparent" disabled={categories.pagination.nextUrl == null}>
                                     <FaAnglesRight />
                                 </button>
                             </div>
