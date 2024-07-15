@@ -9,30 +9,43 @@ import { Card, LineChart, ProgressBar } from "@tremor/react";
 import dayjs from "dayjs";
 import { useId } from "react";
 
-type ProgressTestProps = {
+type BudgetdataProps = {
     value: number;
     max: number;
     title: string;
     category: string;
 }
 
-const ProgressTest = (props: ProgressTestProps) => {
+const BudgetData = (props: BudgetdataProps) => {
     const tooltipId = useId();
+    const perecent = (props.value / props.max) * 100;
+    const daysUntilEnd = dayjs().daysInMonth() - dayjs().date();
+
     return (
         <>
             <p className="flex justify-between text-sm gap-8">
-                <span className="font-medium">
-                    {props.title} <span className="text-indigo-500">({props.category})</span>
-                </span>
-                <span className="font-medium">
-                    ${props.value.toFixed(2)}
-                    <span className="mx-1">
-                        /
+                <div className="flex flex-col">
+                    <span className="font-medium">
+                        {props.title} <span className="text-indigo-500">({props.category})</span>
                     </span>
-                    <span className="font-normal text-gray-500">
-                        ${props.max.toFixed(2)}
+                    <span className="text-gray-500 text-xs">
+                        {daysUntilEnd} days left
                     </span>
-                </span>
+                </div>
+                <div className="flex flex-col items-end">
+                    <span className="font-medium">
+                        ${props.value.toFixed(2)}
+                        <span className="mx-1">
+                            /
+                        </span>
+                        <span className="font-normal text-gray-500">
+                            ${props.max.toFixed(2)}
+                        </span>
+                    </span>
+                    <span className="text-gray-500 text-xs">
+                        {perecent.toFixed(1)}%
+                    </span>
+                </div>
             </p>
             <div className="flex w-full items-center mt-2 [&>*]:h-1.5" data-tooltip-target={tooltipId}>
                 <div className="relative flex h-2 w-full items-center rounded-full bg-indigo-100" aria-label="progress bar" aria-valuenow={492.15} aria-valuemax={1000.00}>
@@ -68,8 +81,7 @@ export default function Home() {
         return <FullLoading injectMain />
     }
 
-    if (homeQuery.isError || budgetQuery.isError)
-    {
+    if (homeQuery.isError || budgetQuery.isError) {
         return <FullError injectMain error={homeQuery.error || budgetQuery.error} />
     }
 
@@ -150,13 +162,13 @@ export default function Home() {
 
             <section aria-labelledby="current-budget" className="max-w-xl md:max-w-4xl">
                 <h1 className="scroll-mt-10 text-3xl">
-                    Budget
+                    Budgets
                 </h1>
                 <ul role="list" className="mt-4 space-5 min-w-48 flex flex-col gap-8 max-h-full md:max-h-28 w-full flex-wrap">
                     {
                         budgets.data.map((budget) => (
                             <li key={budget.id}>
-                                <ProgressTest title={budget.description} category={budget.category.title} value={budget.amount} max={budget.goal} />
+                                <BudgetData title={budget.description} category={budget.category.title} value={budget.amount} max={budget.goal} />
                             </li>
                         ))
                     }
