@@ -20,7 +20,10 @@ type FilterDate = {
 }
 
 type TransactionData = {
-    data: Transaction[],
+    data: (Transaction & {
+        category: Category,
+        account: Account
+    })[],
     pagination: {
         nextUrl: string | null,
         prevUrl: string | null,
@@ -428,10 +431,10 @@ export default function Transactions() {
                                         return (
                                             <tr className="border-b border-gray-200" key={transaction.id}>
                                                 <td className="px-4 py-2 text-xs md:text-sm text-blue-500 hover:text-blue-600">
-                                                    <Link href={`/accounts/${transaction.accountId}`}>{accounts.find(x => x.id == transaction.accountId)?.name} ({accounts.find(x => x.id == transaction.accountId)?.type})</Link>
+                                                    <Link href={`/accounts/${transaction.accountId}`}>{transaction.account.name} ({transaction.account.type})</Link>
                                                 </td>
                                                 <td className="px-4 py-2 text-xs md:text-sm text-blue-500 hover:text-blue-600">
-                                                    <Link href={`/categories/${transaction.categoryId}`}>{categories.find(x => x.id == transaction.categoryId)?.title}</Link>
+                                                    <Link href={`/categories/${transaction.categoryId}`}>{transaction.category.title}</Link>
                                                 </td>
                                                 <td className="px-4 py-2 text-xs md:text-sm">
                                                     {transaction.status == TransactionStatus.CLEARED ? (

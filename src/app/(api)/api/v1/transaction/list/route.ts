@@ -145,6 +145,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
             take: perPage,
             orderBy: {
                 date: "desc"
+            },
+            include: {
+                category: true,
+                account: true
             }
         })
 
