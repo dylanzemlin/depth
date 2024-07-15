@@ -74,7 +74,7 @@ export default function Login() {
                 </Modal>
 
                 <Button color="blue" title="Open Confirm Modal" size="sm" onClick={() => setIsOpenB(true)} />
-                <ConfirmModal title="Confirm" isOpen={isOpenB} onClose={() => setIsOpenB(false)} onConfirm={() => setIsOpenB(false)}>
+                <ConfirmModal title="Confirm" isOpen={isOpenB} onClose={() => setIsOpenB(false)} onConfirm={async () => setIsOpenB(false)}>
                     <p>
                         Are you sure you want to delete this item?
                     </p>

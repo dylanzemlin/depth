@@ -8,6 +8,7 @@ const robot = Roboto({
     subsets: ["latin"]
 });
 import "./globals.css";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
     title: "Depth",
@@ -23,7 +24,9 @@ export default function RootLayout({
         <html lang="en light" style={{ colorScheme: "light" }}>
             <body className={`${robot.className} flex flex-col xl:flex-row overflow-y-auto scroll-auto antialiased`}>
                 <AuthProvider>
-                    {children}
+                    <Suspense>
+                        {children}
+                    </Suspense>
 
                     <script src="/3rd/flowbite.min.js" />
                     <Toaster position="top-center" />

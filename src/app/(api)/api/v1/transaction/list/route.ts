@@ -116,7 +116,7 @@ const generatePrismaQuery = (params: QueryParams) => {
         query.push({
             description: {
                 contains: params.description,
-                mode: "insensitive"
+                // mode: "insensitive"
             }
         });
     }
@@ -139,7 +139,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         const transactions = await prisma.transaction.findMany({
             where: {
                 userId: session.user.id,
-                AND: generatePrismaQuery(params),
+                AND: qry,
             },
             skip: params.page ? params.page * perPage : 0,
             take: perPage,
@@ -151,7 +151,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         const totalCategories = await prisma.transaction.count({
             where: {
                 userId: session.user.id,
-                AND: generatePrismaQuery(params)
+                AND: qry
             }
         });
 
