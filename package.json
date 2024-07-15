@@ -18,9 +18,9 @@
   "dependencies": {
     "@headlessui/react": "^2.1.1",
     "@headlessui/tailwindcss": "^0.2.1",
-    "@material-tailwind/react": "^2.1.9",
     "@octokit/rest": "^21.0.0",
-    "@prisma/client": "^5.16.1",
+    "@popperjs/core": "^2.11.8",
+    "@prisma/client": "^5.16.2",
     "@remixicon/react": "^4.2.0",
     "@tanstack/react-query": "^5.51.1",
     "@tremor/react": "^3.17.4",
@@ -28,11 +28,12 @@
     "flowbite": "^2.3.0",
     "iron-session": "^8.0.2",
     "next": "14.2.4",
-    "prisma": "^5.16.1",
     "react": "^18",
     "react-dom": "^18",
     "react-hot-toast": "^2.4.1",
     "react-icons": "^5.2.1",
+    "react-popper": "^2.3.0",
+    "recharts": "^2.12.7",
     "yup": "^1.4.0"
   },
   "devDependencies": {
@@ -41,6 +42,7 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "postcss": "^8",
+    "prisma": "^5.16.2",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
   }

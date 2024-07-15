@@ -1,6 +1,5 @@
 import type { Config } from "tailwindcss";
 import colors from 'tailwindcss/colors';
-import withMT from "@material-tailwind/react/utils/withMT";
 
 const config: Config = {
   content: [
@@ -141,4 +140,4 @@ const config: Config = {
     require('@tailwindcss/forms')
   ],
 };
-export default withMT(config);
+export default config;

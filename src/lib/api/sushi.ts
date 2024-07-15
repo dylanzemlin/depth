@@ -9,6 +9,7 @@ export async function updateAccountData(request: NextRequest, accountId?: string
         }
         
         await fetch(url.toString(), {
+            method: "POST",
             headers: {
                 Authorization: `Bearer ${process.env.SUSHI_SECRET}`
             }
