@@ -20,7 +20,7 @@ export default function Button(props: ButtonProps) {
     const border = props.outline ? `text-black hover:bg-gray-200` : 'text-white';
 
     return (
-        <button disabled={props.disabled || props.loading} className={`${size} ${border} ${outline}-${color}-500 border-2 border-${color}-500 rounded hover:${outline}-${color}-600 focus:outline-none focus:ring focus:ring-${color}-400 flex items-center ${props.className} disabled:opacity-50`}
+        <button disabled={props.disabled || props.loading} className={`${size} ${border} ${outline}-${color}-500 border-2 border-${color}-500 rounded hover:${outline}-${color}-600 focus:outline-none focus:ring focus:ring-${color}-400 flex items-center ${props.className ?? ''} disabled:opacity-50`}
          onClick={props.onClick}>
             {
                 props.loading ? (

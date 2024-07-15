@@ -4,8 +4,7 @@ import Button from "@/components/buttons/button";
 import FullError from "@/components/feedback/FullError";
 import FullLoading from "@/components/feedback/FullLoading";
 import Modal from "@/components/modals/modal";
-import { createBudget, getBudgets } from "@/lib/api/budget";
-import useBudgets from "@/lib/hooks/useBudgets";
+import { NewBudget, createBudget, getBudgets } from "@/lib/api/budget";
 import useCategories from "@/lib/hooks/useCategories";
 import useSwitch from "@/lib/hooks/useSwitch";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
@@ -15,11 +14,6 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { FaAnglesLeft, FaAnglesRight, FaArrowsLeftRight, FaEquals, FaGreaterThan, FaLessThan, FaAngleLeft, FaAngleRight } from "react-icons/fa6";
 
-type FilterDate = {
-    from?: Date;
-    to?: Date;
-}
-
 export default function Budgets() {
     const [filterCondition, setFilterCondition] = useState<string | undefined>(undefined);
     const [filterGoalRange, setFilterGoalRange] = useState<(number | undefined)[]>([undefined, undefined]);
@@ -28,12 +22,7 @@ export default function Budgets() {
     const [page, setPage] = useState<number>(0);
     const createSwitch = useSwitch(false);
 
-    const [newBudgetDescription, setNewBudgetDescription] = useState<string | undefined>(undefined);
-    const [newBudgetGoal, setNewBudgetGoal] = useState<number | undefined>(undefined);
-    const [newBudgetCategory, setNewBudgetCategory] = useState<string | undefined>(undefined);
-    const [newBudgetStartDate, setNewBudgetStartDate] = useState<Date>(new Date());
-    const [newBudgetEndDate, setNewBudgetEndDate] = useState<Date | undefined>(undefined);
-
+    const [newBudget, setNewBudget] = useState<NewBudget>({} as NewBudget);
     const queryClient = useQueryClient();
 
     const budgetQuery = useQuery({ 
@@ -315,17 +304,12 @@ export default function Budgets() {
             <Modal isOpen={createSwitch.state} onClose={createSwitch.toggle} title="Create Budget" backdrop footer={
                 <div className="flex justify-start gap-2">
                     <Button color="violet" size="sm" title="Create" onClick={() => {
-                        if (newBudgetDescription == null || newBudgetGoal == null || newBudgetCategory == null) {
+                        if (newBudget.description == null || newBudget.goal == null || newBudget.categoryId == null) {
                             return;
                         }
-                        budgetMutation.mutate({
-                            description: newBudgetDescription,
-                            goal: newBudgetGoal,
-                            categoryId: newBudgetCategory,
-                            startDate: newBudgetStartDate,
-                            endDate: newBudgetEndDate
-                        })
-                    }} disabled={newBudgetDescription == null || newBudgetGoal == null || newBudgetCategory == null} />
+
+                        budgetMutation.mutate(newBudget)
+                    }} disabled={newBudget.description == null || newBudget.goal == null || newBudget.categoryId == null} />
                     <Button color="slate" size="sm" title="Cancel" onClick={createSwitch.setFalse} />
                 </div>
             }>
@@ -333,19 +317,19 @@ export default function Budgets() {
                     <label htmlFor="description" className="block text-sm font-medium text-gray-700">
                         Description
                     </label>
-                    <TextInput id="description" name="description" placeholder="Description" value={newBudgetDescription} onValueChange={(e) => setNewBudgetDescription(e)} />
+                    <TextInput id="description" name="description" placeholder="Description" value={newBudget.description} onValueChange={(e) => setNewBudget({ ...newBudget, description: e })} />
                 </div>
                 <div>
                     <label htmlFor="amount" className="block text-sm font-medium text-gray-700">
                         Amount
                     </label>
-                    <NumberInput id="amount" name="amount" value={newBudgetGoal} onValueChange={(e) => setNewBudgetGoal(e)} enableStepper={false} min={0} placeholder="Amount" />
+                    <NumberInput id="amount" name="amount" enableStepper={false} min={0} placeholder="Amount" value={newBudget.goal} onValueChange={(e) => setNewBudget({ ...newBudget, goal: e })} />
                 </div>
                 <div>
                     <label htmlFor="category" className="block text-sm font-medium text-gray-700">
                         Category
                     </label>
-                    <Select id="category" name="category" value={newBudgetCategory} onValueChange={(e) => setNewBudgetCategory(e)}>
+                    <Select id="category" name="category" value={newBudget.categoryId} onValueChange={(e) => setNewBudget({ ...newBudget, categoryId: e })}>
                         {
                             categories.categories?.map((category) => {
                                 return (
@@ -361,13 +345,13 @@ export default function Budgets() {
                     <label htmlFor="start_date" className="block text-sm font-medium text-gray-700">
                         Start Date
                     </label>
-                    <DatePicker id="start_date" value={newBudgetStartDate} onValueChange={(e) => setNewBudgetStartDate(new Date(e?.toUTCString() ?? new Date().toUTCString()))}  />
+                    <DatePicker id="start_date" value={newBudget.startDate} onValueChange={(e) => setNewBudget({ ...newBudget, startDate: new Date(e?.toUTCString() ?? new Date().toUTCString()) })} />
                 </div>
                 <div>
                     <label htmlFor="end_date" className="block text-sm font-medium text-gray-700">
                         End Date
                     </label>
-                    <DatePicker id="end_date" value={newBudgetEndDate} onValueChange={(e) => setNewBudgetEndDate(new Date(e?.toUTCString() ?? new Date().toUTCString()))} />
+                    <DatePicker id="end_date" value={newBudget.endDate} onValueChange={(e) => setNewBudget({ ...newBudget, endDate: new Date(e?.toUTCString() ?? new Date().toUTCString()) })} />
                 </div>
             </Modal>
         </main>
