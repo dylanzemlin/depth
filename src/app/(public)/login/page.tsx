@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { usePathname, useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
+import toast from "react-hot-toast";
 
 export default function Login() {
     const [email, setEmail] = useState("");
@@ -17,7 +18,8 @@ export default function Login() {
 
     useEffect(() => {
         if (searchParams.has("error")) {
-            console.log("Error:", searchParams.get("error"));
+            console.error("Error:", searchParams.get("error"));
+            toast.error("An error occurred while logging in.");
         }
 
         if (Array.from(searchParams.entries()).length > 0) {
