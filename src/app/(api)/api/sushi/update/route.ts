@@ -3,7 +3,7 @@ import { TransactionStatus, TransactionType } from "@prisma/client";
 import dayjs from "dayjs";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(request: NextRequest): Promise<NextResponse>
+export async function POST(request: NextRequest): Promise<NextResponse>
 {
     const secret = request.headers.get("Authorization")?.replace("Bearer ", "");
     if (secret !== process.env.SUSHI_SECRET && process.env.NODE_ENV !== "development")
