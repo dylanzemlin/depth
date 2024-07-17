@@ -7,11 +7,12 @@ import Modal from "@/molecules/modals/modal";
 import useCategories from "@/lib/hooks/useCategories";
 import useSwitch from "@/lib/hooks/useSwitch";
 import { Category } from "@prisma/client";
-import { Select, SelectItem, TextInput } from "@tremor/react";
+import { DateRangePicker, Select, SelectItem, TextInput } from "@tremor/react";
 import { Dropdown } from "flowbite";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { FaAnglesLeft, FaAnglesRight, FaAngleLeft, FaAngleRight, FaWandMagic, FaRegFolder } from "react-icons/fa6";
+import TableFilter from "@/molecules/tables/filter";
 
 type CategoryList = {
     data: Category[],
@@ -129,8 +130,7 @@ export default function Categories() {
         dropdown.hide();
     }, [editModalSwitch.state, archiveModalSwitch.state])
 
-    if (categories.loading || categories.pagination == null || categories.categories == null)
-    {
+    if (categories.loading || categories.pagination == null || categories.categories == null) {
         return <h1>loading...</h1>;
     }
 
@@ -148,28 +148,18 @@ export default function Categories() {
                         <div className="md:text-xs mt-4">
                             <ul className="flex flex-col xl:flex-row gap-2 bg-white xl:bg-none" id="dropdown_filters">
                                 <li>
-                                    <button data-dropdown-toggle="archiveDropdown" className="rounded-md border border-gray-300 px-2 py-1.5 hover:bg-gray-50 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-indigo-500 flex gap-1 items-center min-w-full xl:min-w-fit">
-                                        <span aria-hidden="true">
-                                            <svg onClick={() => setArchived(undefined)} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className={`size-5 -ml-px shrink-0 transition sm:size-4 ${filterArchived != undefined ? 'rotate-45' : ''} hover:text-indigo-600`}>
-                                                <path d="M11 11V5H13V11H19V13H13V19H11V13H5V11H11Z"></path>
-                                            </svg>
-                                        </span>
-                                        Archived
-                                        {
-                                            filterArchived ? (
-                                                <>
-                                                    <div className="w-[1px] h-4 bg-gray-300"></div>
-                                                    <span className="text-indigo-600 font-medium">
-                                                        {filterArchived}
-                                                    </span>
-                                                </>
-                                            ) : (
-                                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-5 shrink-0 text-gray-500 sm:size-4">
-                                                    <path d="M11.9999 13.1714L16.9497 8.22168L18.3639 9.63589L11.9999 15.9999L5.63599 9.63589L7.0502 8.22168L11.9999 13.1714Z"></path>
-                                                </svg>
-                                            )
-                                        }
-                                    </button>
+                                    <TableFilter title="Archived" property={filterArchived} display={filterArchived} onClear={() => setArchived(undefined)}>
+                                        <Select className="mx-auto max-w-md bg-white" id="condition" name="condition" value={filterArchived} onValueChange={(e) => {
+                                            setArchived(e);
+                                        }}>
+                                            <SelectItem value="Archived">
+                                                Archived
+                                            </SelectItem>
+                                            <SelectItem value="Not Archived">
+                                                Not Archived
+                                            </SelectItem>
+                                        </Select>
+                                    </TableFilter>
                                 </li>
                                 <li className="ml-auto hidden xl:flex">
                                     <button className="rounded-md border border-gray-300 px-2 py-1.5 hover:bg-gray-50 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-indigo-500 flex gap-1 items-center" onClick={createModalSwitch.setTrue}>
@@ -287,23 +277,6 @@ export default function Categories() {
                     </div>
 
                     {/* Dropdowns */}
-                    <div id="archiveDropdown" className="z-10 bg-white rounded-md shadow-lg p-2 border border-gray-300 hidden items-center">
-                        <div className="flex flex-col gap-1">
-                            <div>
-                                <Select className="mx-auto max-w-md bg-white" id="condition" name="condition" value={filterArchived} onValueChange={(e) => {
-                                    setArchived(e);
-                                }}>
-                                    <SelectItem value="Archived">
-                                        Archived
-                                    </SelectItem>
-                                    <SelectItem value="Not Archived">
-                                        Not Archived
-                                    </SelectItem>
-                                </Select>
-                            </div>
-                        </div>
-                    </div>
-
                     <div id={`category_dropdown`} className="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700">
                         <ul className="p-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownDefaultButton">
                             <li>
