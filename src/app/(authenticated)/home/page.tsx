@@ -1,13 +1,14 @@
 "use client";
 
-import FullError from "@/components/feedback/FullError";
-import FullLoading from "@/components/feedback/FullLoading";
+import FullError from "@/molecules/feedback/FullError";
+import FullLoading from "@/molecules/feedback/FullLoading";
 import { getBudgets } from "@/lib/api/budget";
 import { getHomeData } from "@/lib/api/home";
 import { useQuery } from "@tanstack/react-query";
 import { Card, LineChart, ProgressBar } from "@tremor/react";
 import dayjs from "dayjs";
 import { useId } from "react";
+import { FaArrowDown, FaArrowUp } from "react-icons/fa6";
 
 type BudgetdataProps = {
     value: number;
@@ -103,6 +104,7 @@ export default function Home() {
         }
     });
 
+    const difference = (homeData?.income ?? 0) - (homeData?.expenses ?? 0)
     return (
         <main className="flex min-h-screen w-full flex-col gap-4 p-4 md:p-12 overflow-hidden overflow-y-auto">
             <section aria-labelledby="current-budget">
@@ -110,13 +112,27 @@ export default function Home() {
                     Overview
                 </h1>
                 <div className="flex gap-4 flex-wrap">
-                    <Card className="max-w-sm">
-                        <h4 className="text-tremor-default text-tremor-content">
-                            Total Balance
-                        </h4>
-                        <p className="font-semibold text-2xl">
-                            ${homeData?.totalBalance.toFixed(2) ?? 0}
-                        </p>
+                    <Card className="max-w-sm flex justify-between">
+                        <div>
+                            <h4 className="text-tremor-default text-tremor-content">
+                                Total Balance
+                            </h4>
+                            <p className="font-semibold text-2xl">
+                                ${homeData?.totalBalance.toFixed(2) ?? 0}
+                            </p>
+                        </div>
+
+                        <div>
+                            <h4 className="text-tremor-default text-tremor-content text-right">
+                                Change
+                            </h4>
+                            <p className="font-semibold text-2xl flex items-center gap-1">
+                                {
+                                    difference > 0 ? <FaArrowUp className="text-green-500" /> : <FaArrowDown className="text-red-500" />
+                                }
+                                ${Math.abs(difference).toFixed(2)}
+                            </p>
+                        </div>
                     </Card>
                     <Card className="max-w-md">
                         <h4 className="text-tremor-default text-tremor-content">

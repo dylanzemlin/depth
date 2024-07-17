@@ -10,8 +10,8 @@ type QueryParams = {
     account?: string;
     status?: "CLEARED" | "PENDING" | "CANCELLED";
     condition?: "is equal to" | "is between" | "is greater than" | "is less than";
-    cost_1?: number;
-    cost_2?: number;
+    minCost?: number;
+    maxCost?: number;
     description?: string;
 }
 
@@ -19,12 +19,12 @@ const tryParseQueryParams = (request: NextRequest): QueryParams => {
     const page = request.nextUrl.searchParams.get("page");
     const from = request.nextUrl.searchParams.get("from");
     const to = request.nextUrl.searchParams.get("to");
-    const category = request.nextUrl.searchParams.get("category");
-    const account = request.nextUrl.searchParams.get("account");
+    const category = request.nextUrl.searchParams.get("categoryId");
+    const account = request.nextUrl.searchParams.get("accountId");
     const status = request.nextUrl.searchParams.get("status");
     const condition = request.nextUrl.searchParams.get("condition");
-    const cost_1 = request.nextUrl.searchParams.get("cost_1");
-    const cost_2 = request.nextUrl.searchParams.get("cost_2");
+    const minCost = request.nextUrl.searchParams.get("minCost");
+    const maxCost = request.nextUrl.searchParams.get("maxCost");
     const description = request.nextUrl.searchParams.get("description");
 
     return {
@@ -35,8 +35,8 @@ const tryParseQueryParams = (request: NextRequest): QueryParams => {
         account: account ?? undefined,
         status: status as "CLEARED" | "PENDING" | "CANCELLED",
         condition: condition as "is equal to" | "is between" | "is greater than" | "is less than",
-        cost_1: cost_1 ? parseFloat(cost_1) : undefined,
-        cost_2: cost_2 ? parseFloat(cost_2) : undefined,
+        minCost: minCost ? parseFloat(minCost) : undefined,
+        maxCost: maxCost ? parseFloat(maxCost) : undefined,
         description: description ?? undefined
     }
 }
@@ -87,26 +87,26 @@ const generatePrismaQuery = (params: QueryParams) => {
         if (params.condition === "is equal to") {
             query.push({
                 amount: {
-                    equals: params.cost_1
+                    equals: params.minCost
                 }
             });
         } else if (params.condition === "is between") {
             query.push({
                 amount: {
-                    gte: params.cost_1,
-                    lte: params.cost_2
+                    gte: params.minCost,
+                    lte: params.maxCost
                 }
             });
         } else if (params.condition === "is greater than") {
             query.push({
                 amount: {
-                    gt: params.cost_1
+                    gt: params.minCost
                 }
             });
         } else if (params.condition === "is less than") {
             query.push({
                 amount: {
-                    lt: params.cost_1
+                    lt: params.minCost
                 }
             });
         }
@@ -116,7 +116,7 @@ const generatePrismaQuery = (params: QueryParams) => {
         query.push({
             description: {
                 contains: params.description,
-                // mode: "insensitive"
+                mode: "insensitive"
             }
         });
     }
@@ -133,7 +133,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const params = tryParseQueryParams(request);
     const page = params.page ?? 0;
     const perPage = 20;
-    const qry = generatePrismaQuery(params);
+    const qry: any = generatePrismaQuery(params); // This "any" is awful but for some reason I am getting type errors :(
 
     try {
         const transactions = await prisma.transaction.findMany({

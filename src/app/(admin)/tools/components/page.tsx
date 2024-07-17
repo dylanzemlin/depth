@@ -1,10 +1,11 @@
 "use client";
 
-import Button from "@/components/buttons/button";
-import IconButton from "@/components/buttons/icon-button";
-import Loading from "@/components/loading";
-import ConfirmModal from "@/components/modals/confirm-modal";
-import Modal from "@/components/modals/modal";
+import Button from "@/molecules/buttons/button";
+import IconButton from "@/molecules/buttons/icon-button";
+import Loading from "@/molecules/loading";
+import ConfirmModal from "@/molecules/modals/confirm-modal";
+import Modal from "@/molecules/modals/modal";
+import { Popover, PopoverContent, PopoverTrigger } from "@/molecules/popover";
 import { NumberInput, TextInput } from "@tremor/react";
 import React from "react";
 import { FaAngleLeft, FaAngleRight, FaAnglesLeft, FaAnglesRight } from "react-icons/fa6";
@@ -84,8 +85,20 @@ export default function Login() {
             <h3 className="text-2xl font-semibold text-gray-900">
                 Other
             </h3>
-            <div className="w-8 h-8">
-                <Loading />
+            <div className="flex">
+                <div className="w-8 h-8">
+                    <Loading />
+                </div>
+
+                <Popover>
+                    <PopoverTrigger>
+                        <Button title="Open Popover" />
+                    </PopoverTrigger>
+
+                    <PopoverContent>
+                        Hello World
+                    </PopoverContent>
+                </Popover>
             </div>
         </main>
     );

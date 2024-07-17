@@ -1,7 +1,7 @@
 "use client";
 
-import Loading from "@/components/loading";
-import Navbar from "@/components/navbar/core";
+import Loading from "@/molecules/loading";
+import Navbar from "@/organisms/navbar/core";
 import { useAuth } from "@/lib/auth";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 

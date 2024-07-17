@@ -1,9 +1,9 @@
 "use client";
 
-import Button from "@/components/buttons/button";
-import FullError from "@/components/feedback/FullError";
-import FullLoading from "@/components/feedback/FullLoading";
-import Modal from "@/components/modals/modal";
+import Button from "@/molecules/buttons/button";
+import FullError from "@/molecules/feedback/FullError";
+import FullLoading from "@/molecules/feedback/FullLoading";
+import Modal from "@/molecules/modals/modal";
 import { BudgetFilter, NewBudget, createBudget, getBudgets } from "@/lib/api/budget";
 import useCategories from "@/lib/hooks/useCategories";
 import useSwitch from "@/lib/hooks/useSwitch";

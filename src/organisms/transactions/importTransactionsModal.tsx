@@ -1,7 +1,7 @@
-import Button from "@/components/buttons/button";
+import Button from "@/molecules/buttons/button";
 import useSwitch from "@/lib/hooks/useSwitch";
 import { useEffect, useState } from "react";
-import Modal from "../modal";
+import Modal from "../../molecules/modals/modal";
 import { Account, Category, TransactionStatus } from "@prisma/client";
 import { Select, SelectItem } from "@tremor/react";
 import { FaArrowsLeftRight } from "react-icons/fa6";

@@ -1,9 +1,9 @@
 "use client";
 
-import FlowbiteReinit from "@/components/FlowbiteReinit";
-import Button from "@/components/buttons/button";
-import ConfirmModal from "@/components/modals/confirm-modal";
-import Modal from "@/components/modals/modal";
+import FlowbiteReinit from "@/molecules/FlowbiteReinit";
+import Button from "@/molecules/buttons/button";
+import ConfirmModal from "@/molecules/modals/confirm-modal";
+import Modal from "@/molecules/modals/modal";
 import useCategories from "@/lib/hooks/useCategories";
 import useSwitch from "@/lib/hooks/useSwitch";
 import { Category } from "@prisma/client";

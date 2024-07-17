@@ -5,8 +5,8 @@ import { Card, LineChart, ProgressBar } from "@tremor/react";
 import dayjs from "dayjs";  
 import { useQuery } from "@tanstack/react-query";
 import { getAccountDashboardData, getAccountData } from "@/lib/api/account";
-import FullLoading from "@/components/feedback/FullLoading";
-import FullError from "@/components/feedback/FullError";
+import FullLoading from "@/molecules/feedback/FullLoading";
+import FullError from "@/molecules/feedback/FullError";
 
 type AccountDashboardData = {
     income: number;

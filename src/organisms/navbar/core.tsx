@@ -1,8 +1,8 @@
 import useSwitch from "@/lib/hooks/useSwitch";
 import DesktopNav from "./desktop";
 import MobileNav from "./mobile";
-import Modal from "../modals/modal";
-import Button from "../buttons/button";
+import Modal from "@/molecules/modals/modal";
+import Button from "@/molecules/buttons/button";
 import { NumberInput, Select, SelectItem, TextInput } from "@tremor/react";
 import { useEffect, useState } from "react";
 import { Account, AccountType } from "@prisma/client";

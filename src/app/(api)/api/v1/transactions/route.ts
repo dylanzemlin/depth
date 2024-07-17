@@ -1,14 +1,15 @@
+import { updateAccountData } from "@/lib/api/sushi";
 import { withSessionRoute } from "@/lib/iron/wrappers";
 import prisma from "@/lib/prisma";
-import { TransactionType } from "@prisma/client";
+import { TransactionStatus, TransactionType } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { object, string, number, date } from "yup";
 
 const schema = object({
     description: string().required(),
     amount: number().required(),
-    type: string().required().oneOf(["income", "expense"]),
-    status: string().required().oneOf(["pending", "cleared", "cancelled"]),
+    type: string().required().oneOf(["INCOME", "EXPENSE"]),
+    status: string().required().oneOf(["PENDING", "CLEARED", "CANCELLED"]),
     accountId: string().required(),
     categoryId: string().required(),
     date: date().required()
@@ -41,8 +42,8 @@ export async function POST(request: NextRequest): Promise<NextResponse>
             data: {
                 description,
                 amount: Math.abs(amount),
-                type: type == "income" ? TransactionType.INCOME : TransactionType.EXPENSE,
-                status: status == "pending" ? "PENDING" : status == "cleared" ? "CLEARED" : "CANCELLED",
+                type: type as TransactionType,
+                status: status as TransactionStatus,
                 date,
                 account: {
                     connect: {
@@ -62,20 +63,7 @@ export async function POST(request: NextRequest): Promise<NextResponse>
             }
         })
 
-        // Update account data as needed
-        try {
-            const url = request.nextUrl.clone();
-            url.pathname = "/api/sushi/update";
-            url.searchParams.set("target_account", accountId);
-            await fetch(url.toString(), {
-                headers: {
-                    Authorization: `Bearer ${process.env.SUSHI_SECRET}`
-                }
-            });
-        } catch (error) {
-            console.error("Failed to update account balance", error);
-        }
-
+        await updateAccountData(request, accountId);
         return NextResponse.json(transaction, { status: 201 });
     } catch (error) {
         return NextResponse.json({ error }, { status: 400 });
