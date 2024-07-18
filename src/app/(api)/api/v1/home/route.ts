@@ -28,8 +28,8 @@ export async function GET(request: NextRequest): Promise<NextResponse>
         where: {
             userId: session.user.id,
             date: {
-                gte: new Date(now.getFullYear(), now.getMonth(), 1),
-                lt: new Date(now.getFullYear(), now.getMonth() + 1, 1)
+                gte: new Date(now.getUTCFullYear(), now.getUTCMonth(), 1),
+                lt: new Date(now.getUTCFullYear(), now.getUTCMonth() + 1, 1)
             }
         },
         orderBy: {
@@ -40,12 +40,12 @@ export async function GET(request: NextRequest): Promise<NextResponse>
     const income = transactions.filter(t => t.type == TransactionType.INCOME).reduce((acc, t) => acc + t.amount, 0);
     const expenses = transactions.filter(t => t.type == TransactionType.EXPENSE).reduce((acc, t) => acc + t.amount, 0);
     const incomeMapByDay = transactions.filter(t => t.type == TransactionType.INCOME).reduce((acc, t) => {
-        const date = new Date(t.date).getDate();
+        const date = new Date(t.date).getUTCDate();
         acc[date] = (acc[date] || 0) + t.amount;
         return acc;
     }, {} as Record<number, number>);
     const expenseMapByDay = transactions.filter(t => t.type == TransactionType.EXPENSE).reduce((acc, t) => {
-        const date = new Date(t.date).getDate();
+        const date = new Date(t.date).getUTCDate();
         acc[date] = (acc[date] || 0) + t.amount;
         return acc;
     }, {} as Record<number, number>);
