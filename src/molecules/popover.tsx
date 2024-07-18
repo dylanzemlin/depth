@@ -1,3 +1,4 @@
+import { selectChild } from "@/lib/select_child";
 import { Transition } from "@headlessui/react";
 import { Placement } from "@popperjs/core";
 import { Children, cloneElement, isValidElement, useEffect, useRef, useState } from "react";
@@ -30,17 +31,8 @@ export function Popover(props: PopoverProps) {
         setOpen(!open);
     }
 
-    const trigger = Children.toArray(props.children).find(child => {
-        if (isValidElement(child) && (child.type as any).name == PopoverTrigger.name) {
-            return child;
-        }
-    });
-
-    const content = Children.toArray(props.children).find(child => {
-        if (isValidElement(child) && (child.type as any).name == PopoverContent.name) {
-            return child;
-        }
-    });
+    const trigger = selectChild(props.children, PopoverTrigger.name);
+    const content = selectChild(props.children, PopoverContent.name);
 
     const handleEscape = (e: KeyboardEvent) => {
         if (e.key === "Escape") {

@@ -1,6 +1,7 @@
 import { Account, Category, Transaction } from "@prisma/client";
 import { Pagination } from "./pagination";
 import { DateRange } from "../types";
+import { QueryFunctionContext } from "@tanstack/react-query";
 
 export type TransactionType = Transaction & {
     category: Category;
@@ -18,10 +19,12 @@ export type TransactionFilter = {
     accountId?: string;
 }
 
-export async function getTransactions({ queryKey }: { queryKey: any }): Promise<Pagination<TransactionType[]>> {
-    const [_key, { filter }]: ["transactions", { filter: TransactionFilter }] = queryKey;
+export async function getTransactions(ctx: QueryFunctionContext): Promise<Pagination<TransactionType[]>> {
+    const pageParam = ctx.pageParam || 0;
+    const filter = ctx.queryKey[1] as TransactionFilter;
 
     const params = createParams(filter);
+    params.set("page", pageParam.toString());
     const response = await fetch(`/api/v1/transactions/list?${params.toString()}`);
     if (!response.ok) {
         throw new Error("Failed to fetch transactions");
