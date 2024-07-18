@@ -55,6 +55,7 @@ export async function GET(request: NextRequest): Promise<NextResponse>
         income,
         expenses,
         incomeMapByDay,
-        expenseMapByDay
+        expenseMapByDay,
+        transactions
     });
 }
