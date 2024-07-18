@@ -70,7 +70,7 @@ export default function EditTransactionModal(props: EditTransactionModalProps) {
                     </label>
                     <Select id="category" name="category" value={editMutation.data.categoryId} onValueChange={(e) => editMutation.setProperty("categoryId", e)}>
                         {
-                            props?.categories?.map((category) => {
+                            props?.categories?.filter(x => !x.archived)?.map((category) => {
                                 return (
                                     <SelectItem key={category.id} value={category.id}>
                                         {category.title}

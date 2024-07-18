@@ -28,7 +28,6 @@ export default function RootLayout({
                         {children}
                     </Suspense>
 
-                    <script src="/3rd/flowbite.min.js" />
                     <Toaster position="top-center" />
                 </AuthProvider>
             </body>

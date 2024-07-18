@@ -11,7 +11,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const pageStr = request.nextUrl.searchParams.get("page");
     const pageSizeStr = request.nextUrl.searchParams.get("pageSize");
     const page = pageStr ? parseInt(pageStr) : 0;
-    const perPage = pageSizeStr ? parseInt(pageSizeStr) : 5;
+    const perPage = pageSizeStr ? parseInt(pageSizeStr) : 20;
 
     const archived = request.nextUrl.searchParams.get("archived");
 
@@ -19,7 +19,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         const categories = await prisma.category.findMany({
             where: {
                 userId: session.user.id,
-                archived: archived == "none" ? undefined : archived === "true",
+                archived: archived == null ? undefined : archived === "true",
                 OR: [
                     {
                         title: {
@@ -38,9 +38,14 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
             },
             skip: page ? page * perPage : 0,
             take: perPage,
-            orderBy: {
-                title: "asc"
-            }
+            orderBy: [
+                {
+                    archived: "asc"
+                },
+                {
+                    title: "asc"
+                }
+            ]
         })
 
         const totalCategories = await prisma.category.count({

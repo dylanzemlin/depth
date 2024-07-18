@@ -4,7 +4,7 @@ type TableFilterProps = {
     title: string;
     property?: any;
     display?: string;
-    onClear: () => void;
+    onClear?: () => void;
     children: React.ReactNode;
 }
 
@@ -16,14 +16,17 @@ export default function TableFilter(props: TableFilterProps) {
                     <button className="rounded-md border border-gray-300 px-2 py-1.5 hover:bg-gray-50 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-indigo-500 flex gap-1 items-center min-w-full xl:min-w-fit">
                         <span aria-hidden="true">
                             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-5 -ml-px shrink-0 transition-all duration-300 sm:size-4" style={{
-                                rotate: props.property ? "45deg" : "0deg"
-                            }} onClick={props.onClear}>
+                                rotate: props.onClear != null ? (props.property != null ? "45deg" : "0deg") : "0deg"
+                            }} onClick={(e) => {
+                                e.preventDefault();
+                                props.onClear?.();
+                            }}>
                                 <path d="M11 11V5H13V11H19V13H13V19H11V13H5V11H11Z"></path>
                             </svg>
                         </span>
                         {props.title}
                         {
-                            props.property ? (
+                            props.property != null ? (
                                 <>
                                     <div className="w-[1px] h-4 bg-gray-300"></div>
                                     <span className="text-indigo-600 font-medium">

@@ -178,7 +178,7 @@ export default function ImportTransactionsModal(props: ImportTransactionsModalPr
                             </label>
                             <Select id="category" name="category" value={category.id} onValueChange={(e) => setCategory(props.categories.find((c) => c.id === e) as Category)}>
                                 {
-                                    props.categories.map((category) => {
+                                    props.categories.filter(x => !x.archived).map((category) => {
                                         return (
                                             <SelectItem key={category.id} value={category.id}>
                                                 {category.title}

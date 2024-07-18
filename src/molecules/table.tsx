@@ -31,9 +31,11 @@ export function TableHead({ children }: { children: React.ReactNode }) {
     const cells = selectChildren(children, TableHeadCell.name);
 
     return (
-        <tr className="[&_td:last-child]:pr-4 [&_th:last-child]:pr-4 [&_td:first-child]:pl-4 [&_th:first-child]:pl-4 border-y border-gray-200">
-            {cells}
-        </tr>
+        <thead>
+            <tr className="[&_td:last-child]:pr-4 [&_th:last-child]:pr-4 [&_td:first-child]:pl-4 [&_th:first-child]:pl-4 border-y border-gray-200">
+                {cells}
+            </tr>
+        </thead>
     )
 }
 

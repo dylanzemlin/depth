@@ -82,7 +82,7 @@ export default function CreateTransactionModal(props?: CreateTransactionModalPro
                     </label>
                     <Select id="category" name="category" value={createMutation.data.categoryId} onValueChange={(e) => createMutation.setProperty("categoryId", e)}>
                         {
-                            props?.categories?.map((category) => {
+                            props?.categories?.filter(x => !x.archived)?.map((category) => {
                                 return (
                                     <SelectItem key={category.id} value={category.id}>
                                         {category.title}

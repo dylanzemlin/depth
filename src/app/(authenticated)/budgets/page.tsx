@@ -1,54 +1,52 @@
 "use client";
 
-import Button from "@/molecules/buttons/button";
 import FullError from "@/molecules/feedback/FullError";
 import FullLoading from "@/molecules/feedback/FullLoading";
-import Modal from "@/molecules/modals/modal";
-import { BudgetFilter, NewBudget, createBudget, getBudgets } from "@/lib/api/budget";
-import useCategories from "@/lib/hooks/useCategories";
-import useSwitch from "@/lib/hooks/useSwitch";
-import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { DatePicker, NumberInput, Select, SelectItem, TextInput } from "@tremor/react";
-import { useState } from "react";
-import toast from "react-hot-toast";
-import { FaAnglesLeft, FaAnglesRight, FaArrowsLeftRight, FaEquals, FaGreaterThan, FaLessThan, FaAngleLeft, FaAngleRight } from "react-icons/fa6";
+import { getCategories } from "@/lib/api/categories";
+import { Budget } from "@prisma/client";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { NumberInput, Select, SelectItem } from "@tremor/react";
+import { useEffect, useState } from "react";
+import { FaArrowsLeftRight, FaEquals, FaGreaterThan, FaLessThan, FaAngleLeft, FaAngleRight } from "react-icons/fa6";
+import TableFilter from "@/molecules/tables/filter";
+import { Table, TableBody, TableBodyCell, TableFilters, TableFooter, TableHead, TableHeadCell, TableRow } from "@/molecules/table";
+import { useDebounce } from 'use-debounce';
+import { BudgetFilter, getBudgets } from "@/lib/api/budget";
 
 export default function Budgets() {
-    const [page, setPage] = useState<number>(0);
-    const createSwitch = useSwitch(false);
+    const [page, setPage] = useState(0);
+    const [selectedBudget, setSelectedBudget] = useState<Budget | null>(null);
 
     const [budgetFilter, setBudgetFilter] = useState<BudgetFilter>({});
-    const [newBudget, setNewBudget] = useState<NewBudget>({} as NewBudget);
-    const queryClient = useQueryClient();
+    const budgetQuery = useInfiniteQuery({
+        queryKey: ["budgets", { filter: budgetFilter }],
+        queryFn: getBudgets,
+        getNextPageParam: (lastPage) => lastPage.pagination.nextUrl ? lastPage.pagination.current + 1 : undefined,
+        getPreviousPageParam: (lastPage) => lastPage.pagination.prevUrl ? lastPage.pagination.current - 1 : undefined,
+        initialPageParam: 0
+    });
+    const categoryQuery = useQuery({ queryKey: ["categories"], queryFn: getCategories });
 
-    const budgetQuery = useQuery({ 
-        queryKey: ["budgets", { filter: budgetFilter }], 
-        queryFn: getBudgets
-    })
-    const budgetData = budgetQuery.data;
-    
-    const budgetMutation = useMutation({
-        mutationFn: createBudget,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["budgets"] });
-            createSwitch.setFalse();
-            toast.success("Budget created successfully");
-        },
-        onError: (error) => toast.error(error.message)
-    })
-    
-    const categories = useCategories({ pageSize: 100 });
+    const [description, setDescription] = useState("");
+    const [value] = useDebounce(description, 500);
+    useEffect(() => {
+        setBudgetFilter({ ...budgetFilter, description: value });
+    }, [value]);
 
-    if (budgetQuery.isPending) {
+    if (categoryQuery.isPending) {
         return <FullLoading injectMain />
     }
 
-    if (budgetQuery.isError) {
-        return <FullError error={budgetQuery.error} injectMain />
+    if (budgetQuery.isError || categoryQuery.isError) {
+        return <FullError injectMain error={budgetQuery.error || categoryQuery.error} />
     }
 
-    const pageSize = budgetData?.pagination?.pageSize ?? 0;
+    const pageData = budgetQuery.data?.pages[page];
+    const budgets = pageData?.data;
+    const tPagination = pageData?.pagination;
+    const categories = categoryQuery.data.data;
+
+    const pageSize = tPagination?.pageSize || 0;
     return (
         <main className="w-full min-h-screen p-2 md:p-12">
             <section aria-labelledby="current-budget">
@@ -56,301 +54,250 @@ export default function Budgets() {
                     Budgets
                 </h1>
 
-                <div className="space-y-2">
-                    {/* Header */}
-                    <div className="md:text-xs mt-4">
-                        <ul className="flex flex-col xl:flex-row gap-2 bg-white xl:bg-none" id="dropdown_filters">
-                            <li>
-                                <Menu>
-                                    <MenuButton className="rounded-md border border-gray-300 px-2 py-1.5 hover:bg-gray-50 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-indigo-500 flex gap-1 items-center min-w-full xl:min-w-fit">
-                                        <span aria-hidden="true">
-                                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-5 -ml-px shrink-0 transition-all duration-300 sm:size-4" style={{
-                                                rotate: budgetFilter.categoryId ? "45deg" : "0deg"
-                                            }} onClick={(e) => {
-                                                if (budgetFilter.categoryId) {
-                                                    setBudgetFilter({ ...budgetFilter, categoryId: undefined });
-                                                    e.preventDefault();
+                <div className="space-y-2 mt-4">
+                    {
+                        <Table>
+                            <TableHead>
+                                <TableHeadCell>Description</TableHeadCell>
+                                <TableHeadCell>Category</TableHeadCell>
+                                <TableHeadCell>Goal</TableHeadCell>
+                                <TableHeadCell>Current Amount</TableHeadCell>
+                                <TableHeadCell>Start Date</TableHeadCell>
+                                <TableHeadCell>End Date</TableHeadCell>
+                                <TableHeadCell>Edit</TableHeadCell>
+                            </TableHead>
+                            <TableBody>
+                                {
+                                    (!budgetQuery.isPending) ? budgets?.map((budget) => {
+                                        return (
+                                            <TableRow key={budget.id}>
+                                                <TableBodyCell>
+                                                    {budget.description}
+                                                </TableBodyCell>
+                                                <TableBodyCell>
+                                                    {budget.category.title}
+                                                </TableBodyCell>
+                                                <TableBodyCell>
+                                                    ${budget.goal.toFixed(2)}
+                                                </TableBodyCell>
+                                                <TableBodyCell>
+                                                    ${budget.amount.toFixed(2)}
+                                                </TableBodyCell>
+                                                <TableBodyCell>
+                                                    {budget.startDate.toString()}
+                                                </TableBodyCell>
+                                                <TableBodyCell>
+                                                    {budget.endDate ? budget.endDate.toString() : "N/A"}
+                                                </TableBodyCell>
+                                                <TableBodyCell>
+                                                    todo
+                                                    {/* <Menu>
+                                                        <div>
+                                                            <MenuButton onClick={() => {
+                                                                setSelectedBudget(transaction)
+                                                            }} className="rounded-md whitespace-nowrap text-center transition-all duration-200 ease-in-out focus-visible:outline-2 outline-indigo-500 border-gray-300 p-1.5 border hover:bg-gray-100 border-opacity-0 hover:border-opacity-100">
+                                                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="remixicon size-4 shrink-0 text-gray-500 group-hover:text-gray-700 group-data-[state=open]:text-gray-700">
+                                                                    <path d="M5 10C3.9 10 3 10.9 3 12C3 13.1 3.9 14 5 14C6.1 14 7 13.1 7 12C7 10.9 6.1 10 5 10ZM19 10C17.9 10 17 10.9 17 12C17 13.1 17.9 14 19 14C20.1 14 21 13.1 21 12C21 10.9 20.1 10 19 10ZM12 10C10.9 10 10 10.9 10 12C10 13.1 10.9 14 12 14C13.1 14 14 13.1 14 12C14 10.9 13.1 10 12 10Z"></path>
+                                                                </svg>
+                                                            </MenuButton>
+                                                        </div>
+
+                                                        <MenuItems anchor="bottom" transition className="absolute p-2 right-0 z-10 mt-2 w-32 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in">
+                                                            <MenuItem>
+                                                                {selectedBudget && (
+                                                                    <EditTransactionModal button={
+                                                                        <button className={classNames('hover:bg-gray-100 hover:text-gray-900 text-gray-700', 'block px-4 py-2 text-sm w-full rounded-md text-left')}>
+                                                                            Edit
+                                                                        </button>
+                                                                    } transaction={selectedBudget} accounts={accounts} categories={categories} />
+                                                                )}
+                                                            </MenuItem>
+                                                            <MenuItem>
+                                                                {selectedBudget && (
+                                                                    <DeleteTransactionModal button={
+                                                                        <button className={classNames('hover:bg-gray-100 text-red-500', 'block px-4 py-2 text-sm w-full rounded-md text-left')}>
+                                                                            Delete
+                                                                        </button>
+                                                                    } transaction={selectedBudget} />
+                                                                )}
+                                                            </MenuItem>
+                                                        </MenuItems>
+                                                    </Menu> */}
+                                                </TableBodyCell>
+                                            </TableRow>
+                                        )
+                                    }) : <FullLoading />
+                                }
+                            </TableBody>
+                            <TableFooter>
+                                <div className={`w-full flex-row justify-between sm:justify-end items-center gap-4 ${budgetQuery.isSuccess ? 'flex' : 'hidden'}`}>
+                                    <p className="flex text-sm tabular-nums text-gray-500 gap-1">
+                                        Showing
+                                        <span className="font-medium text-gray-900">
+                                            {
+                                                ((tPagination?.total || 0) > 0 ? (tPagination?.current || 0) * pageSize + 1 : 0)
+                                            }-{Math.min((tPagination?.current || 0) * pageSize + pageSize, tPagination?.total || 0)}
+                                        </span>
+                                        of
+                                        <span className="font-medium text-gray-900">
+                                            {tPagination?.total || 0}
+                                        </span>
+                                    </p>
+                                    <div className="flex items-center gap-x-1.5">
+                                        <button
+                                            onClick={() => {
+                                                setPage(page - 1)
+                                            }}
+                                            className="rounded-md whitespace-nowrap text-center transition-all duration-200 ease-in-out focus-visible:outline-2 outline-indigo-500 border-gray-300 p-1.5 border hover:bg-gray-100 disabled:opacity-50 disabled:hover:bg-transparent"
+                                            disabled={tPagination?.prevUrl == null}>
+                                            <FaAngleLeft />
+                                        </button>
+                                        <button
+                                            onClick={async () => {
+                                                if (budgetQuery.data?.pages && budgetQuery.data.pages.length <= page + 1) {
+                                                    await budgetQuery.fetchNextPage();
                                                 }
+
+                                                setPage(page + 1);
+                                            }}
+                                            className="rounded-md whitespace-nowrap text-center transition-all duration-200 ease-in-out focus-visible:outline-2 outline-indigo-500 border-gray-300 p-1.5 border hover:bg-gray-100 disabled:opacity-50 disabled:hover:bg-transparent"
+                                            disabled={tPagination?.nextUrl == null}>
+                                            <FaAngleRight />
+                                        </button>
+                                    </div>
+                                </div>
+                            </TableFooter>
+                            <TableFilters>
+                                <TableFilter title="Category" property={budgetFilter.categoryId} display={categories.find(x => x.id == budgetFilter.categoryId)?.title} onClear={() => setBudgetFilter({ ...budgetFilter, categoryId: undefined })}>
+                                    <Select value={budgetFilter.categoryId} onValueChange={(e) => setBudgetFilter({ ...budgetFilter, categoryId: e })}>
+                                        {categories.map((category) => (
+                                            <SelectItem key={category.id} value={category.id}>{category.title}</SelectItem>
+                                        ))}
+                                    </Select>
+                                </TableFilter>
+                                <TableFilter title="Goal"
+                                    property={(budgetFilter.goalCondition && (budgetFilter.goalCondition != 'is between'
+                                        ? (budgetFilter.minGoal || budgetFilter.maxGoal)
+                                        : (budgetFilter.minGoal && budgetFilter.maxGoal)))}
+                                    display={
+                                        budgetFilter.goalCondition != "is between" ? (
+                                            budgetFilter.goalCondition + " $" + (budgetFilter.minGoal ?? 0)
+                                        ) : (
+                                            budgetFilter.goalCondition + " $" + (budgetFilter.minGoal ?? 0) + " and $" + (budgetFilter.maxGoal ?? 0)
+                                        )
+                                    }
+                                    onClear={() => setBudgetFilter({ ...budgetFilter, minGoal: undefined, maxGoal: undefined })}>
+                                    <div className="flex flex-col gap-1">
+                                        <div>
+                                            <label htmlFor="distance" className="text-tremor-default text-tremor-content dark:text-dark-tremor-content">Select condition</label>
+                                            <Select className="mx-auto max-w-md bg-white" id="goalCondition" name="condition" value={budgetFilter.goalCondition} onValueChange={(e) => {
+                                                setBudgetFilter({ ...budgetFilter, goalCondition: e });
                                             }}>
+                                                <SelectItem value="is equal to" icon={FaEquals}>
+                                                    is equal to
+                                                </SelectItem>
+                                                <SelectItem value="is between" icon={FaArrowsLeftRight}>
+                                                    is between
+                                                </SelectItem>
+                                                <SelectItem value="is greater than" icon={FaGreaterThan}>
+                                                    is greater than
+                                                </SelectItem>
+                                                <SelectItem value="is less than" icon={FaLessThan}>
+                                                    is less than
+                                                </SelectItem>
+                                            </Select>
+                                        </div>
+                                        <div className="flex gap-2 items-center p-1">
+                                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="remixicon size-5 shrink-0 text-gray-500">
+                                                <path d="M4.99989 13.9999L4.99976 5L6.99976 4.99997L6.99986 11.9999L17.1717 12L13.222 8.05024L14.6362 6.63603L21.0001 13L14.6362 19.364L13.222 17.9497L17.1717 14L4.99989 13.9999Z"></path>
+                                            </svg>
+                                            {
+                                                budgetFilter.goalCondition == "is between" ? (
+                                                    <div className="flex items-center gap-2">
+                                                        <NumberInput placeholder="$0" className="max-w-12" enableStepper={false} value={budgetFilter.minGoal} onValueChange={(e) => setBudgetFilter({ ...budgetFilter, minGoal: e, })} />
+                                                        <span className="text-gray-500">and</span>
+                                                        <NumberInput placeholder="$0" className="max-w-12" enableStepper={false} value={budgetFilter.maxGoal} onValueChange={(e) => setBudgetFilter({ ...budgetFilter, maxGoal: e })} />
+                                                    </div>
+                                                ) : (
+                                                    <NumberInput placeholder="$0" className="max-w-12" enableStepper={false} value={budgetFilter.minGoal} onValueChange={(e) => setBudgetFilter({ ...budgetFilter, minGoal: e, maxGoal: e, })} />
+                                                )
+                                            }
+                                        </div>
+                                    </div>
+                                </TableFilter>
+                                <TableFilter title="Amount"
+                                    property={(budgetFilter.amountCondition && (budgetFilter.amountCondition != 'is between'
+                                        ? (budgetFilter.minAmount || budgetFilter.maxAmount)
+                                        : (budgetFilter.minAmount && budgetFilter.maxAmount)))}
+                                    display={
+                                        budgetFilter.amountCondition != "is between" ? (
+                                            budgetFilter.amountCondition + " $" + (budgetFilter.minAmount ?? 0)
+                                        ) : (
+                                            budgetFilter.amountCondition + " $" + (budgetFilter.minAmount ?? 0) + " and $" + (budgetFilter.maxAmount ?? 0)
+                                        )
+                                    }
+                                    onClear={() => setBudgetFilter({ ...budgetFilter, minAmount: undefined, maxAmount: undefined })}>
+                                    <div className="flex flex-col gap-1">
+                                        <div>
+                                            <label htmlFor="distance" className="text-tremor-default text-tremor-content dark:text-dark-tremor-content">Select condition</label>
+                                            <Select className="mx-auto max-w-md bg-white" id="amountCondition" name="condition" value={budgetFilter.amountCondition} onValueChange={(e) => {
+                                                setBudgetFilter({ ...budgetFilter, amountCondition: e });
+                                            }}>
+                                                <SelectItem value="is equal to" icon={FaEquals}>
+                                                    is equal to
+                                                </SelectItem>
+                                                <SelectItem value="is between" icon={FaArrowsLeftRight}>
+                                                    is between
+                                                </SelectItem>
+                                                <SelectItem value="is greater than" icon={FaGreaterThan}>
+                                                    is greater than
+                                                </SelectItem>
+                                                <SelectItem value="is less than" icon={FaLessThan}>
+                                                    is less than
+                                                </SelectItem>
+                                            </Select>
+                                        </div>
+                                        <div className="flex gap-2 items-center p-1">
+                                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="remixicon size-5 shrink-0 text-gray-500">
+                                                <path d="M4.99989 13.9999L4.99976 5L6.99976 4.99997L6.99986 11.9999L17.1717 12L13.222 8.05024L14.6362 6.63603L21.0001 13L14.6362 19.364L13.222 17.9497L17.1717 14L4.99989 13.9999Z"></path>
+                                            </svg>
+                                            {
+                                                budgetFilter.amountCondition == "is between" ? (
+                                                    <div className="flex items-center gap-2">
+                                                        <NumberInput placeholder="$0" className="max-w-12" enableStepper={false} value={budgetFilter.minAmount} onValueChange={(e) => setBudgetFilter({ ...budgetFilter, minAmount: e, })} />
+                                                        <span className="text-gray-500">and</span>
+                                                        <NumberInput placeholder="$0" className="max-w-12" enableStepper={false} value={budgetFilter.maxAmount} onValueChange={(e) => setBudgetFilter({ ...budgetFilter, maxAmount: e })} />
+                                                    </div>
+                                                ) : (
+                                                    <NumberInput placeholder="$0" className="max-w-12" enableStepper={false} value={budgetFilter.minAmount} onValueChange={(e) => setBudgetFilter({ ...budgetFilter, minAmount: e, maxAmount: e, })} />
+                                                )
+                                            }
+                                        </div>
+                                    </div>
+                                </TableFilter>
+                                <li className="relative z-10">
+                                    <input type="search" className="block w-full appearance-none rounded-md border px-2.5 py-1 outline-none transition sm:text-sm border-transparent text-gray-900 placeholder-gray-400 bg-gray-100 focus:ring-0 focus:ring-indigo-300 focus:border-indigo-300 [&::--webkit-search-cancel-button]:hidden [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden pl-8" placeholder="Search by description" value={description} onChange={(e) => setDescription(e.target.value)} />
+                                    <div className="pointer-events-none absolute bottom-0 left-2 flex h-full items-center justify-center text-gray-400">
+                                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" aria-hidden="true" className="size-[1.125rem] shrink-0">
+                                            <path d="M18.031 16.6168L22.3137 20.8995L20.8995 22.3137L16.6168 18.031C15.0769 19.263 13.124 20 11 20C6.032 20 2 15.968 2 11C2 6.032 6.032 2 11 2C15.968 2 20 6.032 20 11C20 13.124 19.263 15.0769 18.031 16.6168ZM16.0247 15.8748C17.2475 14.6146 18 12.8956 18 11C18 7.1325 14.8675 4 11 4C7.1325 4 4 7.1325 4 11C4 14.8675 7.1325 18 11 18C12.8956 18 14.6146 17.2475 15.8748 16.0247L16.0247 15.8748Z"></path>
+                                        </svg>
+                                    </div>
+                                </li>
+                                <li className="ml-auto hidden xl:flex">
+                                    <button disabled={categories.length <= 0} className="rounded-md border border-gray-300 px-2 py-1.5 hover:bg-gray-50 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-indigo-500 flex gap-1 items-center disabled:opacity-50">
+                                        <span aria-hidden="true">
+                                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-5 -ml-px shrink-0 transition sm:size-4">
                                                 <path d="M11 11V5H13V11H19V13H13V19H11V13H5V11H11Z"></path>
                                             </svg>
                                         </span>
-                                        Category
-                                        {
-                                            budgetFilter.categoryId ? (
-                                                <>
-                                                    <div className="w-[1px] h-4 bg-gray-300"></div>
-                                                    <span className="text-indigo-600 font-medium">
-                                                        {categories.categories?.find((category) => category.id == budgetFilter.categoryId)?.title ?? "N/A"}
-                                                    </span>
-                                                </>
-                                            ) : (
-                                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-5 shrink-0 text-gray-500 sm:size-4">
-                                                    <path d="M11.9999 13.1714L16.9497 8.22168L18.3639 9.63589L11.9999 15.9999L5.63599 9.63589L7.0502 8.22168L11.9999 13.1714Z"></path>
-                                                </svg>
-                                            )
-                                        }
-                                    </MenuButton>
-
-                                    <MenuItems anchor="bottom" transition className="absolute p-2 right-0 z-10 mt-2 w-fit origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in">
-                                        {
-                                            categories.categories?.map((category) => {
-                                                return (
-                                                    <MenuItem key={category.id}>
-                                                        <button onClick={() => setBudgetFilter({ ...budgetFilter, categoryId: category.id })} className="w-full text-left px-2 py-1.5 hover:bg-gray-50 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-indigo-500 flex gap-1 items-center">
-                                                            {category.title}
-                                                        </button>
-                                                    </MenuItem>
-                                                );
-                                            })
-                                        }
-                                    </MenuItems>
-                                </Menu>
-                            </li>
-                            <li>
-                                <button data-dropdown-toggle="costDropdown" className="rounded-md border border-gray-300 px-2 py-1.5 hover:bg-gray-50 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-indigo-500 flex gap-1 items-center min-w-full xl:min-w-fit">
-                                    <span aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-5 -ml-px shrink-0 transition sm:size-4">
-                                            <path d="M11 11V5H13V11H19V13H13V19H11V13H5V11H11Z"></path>
-                                        </svg>
-                                    </span>
-                                    Goal
-                                    {
-                                        budgetFilter.condition ? (
-                                            <>
-                                                <div className="w-[1px] h-4 bg-gray-300"></div>
-                                                {
-                                                    budgetFilter.condition != "is between" ? (
-                                                        <span className="text-indigo-600 font-medium">
-                                                            {budgetFilter.condition} ${budgetFilter.goal_1 ?? 0}
-                                                        </span>
-                                                    ) : (
-                                                        <span className="text-indigo-600 font-medium">
-                                                            {budgetFilter.condition} ${budgetFilter.goal_1 ?? 0} and ${budgetFilter.goal_2 ?? 0}
-                                                        </span>
-                                                    )
-                                                }
-                                            </>
-                                        ) : (
-                                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-5 shrink-0 text-gray-500 sm:size-4">
-                                                <path d="M11.9999 13.1714L16.9497 8.22168L18.3639 9.63589L11.9999 15.9999L5.63599 9.63589L7.0502 8.22168L11.9999 13.1714Z"></path>
-                                            </svg>
-                                        )
-                                    }
-                                </button>
-                            </li>
-                            <li className="relative">
-                                <input type="search" className="block w-full appearance-none rounded-md border px-2.5 py-1 outline-none transition sm:text-sm border-transparent text-gray-900 placeholder-gray-400 bg-gray-100 focus:ring-2 focus:ring-indigo-200 focus:border-indigo-500 [&::--webkit-search-cancel-button]:hidden [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden pl-8" placeholder="Search by description" />
-                                <div className="pointer-events-none absolute bottom-0 left-2 flex h-full items-center justify-center text-gray-400">
-                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" aria-hidden="true" className="size-[1.125rem] shrink-0">
-                                        <path d="M18.031 16.6168L22.3137 20.8995L20.8995 22.3137L16.6168 18.031C15.0769 19.263 13.124 20 11 20C6.032 20 2 15.968 2 11C2 6.032 6.032 2 11 2C15.968 2 20 6.032 20 11C20 13.124 19.263 15.0769 18.031 16.6168ZM16.0247 15.8748C17.2475 14.6146 18 12.8956 18 11C18 7.1325 14.8675 4 11 4C7.1325 4 4 7.1325 4 11C4 14.8675 7.1325 18 11 18C12.8956 18 14.6146 17.2475 15.8748 16.0247L16.0247 15.8748Z"></path>
-                                    </svg>
-                                </div>
-                            </li>
-                            <li className="ml-auto hidden xl:flex">
-                                <button className="rounded-md border border-gray-300 px-2 py-1.5 hover:bg-gray-50 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-indigo-500 flex gap-1 items-center" onClick={createSwitch.setTrue}>
-                                    <span aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-5 -ml-px shrink-0 transition sm:size-4">
-                                            <path d="M11 11V5H13V11H19V13H13V19H11V13H5V11H11Z"></path>
-                                        </svg>
-                                    </span>
-                                    Add
-                                </button>
-                            </li>
-                        </ul>
-                    </div>
-
-                    {/* Table */}
-                    <div className="overflow-hidden overflow-x-auto">
-                        <table className="caption-bottom border-b border-gray-200 w-full">
-                            <thead>
-                                <tr className="[&_td:last-child]:pr-4 [&_th:last-child]:pr-4 [&_td:first-child]:pl-4 [&_th:first-child]:pl-4 border-y border-gray-200">
-                                    <th className="border-b px-4 text-left font-semibold text-gray-900 border-gray-200 whitespace-nowrap py-1 text-sm">
-                                        Description
-                                    </th>
-                                    <th className="border-b px-4 text-left font-semibold text-gray-900 border-gray-200 whitespace-nowrap py-1 text-sm">
-                                        Category
-                                    </th>
-                                    <th className="border-b px-4 text-left font-semibold text-gray-900 border-gray-200 whitespace-nowrap py-1 text-sm">
-                                        Goal
-                                    </th>
-                                    <th className="border-b px-4 text-left font-semibold text-gray-900 border-gray-200 whitespace-nowrap py-1 text-sm">
-                                        Current Amount
-                                    </th>
-                                    <th className="border-b px-4 text-left font-semibold text-gray-900 border-gray-200 whitespace-nowrap py-1 text-sm">
-                                        Start Date
-                                    </th>
-                                    <th className="border-b px-4 text-left font-semibold text-gray-900 border-gray-200 whitespace-nowrap py-1 text-sm">
-                                        End Date
-                                    </th>
-                                    <th className="border-b px-4 text-left font-semibold text-gray-900 border-gray-200 whitespace-nowrap py-1 text-sm max-w-5">
-                                        Edit
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {
-                                    budgetData?.data?.map((budget) => {
-                                        return (
-                                            <tr className="border-b border-gray-200" key={budget.id}>
-                                                <td className="px-4 py-2 text-xs md:text-sm">
-                                                    {budget.description}
-                                                </td>
-                                                <td className="px-4 py-2 text-xs md:text-sm">
-                                                    {budget.category.title}
-                                                </td>
-                                                <td className="px-4 py-2 text-xs md:text-sm">
-                                                    ${budget.goal}
-                                                </td>
-                                                <td className="px-4 py-2 text-xs md:text-sm">
-                                                    ${budget.amount}
-                                                </td>
-                                                <td className="px-4 py-2 text-xs md:text-sm">
-                                                    {budget.startDate.toString()}
-                                                </td>
-                                                <td className="px-4 py-2 text-xs md:text-sm">
-                                                    {budget.endDate?.toString() ?? "N/A"}
-                                                </td>
-                                                <td className="px-4 py-2 text-xs md:text-sm max-w-5">
-                                                    <button className="rounded-md whitespace-nowrap text-center transition-all duration-200 ease-in-out focus-visible:outline-2 outline-indigo-500 border-gray-300 p-1.5 border hover:bg-gray-100 border-opacity-0 hover:border-opacity-100" data-dropdown-toggle={`row_dropdown_${budget.id}`}>
-                                                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="remixicon size-4 shrink-0 text-gray-500 group-hover:text-gray-700 group-data-[state=open]:text-gray-700">
-                                                            <path d="M5 10C3.9 10 3 10.9 3 12C3 13.1 3.9 14 5 14C6.1 14 7 13.1 7 12C7 10.9 6.1 10 5 10ZM19 10C17.9 10 17 10.9 17 12C17 13.1 17.9 14 19 14C20.1 14 21 13.1 21 12C21 10.9 20.1 10 19 10ZM12 10C10.9 10 10 10.9 10 12C10 13.1 10.9 14 12 14C13.1 14 14 13.1 14 12C14 10.9 13.1 10 12 10Z"></path>
-                                                        </svg>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        )
-                                    })
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-
-                    {/* Footer */}
-                    <div className="w-full flex flex-row justify-between sm:justify-end items-center gap-8">
-                        <p className="flex text-sm tabular-nums text-gray-500 gap-1">
-                            Showing
-                            <span className="font-medium text-gray-900">
-                                {
-                                    ((budgetData?.pagination?.total || 0) > 0 ? (budgetData?.pagination?.current || 0) * pageSize + 1 : 0)
-                                }-{Math.min((budgetData?.pagination?.current || 0) * pageSize + pageSize, budgetData?.pagination?.total || 0)}
-                            </span>
-                            of
-                            <span className="font-medium text-gray-900">
-                                {budgetData?.pagination?.total || 0}
-                            </span>
-                        </p>
-                        <div className="flex items-center gap-x-1.5">
-                            <button className="rounded-md whitespace-nowrap text-center transition-all duration-200 ease-in-out focus-visible:outline-2 outline-indigo-500 border-gray-300 p-1.5 border hover:bg-gray-100">
-                                <FaAnglesLeft />
-                            </button>
-                            <button className="rounded-md whitespace-nowrap text-center transition-all duration-200 ease-in-out focus-visible:outline-2 outline-indigo-500 border-gray-300 p-1.5 border hover:bg-gray-100">
-                                <FaAngleLeft />
-                            </button>
-                            <button className="rounded-md whitespace-nowrap text-center transition-all duration-200 ease-in-out focus-visible:outline-2 outline-indigo-500 border-gray-300 p-1.5 border hover:bg-gray-100">
-                                <FaAngleRight />
-                            </button>
-                            <button className="rounded-md whitespace-nowrap text-center transition-all duration-200 ease-in-out focus-visible:outline-2 outline-indigo-500 border-gray-300 p-1.5 border hover:bg-gray-100">
-                                <FaAnglesRight />
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="costDropdown" className="z-10 bg-white rounded-md shadow-lg p-2 border border-gray-300 hidden items-center">
-                    <div className="flex flex-col gap-1">
-                        <div>
-                            <label htmlFor="distance" className="text-tremor-default text-tremor-content dark:text-dark-tremor-content">Select condition</label>
-                            <Select className="mx-auto max-w-md bg-white" id="condition" name="condition" value={budgetFilter.condition} onValueChange={(e) => {
-                                setBudgetFilter({ ...budgetFilter, condition: e });
-                            }}>
-                                <SelectItem value="is equal to" icon={FaEquals}>
-                                    is equal to
-                                </SelectItem>
-                                <SelectItem value="is between" icon={FaArrowsLeftRight}>
-                                    is between
-                                </SelectItem>
-                                <SelectItem value="is greater than" icon={FaGreaterThan}>
-                                    is greater than
-                                </SelectItem>
-                                <SelectItem value="is less than" icon={FaLessThan}>
-                                    is less than
-                                </SelectItem>
-                            </Select>
-                        </div>
-                        <div className="flex gap-2 items-center p-1">
-                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="remixicon size-5 shrink-0 text-gray-500">
-                                <path d="M4.99989 13.9999L4.99976 5L6.99976 4.99997L6.99986 11.9999L17.1717 12L13.222 8.05024L14.6362 6.63603L21.0001 13L14.6362 19.364L13.222 17.9497L17.1717 14L4.99989 13.9999Z"></path>
-                            </svg>
-                            {
-                                budgetFilter.condition == "is between" ? (
-                                    <div className="flex items-center gap-2">
-                                        <NumberInput placeholder="$0" className="max-w-12" enableStepper={false} onValueChange={(e) => setBudgetFilter({ ...budgetFilter, goal_1: e })} />
-                                        <span className="text-gray-500">and</span>
-                                        <NumberInput placeholder="$0" className="max-w-12" enableStepper={false} onValueChange={(e) => setBudgetFilter({ ...budgetFilter, goal_2: e })} />
-                                    </div>
-                                ) : (
-                                    <NumberInput placeholder="$0" className="max-w-12" enableStepper={false} onValueChange={(e) => setBudgetFilter({ ...budgetFilter, goal_1: e })} />
-                                )
-                            }
-                        </div>
-                    </div>
+                                        Add
+                                    </button>
+                                </li>
+                            </TableFilters>
+                        </Table>
+                    }
                 </div>
             </section>
-
-            <Modal isOpen={createSwitch.state} onClose={createSwitch.toggle} title="Create Budget" backdrop footer={
-                <div className="flex justify-start gap-2">
-                    <Button color="violet" size="sm" title="Create" onClick={() => {
-                        if (newBudget.description == null || newBudget.goal == null || newBudget.categoryId == null) {
-                            return;
-                        }
-
-                        budgetMutation.mutate(newBudget)
-                    }} disabled={newBudget.description == null || newBudget.goal == null || newBudget.categoryId == null} />
-                    <Button color="slate" size="sm" title="Cancel" onClick={createSwitch.setFalse} />
-                </div>
-            }>
-                <div>
-                    <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-                        Description
-                    </label>
-                    <TextInput id="description" name="description" placeholder="Description" value={newBudget.description} onValueChange={(e) => setNewBudget({ ...newBudget, description: e })} />
-                </div>
-                <div>
-                    <label htmlFor="amount" className="block text-sm font-medium text-gray-700">
-                        Amount
-                    </label>
-                    <NumberInput id="amount" name="amount" enableStepper={false} min={0} placeholder="Amount" value={newBudget.goal} onValueChange={(e) => setNewBudget({ ...newBudget, goal: e })} />
-                </div>
-                <div>
-                    <label htmlFor="category" className="block text-sm font-medium text-gray-700">
-                        Category
-                    </label>
-                    <Select id="category" name="category" value={newBudget.categoryId} onValueChange={(e) => setNewBudget({ ...newBudget, categoryId: e })}>
-                        {
-                            categories.categories?.map((category) => {
-                                return (
-                                    <SelectItem key={category.id} value={category.id}>
-                                        {category.title}
-                                    </SelectItem>
-                                )
-                            })
-                        }
-                    </Select>
-                </div>
-                <div>
-                    <label htmlFor="start_date" className="block text-sm font-medium text-gray-700">
-                        Start Date
-                    </label>
-                    <DatePicker id="start_date" value={newBudget.startDate} onValueChange={(e) => setNewBudget({ ...newBudget, startDate: new Date(e?.toUTCString() ?? new Date().toUTCString()) })} />
-                </div>
-                <div>
-                    <label htmlFor="end_date" className="block text-sm font-medium text-gray-700">
-                        End Date
-                    </label>
-                    <DatePicker id="end_date" value={newBudget.endDate} onValueChange={(e) => setNewBudget({ ...newBudget, endDate: new Date(e?.toUTCString() ?? new Date().toUTCString()) })} />
-                </div>
-            </Modal>
         </main>
     );
 }

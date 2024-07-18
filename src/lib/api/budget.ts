@@ -9,9 +9,12 @@ export type BudgetType = Budget & {
 
 export type BudgetFilter = {
     categoryId?: string;
-    condition?: string;
-    goal_1?: number;
-    goal_2?: number;
+    goalCondition?: string;
+    minGoal?: number;
+    maxGoal?: number;
+    amountCondition?: string;
+    minAmount?: number;
+    maxAmount?: number;
     description?: string;
 }
 
@@ -22,20 +25,33 @@ export async function getBudgets({ queryKey }: { queryKey: any }): Promise<Pagin
     if (filter.categoryId) {
         params.append("categoryId", filter.categoryId.toString());
     }
-    if (filter.condition) {
-        params.append("condition", filter.condition);
-    }
-    if (filter.goal_1) {
-        params.append("goal_1", filter.goal_1.toString());
-    }
-    if (filter.goal_2) {
-        params.append("goal_2", filter.goal_2.toString());
-    }
     if (filter.description) {
         params.append("description", filter.description);
     }
+    if (filter.amountCondition)
+    {
+        if (filter.minAmount) {
+            params.append("minAmount", filter.minAmount.toString());
+        }
+        if (filter.maxAmount) {
+            params.append("maxAmount", filter.maxAmount.toString());
+        }
 
-    const response = await fetch(`/api/v1/budget/list?${params.toString()}`);
+        params.append("amountCondition", filter.amountCondition);
+    }
+    if (filter.goalCondition)
+    {
+        if (filter.minGoal) {
+            params.append("minGoal", filter.minGoal.toString());
+        }
+        if (filter.maxGoal) {
+            params.append("maxGoal", filter.maxGoal.toString());
+        }
+
+        params.append("goalCondition", filter.goalCondition);
+    }
+
+    const response = await fetch(`/api/v1/budgets/list?${params.toString()}`);
     if (!response.ok) {
         throw new Error("Failed to fetch budgets");
     }
@@ -52,7 +68,7 @@ export type NewBudget = {
 }
 
 export async function createBudget(budget: NewBudget) {
-    const response = await fetch("/api/v1/budget", {
+    const response = await fetch("/api/v1/budgets", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
