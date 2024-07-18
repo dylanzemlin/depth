@@ -1,3 +1,4 @@
+import utcDate from "@/lib/date";
 import { withSessionRoute } from "@/lib/iron/wrappers";
 import prisma from "@/lib/prisma";
 import { Account, TransactionType } from "@prisma/client";
@@ -22,12 +23,13 @@ export async function GET(request: NextRequest): Promise<NextResponse>
 
     // Calculate total income/expenses for this month
     // Find all transactions for the account for this month
+    const now = utcDate();
     const transactions = await prisma.transaction.findMany({
         where: {
             userId: session.user.id,
             date: {
-                gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-                lt: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1)
+                gte: new Date(now.getFullYear(), now.getMonth(), 1),
+                lt: new Date(now.getFullYear(), now.getMonth() + 1, 1)
             }
         },
         orderBy: {
