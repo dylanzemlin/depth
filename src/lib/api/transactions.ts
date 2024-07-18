@@ -21,7 +21,8 @@ export type TransactionFilter = {
 
 export async function getTransactions(ctx: QueryFunctionContext): Promise<Pagination<TransactionType[]>> {
     const pageParam = ctx.pageParam || 0;
-    const filter = ctx.queryKey[1] as TransactionFilter;
+    console.log(ctx.queryKey);
+    const filter = (ctx.queryKey[1] as any).filter as TransactionFilter;
 
     const params = createParams(filter);
     params.set("page", pageParam.toString());
