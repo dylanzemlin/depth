@@ -28,8 +28,8 @@ export async function GET(request: NextRequest): Promise<NextResponse>
         where: {
             userId: session.user.id,
             date: {
-                gte: new Date(now.getUTCFullYear(), now.getUTCMonth(), 1),
-                lt: new Date(now.getUTCFullYear(), now.getUTCMonth() + 1, 1)
+                gte: new Date(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0),
+                lt: new Date(now.getUTCFullYear(), now.getUTCMonth() + 1, 1, 0, 0, 0)
             }
         },
         orderBy: {

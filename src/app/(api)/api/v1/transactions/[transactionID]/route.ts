@@ -2,6 +2,7 @@ import { updateAccountData } from "@/lib/api/sushi";
 import { withSessionRoute } from "@/lib/iron/wrappers";
 import prisma from "@/lib/prisma";
 import { TransactionType } from "@prisma/client";
+import dayjs from "dayjs";
 import { NextRequest, NextResponse } from "next/server";
 import { object, string, number, date } from "yup";
 
@@ -50,7 +51,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { transa
                 amount: amount ?? transaction.amount,
                 type: (type ?? transaction.type) == "INCOME" ? TransactionType.INCOME : TransactionType.EXPENSE,
                 status: (status ?? transaction.status) == "PENDING" ? "PENDING" : status == "CLEARED" ? "CLEARED" : "CANCELLED",
-                date: date ?? transaction.date,
+                date: dayjs(date ?? transaction.date).hour(12).minute(0).second(0).millisecond(0).toDate(),
                 account: {
                     connect: {
                         id: accountId ?? transaction.accountId

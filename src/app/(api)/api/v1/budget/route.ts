@@ -1,6 +1,7 @@
 import { updateAccountData } from "@/lib/api/sushi";
 import { withSessionRoute } from "@/lib/iron/wrappers";
 import prisma from "@/lib/prisma";
+import dayjs from "dayjs";
 import { NextRequest, NextResponse } from "next/server";
 import { start } from "repl";
 import { object, string, number, date } from "yup";
@@ -30,8 +31,8 @@ export async function POST(request: NextRequest): Promise<NextResponse>
                 description,
                 amount: 0,
                 goal,
-                startDate,
-                endDate,
+                startDate: dayjs(startDate).hour(12).minute(0).second(0).millisecond(0).toDate(),
+                endDate: dayjs(endDate).hour(12).minute(0).second(0).millisecond(0).toDate(),
                 category: {
                     connect: {
                         id: categoryId
