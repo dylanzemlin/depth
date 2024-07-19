@@ -41,7 +41,7 @@ export default function ArchiveCategoryModal(props: ArchiveCategoryModalProps) {
                     id: props.category.id,
                     archived: props.method === "archive"
                 });
-            }} >
+            }} loading={mutation.isPending} >
                 Are you sure you want to {props.method === "archive" ? "archive" : "unarchive"} this category?
             </ConfirmModal>
         </>

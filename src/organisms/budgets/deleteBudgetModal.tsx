@@ -33,7 +33,7 @@ export default function DeleteBudgetModal(props: DeleteBudgetModalProps) {
                     <Button color="violet" title="Delete Budget" onClick={sw.setTrue} />
                 )
             }
-            <ConfirmModal title="Delete Budget" isOpen={sw.state} onClose={sw.setFalse} onConfirm={async () => await mutation.mutateAsync(props.budget.id) } >
+            <ConfirmModal title="Delete Budget" isOpen={sw.state} onClose={sw.setFalse} onConfirm={async () => await mutation.mutateAsync(props.budget.id) } loading={mutation.isPending} >
                 Are you sure you want to delete this budget, this action <span className="text-red-500 font-bold">cannot</span> be undone.
             </ConfirmModal>
         </>
