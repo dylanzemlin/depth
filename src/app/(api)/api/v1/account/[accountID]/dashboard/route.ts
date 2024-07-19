@@ -34,6 +34,9 @@ export async function GET(request: NextRequest, { params }: {  params: { account
         },
         orderBy: {
             date: "desc"
+        },
+        include: {
+            category: true
         }
     });
 

@@ -2,7 +2,7 @@
 
 import { Account, AccountType, Transaction } from "@prisma/client";
 import { Card, LineChart, ProgressBar } from "@tremor/react";
-import dayjs from "dayjs";  
+import dayjs from "dayjs";
 import { useQuery } from "@tanstack/react-query";
 import { getAccountDashboardData, getAccountData } from "@/lib/api/accounts";
 import FullLoading from "@/molecules/feedback/FullLoading";
@@ -28,8 +28,7 @@ export default function AccountPage({ params }: { params: { accountID: string } 
         return <FullLoading injectMain />;
     }
 
-    if (accountQuery.isError || dashboardQuery.isError)
-    {
+    if (accountQuery.isError || dashboardQuery.isError) {
         return <FullError injectMain error={accountQuery.error ?? dashboardQuery.error} />;
     }
 
@@ -104,13 +103,23 @@ export default function AccountPage({ params }: { params: { accountID: string } 
                     }
                     {
                         account.type !== AccountType.CREDIT && (
-                            <Card className="max-w-md">
-                                <h4 className="text-tremor-default text-tremor-content">
-                                    Balance
-                                </h4>
-                                <p className="font-semibold text-2xl">
-                                    ${account.balance.toFixed(2)}
-                                </p>
+                            <Card className="max-w-md flex flex-col justify-between gap-2">
+                                <div>
+                                    <h4 className="text-tremor-default text-tremor-content">
+                                        Balance
+                                    </h4>
+                                    <p className="font-semibold text-2xl">
+                                        ${account.balance.toFixed(2)}
+                                    </p>
+                                </div>
+                                <div>
+                                    <h4 className="text-tremor-default text-tremor-content">
+                                        Pending Balance
+                                    </h4>
+                                    <p className="font-semibold text-2xl">
+                                        ${account.pendingBalance.toFixed(2)}
+                                    </p>
+                                </div>
                             </Card>
                         )
                     }
@@ -191,7 +200,7 @@ export default function AccountPage({ params }: { params: { accountID: string } 
                                     dashboardData.recentTransactions.map((transaction, index) => (
                                         <tr className="border-b border-gray-200" key={index}>
                                             <td className="px-4 py-2 text-xs md:text-sm">
-                                                {transaction.categoryId}
+                                                {(transaction as any).category.title}
                                             </td>
                                             <td className="px-4 py-2 text-xs md:text-sm">
                                                 {transaction.status === 'CLEARED' ? (
@@ -211,7 +220,7 @@ export default function AccountPage({ params }: { params: { accountID: string } 
                                                 ${transaction.amount.toFixed(2)}
                                             </td>
                                             <td className="px-4 py-2 text-xs md:text-sm">
-                                                {dayjs(transaction.date).format('YYYY-MM-DD')}
+                                                {dayjs(transaction.date).format('MMM D, YYYY')}
                                             </td>
                                         </tr>
                                     ))
