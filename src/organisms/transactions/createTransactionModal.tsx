@@ -1,9 +1,12 @@
+import { getAccounts } from "@/lib/api/accounts";
+import { getCategories } from "@/lib/api/categories";
 import { CreateTransactionData, createTransaction } from "@/lib/api/transactions";
 import useEditObject from "@/lib/hooks/useEditObject";
 import useSwitch from "@/lib/hooks/useSwitch";
 import Button from "@/molecules/buttons/button";
 import Modal from "@/molecules/modals/modal";
 import { Account, Category } from "@prisma/client";
+import { useQuery } from "@tanstack/react-query";
 import { DatePicker, NumberInput, Select, SelectItem, TextInput } from "@tremor/react";
 import toast from "react-hot-toast";
 
@@ -28,8 +31,13 @@ export default function CreateTransactionModal(props?: CreateTransactionModalPro
         date: new Date()
     }, invalidateQueries: { queryKey: ["transactions"] } });
 
-    const canCreate = createMutation.data?.accountId != null && createMutation.data?.categoryId != null && createMutation.data?.status != null && createMutation.data?.type != null && createMutation.data?.amount != null && createMutation.data?.date != null;
+    const categoriesQuery = useQuery({ queryKey: ["categories"], queryFn: getCategories, enabled: props?.categories == undefined });
+    const accountsQuery = useQuery({ queryKey: ["accounts"], queryFn: getAccounts, enabled: props?.accounts == undefined });
 
+    const accounts = props?.accounts ?? accountsQuery.data?.data;
+    const categories = props?.categories ?? categoriesQuery.data?.data;
+
+    const canCreate = createMutation.data?.accountId != null && createMutation.data?.categoryId != null && createMutation.data?.status != null && createMutation.data?.type != null && createMutation.data?.amount != null && createMutation.data?.date != null;
     return (
         <>
             {
@@ -66,7 +74,7 @@ export default function CreateTransactionModal(props?: CreateTransactionModalPro
                     </label>
                     <Select id="account" name="account" value={createMutation.data.accountId} onValueChange={(e) => createMutation.setProperty("accountId", e)}>
                         {
-                            props?.accounts?.map((account) => {
+                            accounts?.map((account) => {
                                 return (
                                     <SelectItem key={account.id} value={account.id}>
                                         {account.name} ({account.type})
@@ -82,7 +90,7 @@ export default function CreateTransactionModal(props?: CreateTransactionModalPro
                     </label>
                     <Select id="category" name="category" value={createMutation.data.categoryId} onValueChange={(e) => createMutation.setProperty("categoryId", e)}>
                         {
-                            props?.categories?.filter(x => !x.archived)?.map((category) => {
+                            categories?.filter(x => !x.archived)?.map((category) => {
                                 return (
                                     <SelectItem key={category.id} value={category.id}>
                                         {category.title}

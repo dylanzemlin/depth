@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getAccountDashboardData, getAccountData } from "@/lib/api/accounts";
 import FullLoading from "@/molecules/feedback/FullLoading";
 import FullError from "@/molecules/feedback/FullError";
+import CreateTransactionModal from "@/organisms/transactions/createTransactionModal";
 
 type AccountDashboardData = {
     income: number;
@@ -170,9 +171,24 @@ export default function AccountPage({ params }: { params: { accountID: string } 
                 </div>
 
                 <div className="scroll-mt-10 text-xl">
-                    <h2 className="mb-2">
-                        Recent Activity
-                    </h2>
+                    <div className="mb-2 mt-2 flex justify-between w-full">
+                        <h2>
+                            Recent Activity
+                        </h2>
+
+                        <div className="text-xs">
+                            <CreateTransactionModal button={
+                                <button className="rounded-md border border-gray-300 px-2 py-1.5 hover:bg-gray-50 outline outline-offset-2 outline-0 focus-visible:outline-2 outline-indigo-500 flex gap-1 items-center disabled:opacity-50">
+                                    <span aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" aria-hidden="true" className="size-5 -ml-px shrink-0 transition sm:size-4">
+                                            <path d="M11 11V5H13V11H19V13H13V19H11V13H5V11H11Z"></path>
+                                        </svg>
+                                    </span>
+                                    Create Transaction
+                                </button>
+                            } defaultStatus="CLEARED" defaultType="EXPENSE" defaultAccountId={account.id} />
+                        </div>
+                    </div>
 
                     <div className="overflow-hidden overflow-x-auto">
                         <table className="caption-bottom border-b border-gray-200 w-full">
