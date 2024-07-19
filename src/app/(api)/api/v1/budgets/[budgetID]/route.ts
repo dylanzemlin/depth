@@ -27,7 +27,8 @@ export async function PATCH(request: NextRequest, { params }: {  params: { budge
         // Update budget
         const budget = await prisma.budget.update({
             where: {
-                id: params.budgetID
+                id: params.budgetID,
+                userId: session.user.id
             },
             data: {
                 description,
@@ -50,6 +51,29 @@ export async function PATCH(request: NextRequest, { params }: {  params: { budge
 
         await updateAccountData(request);
         return NextResponse.json(budget, { status: 200 });
+    } catch (error) {
+        return NextResponse.json({ error }, { status: 400 });
+    }
+}
+
+export async function DELETE(request: NextRequest, { params }: {  params: { budgetID: string }}): Promise<NextResponse>
+{
+    const session = await withSessionRoute();
+    if (session.user == null)
+    {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    try {
+        await prisma.budget.delete({
+            where: {
+                id: params.budgetID,
+                userId: session.user.id
+            }
+        })
+
+        await updateAccountData(request);
+        return NextResponse.json({ success: true }, { status: 200 });
     } catch (error) {
         return NextResponse.json({ error }, { status: 400 });
     }
