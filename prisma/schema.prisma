@@ -101,6 +101,9 @@ model Transaction {
 
     categoryId String
     category Category @relation(fields: [categoryId], references: [id])
+
+    subscriptionId String?
+    subscription Subscription? @relation(fields: [subscriptionId], references: [id])
 }
 
 enum TransactionStatus {
@@ -134,6 +137,8 @@ model Subscription {
 
     accountId String
     account Account @relation(fields: [accountId], references: [id])
+
+    transactions Transaction[]
 }
 
 enum SubscriptionFrequency {

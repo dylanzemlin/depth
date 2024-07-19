@@ -95,6 +95,13 @@ export async function DELETE(request: NextRequest, { params }: { params: { subsc
             return NextResponse.json({ error: "Subscription not found" }, { status: 404 });
         }
 
+        // Find all transactions for the subscription and delete them
+        await prisma.transaction.deleteMany({
+            where: {
+                subscriptionId: subscription.id
+            }
+        })
+
         // Delete the subscription
         await prisma.subscription.delete({
             where: {
