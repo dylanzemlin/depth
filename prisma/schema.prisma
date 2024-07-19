@@ -29,6 +29,7 @@ model User {
     transactions Transaction[]
     subscriptions Subscription[]
     budgets Budget[]
+    transfers Transfer[]
 }
 
 enum Role {
@@ -54,6 +55,8 @@ model Account {
 
     transactions Transaction[]
     subscriptions Subscription[]
+    transfersFrom Transfer[] @relation("fromAccount")
+    transfersTo Transfer[] @relation("toAccount")
 }
 
 enum AccountType {
@@ -79,6 +82,7 @@ model Category {
     transactions Transaction[]
     subscriptions Subscription[]
     budgets Budget[]
+    transfers Transfer[]
 }
 
 model Transaction {
@@ -104,6 +108,9 @@ model Transaction {
 
     subscriptionId String?
     subscription Subscription? @relation(fields: [subscriptionId], references: [id])
+
+    transfersFrom Transfer[] @relation("fromAccountTransaction")
+    transfersTo Transfer[] @relation("toAccountTransaction")
 }
 
 enum TransactionStatus {
@@ -166,4 +173,40 @@ model Budget {
 
     categoryId String
     category Category @relation(fields: [categoryId], references: [id])
+}
+
+model Transfer {
+    id String @id @default(cuid())
+    amount Float
+    description String
+    status TransferStatus
+    date DateTime
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // Attachments
+    userId String
+    user User @relation(fields: [userId], references: [id])
+
+    categoryId String
+    category Category @relation(fields: [categoryId], references: [id])
+
+    fromAccountId String
+    fromAccount Account @relation("fromAccount", fields: [fromAccountId], references: [id])
+
+    toAccountId String
+    toAccount Account @relation("toAccount", fields: [toAccountId], references: [id])
+
+    fromAccountTransactionId String
+    fromAccountTransaction Transaction @relation("fromAccountTransaction", fields: [fromAccountTransactionId], references: [id])
+    
+    toAccountTransactionId String
+    toAccountTransaction Transaction @relation("toAccountTransaction", fields: [toAccountTransactionId], references: [id])
+}
+
+enum TransferStatus {
+    CLEARED
+    PENDING
+    CANCELLED
 }
