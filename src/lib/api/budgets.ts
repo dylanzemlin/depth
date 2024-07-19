@@ -96,3 +96,12 @@ export async function editBudget(data: EditBudgetData) {
         throw new Error("Failed to create budget");
     }
 }
+
+export async function deleteBudget(id: string) {
+    const response = await fetch(`/api/v1/budgets/${id}`, {
+        method: "DELETE",
+    });
+    if (!response.ok) {
+        throw new Error("Failed to delete budget");
+    }
+}

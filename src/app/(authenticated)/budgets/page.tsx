@@ -17,6 +17,7 @@ import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import EditBudgetModal from "@/organisms/budgets/editBudgetModal";
 import { classNames } from "@/lib/classnames";
 import dayjs from "dayjs";
+import DeleteBudgetModal from "@/organisms/budgets/deleteBudgetModal";
 
 export default function Budgets() {
     const [page, setPage] = useState(0);
@@ -114,6 +115,15 @@ export default function Budgets() {
                                                                             Edit
                                                                         </button>
                                                                     } categories={categories} budget={selectedBudget} />
+                                                                )}
+                                                            </MenuItem>
+                                                            <MenuItem>
+                                                                {selectedBudget && (
+                                                                    <DeleteBudgetModal button={
+                                                                        <button className={classNames('hover:bg-gray-100 text-red-500', 'block px-4 py-2 text-sm w-full rounded-md text-left')}>
+                                                                            Delete
+                                                                        </button>
+                                                                    } budget={selectedBudget} />
                                                                 )}
                                                             </MenuItem>
                                                         </MenuItems>
