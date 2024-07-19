@@ -8,6 +8,7 @@ type IronData = {
         name: string;
         email: string;
         avatarUrl: string;
+        role: "ADMIN" | "USER";
     } | null;
 }
 

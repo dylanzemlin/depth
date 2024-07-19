@@ -92,7 +92,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         id: user.id,
         name: user.name,
         email: user.email,
-        avatarUrl: user.avatarUrl
+        avatarUrl: user.avatarUrl,
+        role: user.role
     }
     await session.save();
 

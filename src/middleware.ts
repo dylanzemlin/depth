@@ -7,6 +7,11 @@ const unauthenticatedPaths = [
     "/register"
 ]
 
+const adminRoutes = [
+    "/tools/metadata",
+    "/tools/components"
+]
+
 export async function middleware(request: NextRequest) {
     const session = await withSessionRoute();
     if (session.user && unauthenticatedPaths.includes(request.nextUrl.pathname)) {
@@ -20,6 +25,12 @@ export async function middleware(request: NextRequest) {
 
     if (!session.user && !unauthenticatedPaths.includes(request.nextUrl.pathname)) {
         return NextResponse.error();
+    }
+
+    if (session.user && adminRoutes.includes(request.nextUrl.pathname)) {
+        if (session.user?.role !== "ADMIN") {
+            return NextResponse.redirect(new URL("/home", request.nextUrl));
+        }
     }
 
     return NextResponse.next();
