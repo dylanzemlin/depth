@@ -7,6 +7,7 @@ interface User {
     name: string;
     email: string;
     avatarUrl: string;
+    role: "USER" | "ADMIN";
 }
 
 type authContextType = {
@@ -43,6 +44,7 @@ async function logout(): Promise<string | undefined>
 
     if (response.status === 200)
     {
+        location.href = "/login";
         return undefined;
     }
 
