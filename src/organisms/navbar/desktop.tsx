@@ -104,7 +104,8 @@ export default function DesktopNav(props: DesktopNavProps) {
                     </Accordion>
 
                     {
-                        <Accordion>
+                        auth.user?.role === "ADMIN" && (
+                            <Accordion>
                             <AccordionButton>
                                 <button type="button" className="py-2 w-full hover:bg-indigo-100 flex items-center px-4 gap-4 rounded-md" aria-controls="accounts_dropdown" data-collapse-toggle="accounts_dropdown">
                                     <FaShield className="inline-block w-6 h-6" />
@@ -131,6 +132,7 @@ export default function DesktopNav(props: DesktopNavProps) {
                                 </ul>
                             </AccordionBody>
                         </Accordion>
+                        )
                     }
                 </ul>
             </div>

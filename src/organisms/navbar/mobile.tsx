@@ -149,33 +149,35 @@ export default function MobileNav(props: MobileNavProps) {
                         </Accordion>
 
                         {
-                            <Accordion>
-                                <AccordionButton>
-                                    <button type="button" className="py-2 w-full hover:bg-indigo-100 flex items-center px-4 gap-4 rounded-md" aria-controls="accounts_dropdown" data-collapse-toggle="accounts_dropdown">
-                                        <FaShield className="inline-block w-6 h-6" />
-                                        <span className="flex-1 text-left rtl:text-right whitespace-nowrap">Admin</span>
-                                        <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-                                        </svg>
-                                    </button>
-                                </AccordionButton>
-                                <AccordionBody>
-                                    <ul>
-                                        <li className="w-full">
-                                            <a href="/tools/metadata" className="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-indigo-100 gap-2 text-nowrap">
-                                                <FaSimCard className="inline-block w-6 h-6" />
-                                                Metadata
-                                            </a>
-                                        </li>
-                                        <li className="w-full">
-                                            <a href="/tools/components" className="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-indigo-100 gap-2 text-nowrap">
-                                                <FaNetworkWired className="inline-block w-6 h-6" />
-                                                Components
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </AccordionBody>
-                            </Accordion>
+                            auth.user?.role === "ADMIN" && (
+                                <Accordion>
+                                    <AccordionButton>
+                                        <button type="button" className="py-2 w-full hover:bg-indigo-100 flex items-center px-4 gap-4 rounded-md" aria-controls="accounts_dropdown" data-collapse-toggle="accounts_dropdown">
+                                            <FaShield className="inline-block w-6 h-6" />
+                                            <span className="flex-1 text-left rtl:text-right whitespace-nowrap">Admin</span>
+                                            <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                                                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                                            </svg>
+                                        </button>
+                                    </AccordionButton>
+                                    <AccordionBody>
+                                        <ul>
+                                            <li className="w-full">
+                                                <a href="/tools/metadata" className="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-indigo-100 gap-2 text-nowrap">
+                                                    <FaSimCard className="inline-block w-6 h-6" />
+                                                    Metadata
+                                                </a>
+                                            </li>
+                                            <li className="w-full">
+                                                <a href="/tools/components" className="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-indigo-100 gap-2 text-nowrap">
+                                                    <FaNetworkWired className="inline-block w-6 h-6" />
+                                                    Components
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </AccordionBody>
+                                </Accordion>
+                            )
                         }
                     </ul>
                 </div>
