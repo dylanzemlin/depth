@@ -90,10 +90,10 @@ export default function Budgets() {
                                                     ${budget.amount.toFixed(2)}
                                                 </TableBodyCell>
                                                 <TableBodyCell>
-                                                    {dayjs(budget.startDate).format("MM/DD/YYYY")}
+                                                    {dayjs(budget.startDate).format("MMM D, YYYY")}
                                                 </TableBodyCell>
                                                 <TableBodyCell>
-                                                    {budget.endDate ? dayjs(budget.endDate).format("MM/DD/YYYY") : "N/A"}
+                                                    {budget.endDate ? dayjs(budget.endDate).format("MMM D, YYYY") : "N/A"}
                                                 </TableBodyCell>
                                                 <TableBodyCell>
                                                     <Menu>

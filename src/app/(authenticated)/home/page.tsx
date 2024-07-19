@@ -2,7 +2,7 @@
 
 import FullError from "@/molecules/feedback/FullError";
 import FullLoading from "@/molecules/feedback/FullLoading";
-import { getBudgets } from "@/lib/api/budget";
+import { getBudgets } from "@/lib/api/budgets";
 import { getHomeData } from "@/lib/api/home";
 import { useQuery } from "@tanstack/react-query";
 import { Card, LineChart, ProgressBar } from "@tremor/react";

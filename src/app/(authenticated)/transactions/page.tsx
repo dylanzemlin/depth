@@ -20,6 +20,7 @@ import DeleteTransactionModal from "@/organisms/transactions/deleteTransactionMo
 import TableFilter from "@/molecules/tables/filter";
 import { Table, TableBody, TableBodyCell, TableFilters, TableFooter, TableHead, TableHeadCell, TableRow } from "@/molecules/table";
 import { useDebounce } from 'use-debounce';
+import dayjs from "dayjs";
 
 export default function Transactions() {
     const [page, setPage] = useState(0);
@@ -117,7 +118,7 @@ export default function Transactions() {
                                                     ${transaction.amount.toFixed(2)}
                                                 </TableBodyCell>
                                                 <TableBodyCell>
-                                                    {new Date(transaction.date).toLocaleDateString()}
+                                                    {dayjs(transaction.date).format("MMM D, YYYY")}
                                                 </TableBodyCell>
                                                 <TableBodyCell>
                                                     <Menu>
