@@ -3,7 +3,7 @@
 import FullError from "@/molecules/feedback/FullError";
 import FullLoading from "@/molecules/feedback/FullLoading";
 import ImportTransactionsModal from "@/organisms/transactions/importTransactionsModal";
-import { getAccounts } from "@/lib/api/account";
+import { getAccounts } from "@/lib/api/accounts";
 import { getCategories } from "@/lib/api/categories";
 import { TransactionFilter, getTransactions } from "@/lib/api/transactions";
 import { classNames } from "@/lib/classnames";

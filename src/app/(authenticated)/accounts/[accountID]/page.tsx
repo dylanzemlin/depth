@@ -4,7 +4,7 @@ import { Account, AccountType, Transaction } from "@prisma/client";
 import { Card, LineChart, ProgressBar } from "@tremor/react";
 import dayjs from "dayjs";  
 import { useQuery } from "@tanstack/react-query";
-import { getAccountDashboardData, getAccountData } from "@/lib/api/account";
+import { getAccountDashboardData, getAccountData } from "@/lib/api/accounts";
 import FullLoading from "@/molecules/feedback/FullLoading";
 import FullError from "@/molecules/feedback/FullError";
 
