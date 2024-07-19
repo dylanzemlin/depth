@@ -28,7 +28,7 @@ export async function getBudgets({ queryKey }: { queryKey: any }): Promise<Pagin
     if (filter.description) {
         params.append("description", filter.description);
     }
-    if (filter.amountCondition)
+    if (filter.amountCondition && filter.minAmount)
     {
         if (filter.minAmount) {
             params.append("minAmount", filter.minAmount.toString());
@@ -39,7 +39,7 @@ export async function getBudgets({ queryKey }: { queryKey: any }): Promise<Pagin
 
         params.append("amountCondition", filter.amountCondition);
     }
-    if (filter.goalCondition)
+    if (filter.goalCondition && filter.minAmount)
     {
         if (filter.minGoal) {
             params.append("minGoal", filter.minGoal.toString());
@@ -59,21 +59,38 @@ export async function getBudgets({ queryKey }: { queryKey: any }): Promise<Pagin
     return await response.json();
 }
 
-export type NewBudget = {
-    description: string;
-    goal: number;
-    categoryId: string;
-    startDate: Date;
+export type CreateBudgetData = {
+    description?: string;
+    goal?: number;
+    categoryId?: string;
+    startDate?: Date;
     endDate?: Date;
 }
 
-export async function createBudget(budget: NewBudget) {
+export async function createBudget(data: CreateBudgetData) {
     const response = await fetch("/api/v1/budgets", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
         },
-        body: JSON.stringify(budget),
+        body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+        throw new Error("Failed to create budget");
+    }
+}
+
+export type EditBudgetData = {
+    id: string;
+} & CreateBudgetData;
+
+export async function editBudget(data: EditBudgetData) {
+    const response = await fetch(`/api/v1/budgets/${data.id}`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
     });
     if (!response.ok) {
         throw new Error("Failed to create budget");

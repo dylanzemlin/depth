@@ -6,14 +6,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { object, string, number, date } from "yup";
 
 const schema = object({
-    description: string().required(),
-    goal: number().required(),
-    categoryId: string().required(),
-    startDate: date().required(),
-    endDate: date().optional()
+    description: string().optional(),
+    goal: number().optional(),
+    categoryId: string().optional(),
+    startDate: date().optional(),
+    endDate: date().optional(),
 })
 
-export async function POST(request: NextRequest): Promise<NextResponse>
+export async function PATCH(request: NextRequest, { params }: {  params: { budgetID: string }}): Promise<NextResponse>
 {
     const session = await withSessionRoute();
     if (session.user == null)
@@ -24,8 +24,11 @@ export async function POST(request: NextRequest): Promise<NextResponse>
     try {
         const { description, goal, categoryId, startDate, endDate } = await schema.validate(await request.json());
 
-        // Create budget
-        const budget = await prisma.budget.create({
+        // Update budget
+        const budget = await prisma.budget.update({
+            where: {
+                id: params.budgetID
+            },
             data: {
                 description,
                 amount: 0,
@@ -46,7 +49,7 @@ export async function POST(request: NextRequest): Promise<NextResponse>
         })
 
         await updateAccountData(request);
-        return NextResponse.json(budget, { status: 201 });
+        return NextResponse.json(budget, { status: 200 });
     } catch (error) {
         return NextResponse.json({ error }, { status: 400 });
     }
