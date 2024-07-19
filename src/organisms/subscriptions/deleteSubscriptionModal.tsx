@@ -34,7 +34,7 @@ export default function DeleteSubscriptionModal(props: DeleteSubscriptionModalPr
                 )
             }
             <ConfirmModal title="Delete Subscription" isOpen={sw.state} onClose={sw.setFalse} onConfirm={async () => await mutation.mutateAsync(props.subscription.id) } loading={mutation.isPending} >
-                Are you sure you want to delete this subscription, this action <span className="text-red-500 font-bold">cannot</span> be undone.
+                Are you sure you want to delete this subscription? This action <span className="text-red-500 font-bold">cannot</span> be undone and all transactions related to this subscription <span className="text-red-500 font-bold">will</span> be deleted.
             </ConfirmModal>
         </>
     )
