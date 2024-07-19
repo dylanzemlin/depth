@@ -11,6 +11,8 @@ export async function POST(request: NextRequest): Promise<NextResponse>
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const start = Date.now();
+
     const accounts = await prisma.account.findMany({
         where: request.nextUrl.searchParams.has("target_account") ? {
             id: request.nextUrl.searchParams.get("target_account") as string
@@ -113,7 +115,10 @@ export async function POST(request: NextRequest): Promise<NextResponse>
         });
     }
 
+    const elapsed = Date.now() - start;
+
     return NextResponse.json({
-        success: true
+        success: true,
+        elapsed
     });
 }

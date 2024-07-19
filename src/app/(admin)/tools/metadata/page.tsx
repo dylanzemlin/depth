@@ -1,8 +1,10 @@
 "use client";
 
 import { useAuth } from "@/lib/auth";
+import Button from "@/molecules/buttons/button";
 import Image from "next/image";
 import { usePathname, useSearchParams } from "next/navigation";
+import toast from "react-hot-toast";
 
 function MetaGroup({ children, title }: { children: React.ReactNode, title: string }) {
     return (
@@ -34,7 +36,7 @@ export default function Login() {
     const searchParamsEntries = Array.from(searchParams.entries());
 
     return (
-        <main className="flex min-h-screen w-full gap-4 p-4 bg-slate-100 flex-col">
+        <main className="flex flex-wrap min-h-screen w-full gap-4 p-4 bg-slate-100 flex-col">
             <MetaGroup title="Authentication">
                 <Meta title="Loading"> { auth.loading ? 'True' : 'False' } </Meta>
                 { auth.user == null ? (
@@ -61,6 +63,30 @@ export default function Login() {
             </MetaGroup>
             <MetaGroup title="Route">
                 <Meta title="Pathname">{pathName}</Meta>
+            </MetaGroup>
+            <MetaGroup title="Packages">
+                <Meta title="Next.js">v{require("next/package.json").version}</Meta>
+                <Meta title="React">v{require("react/package.json").version}</Meta>
+            </MetaGroup>
+            <MetaGroup title="Tools">
+                <Meta title="Run Sushi">
+                    <Button color="violet" size="sm" title="Run" onClick={async () => {
+                        try {
+                            const result = await fetch("/api/sushi/update", {
+                                method: "POST"
+                            });
+
+                            if (result.status == 200)
+                            {
+                                const json = await result.json();
+                                console.log(json);
+                                toast.success(`Ran sushi in ${json.elapsed}ms`);
+                            }
+                        } catch (error) {
+                            toast.error("Failed to run Sushi");
+                        }
+                    }} />
+                </Meta>
             </MetaGroup>
         </main>
     );
