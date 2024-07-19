@@ -3,7 +3,7 @@
 import { useAuth } from "@/lib/auth";
 import Image from "next/image";
 import { FaFolder, FaHome, FaLink, FaMoneyBill } from "react-icons/fa";
-import { FaArrowsLeftRight, FaCalendar, FaNetworkWired, FaShield, FaSimCard, FaVectorSquare } from "react-icons/fa6";
+import { FaCalendar, FaMoneyBillTransfer, FaMoneyCheck, FaNetworkWired, FaShield, FaSimCard, FaVectorSquare } from "react-icons/fa6";
 import { Account } from "@prisma/client";
 import { accountTypeToDisplayName, accountTypeToIcon } from "./core";
 import { Popover, PopoverContent, PopoverTrigger } from "@/molecules/popover";
@@ -39,8 +39,14 @@ export default function DesktopNav(props: DesktopNavProps) {
                     </li>
                     <li className="w-full">
                         <a href="/transactions" className="py-2 w-full hover:bg-indigo-100 flex items-center px-4 gap-4 rounded-md">
-                            <FaArrowsLeftRight className="inline-block w-6 h-6" />
+                            <FaMoneyCheck className="inline-block w-6 h-6" />
                             Transactions
+                        </a>
+                    </li>
+                    <li className="w-full">
+                        <a href="/transfers" className="py-2 w-full hover:bg-indigo-100 flex items-center px-4 gap-4 rounded-md">
+                            <FaMoneyBillTransfer className="inline-block w-6 h-6" />
+                            Transfers
                         </a>
                     </li>
                     <li className="w-full">

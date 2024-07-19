@@ -1,4 +1,4 @@
-import { Account, Category, Transaction } from "@prisma/client";
+import { Account, Category, Transaction, Transfer } from "@prisma/client";
 import { Pagination } from "./pagination";
 import { DateRange } from "../types";
 import { QueryFunctionContext } from "@tanstack/react-query";
@@ -6,6 +6,8 @@ import { QueryFunctionContext } from "@tanstack/react-query";
 export type TransactionType = Transaction & {
     category: Category;
     account: Account;
+    transfersFrom: Transfer[];
+    transfersTo: Transfer[];
 }
 
 export type TransactionFilter = {

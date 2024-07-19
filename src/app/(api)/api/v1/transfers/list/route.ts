@@ -1,48 +1,51 @@
 import { withSessionRoute } from "@/lib/iron/wrappers";
 import prisma from "@/lib/prisma";
+import { TransferStatus } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
 type QueryParams = {
     page?: number;
+    category?: string;
     from?: Date;
     to?: Date;
-    category?: string;
-    account?: string;
-    status?: "CLEARED" | "PENDING" | "CANCELLED";
+    fromAccount?: string;
+    toAccount?: string;
     condition?: "is equal to" | "is between" | "is greater than" | "is less than";
     minCost?: number;
     maxCost?: number;
     description?: string;
+    status?: TransferStatus;
 }
 
 const tryParseQueryParams = (request: NextRequest): QueryParams => {
     const page = request.nextUrl.searchParams.get("page");
+    const category = request.nextUrl.searchParams.get("categoryId");
     const from = request.nextUrl.searchParams.get("from");
     const to = request.nextUrl.searchParams.get("to");
-    const category = request.nextUrl.searchParams.get("categoryId");
-    const account = request.nextUrl.searchParams.get("accountId");
-    const status = request.nextUrl.searchParams.get("status");
+    const fromAccount = request.nextUrl.searchParams.get("fromAccountId");
+    const toAccount = request.nextUrl.searchParams.get("toAccountId");
     const condition = request.nextUrl.searchParams.get("condition");
     const minCost = request.nextUrl.searchParams.get("minCost");
     const maxCost = request.nextUrl.searchParams.get("maxCost");
     const description = request.nextUrl.searchParams.get("description");
+    const status = request.nextUrl.searchParams.get("status");
 
     return {
         page: page ? parseInt(page) : undefined,
-        from: from ? new Date(from) : undefined,
-        to: to ? new Date(to) : undefined,
         category: category ?? undefined,
-        account: account ?? undefined,
-        status: status as "CLEARED" | "PENDING" | "CANCELLED",
+        fromAccount: fromAccount ?? undefined,
+        toAccount: toAccount ?? undefined,
         condition: condition as "is equal to" | "is between" | "is greater than" | "is less than",
         minCost: minCost ? parseFloat(minCost) : undefined,
         maxCost: maxCost ? parseFloat(maxCost) : undefined,
-        description: description ?? undefined
+        description: description ?? undefined,
+        status: status as TransferStatus
     }
 }
 
 const generatePrismaQuery = (params: QueryParams) => {
     const query = [];
+
     if (params.from) {
         query.push({
             date: {
@@ -67,18 +70,18 @@ const generatePrismaQuery = (params: QueryParams) => {
         });
     }
 
-    if (params.account) {
+    if (params.fromAccount) {
         query.push({
-            accountId: {
-                equals: params.account
+            fromAccountId: {
+                equals: params.fromAccount
             }
         });
     }
 
-    if (params.status) {
+    if (params.toAccount) {
         query.push({
-            status: {
-                equals: params.status
+            toAccountId: {
+                equals: params.toAccount
             }
         });
     }
@@ -121,6 +124,14 @@ const generatePrismaQuery = (params: QueryParams) => {
         });
     }
 
+    if (params.status) {
+        query.push({
+            status: {
+                equals: params.status
+            }
+        });
+    }
+
     return query;
 }
 
@@ -136,37 +147,24 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const qry: any = generatePrismaQuery(params); // This "any" is awful but for some reason I am getting type errors :(
 
     try {
-        const transactions = await prisma.transaction.findMany({
+        const tranfers = await prisma.transfer.findMany({
             where: {
                 userId: session.user.id,
                 AND: qry,
             },
             skip: params.page ? params.page * perPage : 0,
             take: perPage,
-            orderBy: [
-                {
-                    date: "desc"
-                },
-                {
-                    transfersFrom: {
-                        _count: "asc"
-                    }
-                },
-                {
-                    transfersTo: {
-                        _count: "asc"
-                    }
-                }
-            ],
+            orderBy: {
+                date: "asc"
+            },
             include: {
                 category: true,
-                account: true,
-                transfersFrom: true,
-                transfersTo: true
+                fromAccount: true,
+                toAccount: true
             }
         })
 
-        const totalCategories = await prisma.transaction.count({
+        const totalTransfers = await prisma.transfer.count({
             where: {
                 userId: session.user.id,
                 AND: qry
@@ -174,11 +172,11 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         });
 
         return NextResponse.json({
-            data: transactions,
+            data: tranfers,
             pagination: {
-                nextUrl: totalCategories > (page + 1) * perPage ? `${request.nextUrl.pathname}?page=${page + 1}` : null,
+                nextUrl: totalTransfers > (page + 1) * perPage ? `${request.nextUrl.pathname}?page=${page + 1}` : null,
                 prevUrl: page > 0 ? `${request.nextUrl.pathname}?page=${page - 1}` : null,
-                total: totalCategories,
+                total: totalTransfers,
                 current: page,
                 pageSize: perPage
             }

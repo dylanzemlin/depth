@@ -36,18 +36,21 @@ export async function GET(request: NextRequest, { params }: {  params: { account
             date: "desc"
         },
         include: {
-            category: true
+            category: true,
+            transfersFrom: true,
+            transfersTo: true
         }
     });
 
-    const income = transactions.filter(t => t.type == TransactionType.INCOME).reduce((acc, t) => acc + t.amount, 0);
-    const expenses = transactions.filter(t => t.type == TransactionType.EXPENSE).reduce((acc, t) => acc + t.amount, 0);
-    const incomeMapByDay = transactions.filter(t => t.type == TransactionType.INCOME).reduce((acc, t) => {
+    const pureTransactions = transactions.filter(x => x.transfersFrom.length == 0 && x.transfersTo.length == 0);
+    const income = pureTransactions.filter(t => t.type == TransactionType.INCOME).reduce((acc, t) => acc + t.amount, 0);
+    const expenses = pureTransactions.filter(t => t.type == TransactionType.EXPENSE).reduce((acc, t) => acc + t.amount, 0);
+    const incomeMapByDay = pureTransactions.filter(t => t.type == TransactionType.INCOME).reduce((acc, t) => {
         const date = new Date(t.date).getDate();
         acc[date] = (acc[date] || 0) + t.amount;
         return acc;
     }, {} as Record<number, number>);
-    const expenseMapByDay = transactions.filter(t => t.type == TransactionType.EXPENSE).reduce((acc, t) => {
+    const expenseMapByDay = pureTransactions.filter(t => t.type == TransactionType.EXPENSE).reduce((acc, t) => {
         const date = new Date(t.date).getDate();
         acc[date] = (acc[date] || 0) + t.amount;
         return acc;
