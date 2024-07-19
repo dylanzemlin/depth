@@ -53,7 +53,7 @@ export async function GET(request: NextRequest, { params }: {  params: { account
         return acc;
     }, {} as Record<number, number>);
 
-    const recentTransactions = transactions.slice(0, 5);
+    const recentTransactions = transactions.slice(0, 10);
 
     return NextResponse.json({
         income,
