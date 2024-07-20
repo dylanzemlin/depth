@@ -28,8 +28,8 @@ export async function GET(request: NextRequest, { params }: {  params: { account
         where: {
             accountId: account.id,
             date: {
-                gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-                lt: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1)
+                gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1, 0, 0, 0),
+                lt: new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate(), 23, 59, 59)
             }
         },
         orderBy: {

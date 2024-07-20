@@ -29,7 +29,7 @@ export async function GET(request: NextRequest): Promise<NextResponse>
             userId: session.user.id,
             date: {
                 gte: new Date(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0),
-                lt: new Date(now.getUTCFullYear(), now.getUTCMonth() + 1, 1, 0, 0, 0)
+                lt: new Date(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23, 59, 59)
             }
         },
         orderBy: {
