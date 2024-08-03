@@ -19,6 +19,8 @@ type CreateTransactionModalProps = {
     defaultCategoryId?: string;
     defaultStatus?: "CLEARED" | "PENDING" | "CANCELLED";
     defaultType?: "INCOME" | "EXPENSE";
+
+    onTransactionCreated?: () => void;
 }
 
 export default function CreateTransactionModal(props?: CreateTransactionModalProps) {
@@ -57,6 +59,7 @@ export default function CreateTransactionModal(props?: CreateTransactionModalPro
                                 await createMutation.mutate(true)
                                 toast.success("Transaction created successfully")
                                 sw.setFalse()
+                                props?.onTransactionCreated?.()
                             } catch (error: any) {
                                 toast.error(error.message)
                             }

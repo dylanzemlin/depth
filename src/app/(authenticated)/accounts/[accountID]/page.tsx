@@ -186,7 +186,10 @@ export default function AccountPage({ params }: { params: { accountID: string } 
                                     </span>
                                     Create Transaction
                                 </button>
-                            } defaultStatus="CLEARED" defaultType="EXPENSE" defaultAccountId={account.id} />
+                            } defaultStatus="CLEARED" defaultType="EXPENSE" defaultAccountId={account.id} onTransactionCreated={() => {
+                                dashboardQuery.refetch();
+                                accountQuery.refetch();
+                            }} />
                         </div>
                     </div>
 
