@@ -148,7 +148,7 @@ export default function CreateTransactionModal(props?: CreateTransactionModalPro
                     <label htmlFor="Date" className="block text-sm font-medium text-gray-700">
                         Date
                     </label>
-                    <DatePicker id="date" value={createMutation.data.date} onValueChange={(e) => createMutation.setProperty("date", new Date(e?.toUTCString() ?? new Date().toUTCString()))} />
+                    <DatePicker id="date" value={createMutation.data.date} onValueChange={(e) => createMutation.setProperty("date", new Date(e?.toString() ?? new Date().toString()))} />
                 </div>
             </Modal>
         </>

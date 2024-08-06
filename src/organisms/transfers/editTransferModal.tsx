@@ -148,7 +148,7 @@ export default function EditTransferModal(props: CreateTransferModalProps) {
                     <label htmlFor="date" className="block text-sm font-medium text-gray-700">
                         Date
                     </label>
-                    <DatePicker id="date" value={new Date(editMutation.data.date ?? new Date())} onValueChange={(e) => editMutation.setProperty("date", new Date(e?.toUTCString() ?? new Date().toUTCString()))} />
+                    <DatePicker id="date" value={new Date(editMutation.data.date ?? new Date())} onValueChange={(e) => editMutation.setProperty("date", new Date(e?.toString() ?? new Date().toString()))} />
                 </div>
             </Modal>
         </>

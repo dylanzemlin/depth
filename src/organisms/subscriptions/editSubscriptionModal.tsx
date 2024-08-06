@@ -137,13 +137,13 @@ export default function EditSubscriptionModal(props: EditSubscriptionModalProps)
                     <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">
                         Start Date
                     </label>
-                    <DatePicker id="startDate" value={new Date(createMutation.data.startDate ?? new Date())} onValueChange={(e) => createMutation.setProperty("startDate", new Date(e?.toUTCString() ?? new Date().toUTCString()))} />
+                    <DatePicker id="startDate" value={new Date(createMutation.data.startDate ?? new Date())} onValueChange={(e) => createMutation.setProperty("startDate", new Date(e?.toString() ?? new Date().toString()))} />
                 </div>
                 <div>
                     <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">
                         End Date
                     </label>
-                    <DatePicker id="endDate" value={createMutation.data.endDate ? new Date(createMutation.data.endDate) : undefined} onValueChange={(e) => createMutation.setProperty("endDate", new Date(e?.toUTCString() ?? new Date().toUTCString()))} />
+                    <DatePicker id="endDate" value={createMutation.data.endDate ? new Date(createMutation.data.endDate) : undefined} onValueChange={(e) => createMutation.setProperty("endDate", new Date(e?.toString() ?? new Date().toString()))} />
                 </div>
             </Modal>
         </>
