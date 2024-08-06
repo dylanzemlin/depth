@@ -3,10 +3,6 @@ import prisma from "@/lib/prisma";
 import { Octokit } from "@octokit/rest";
 import { NextRequest, NextResponse } from "next/server";
 
-import dayjs from "dayjs";
-import timezone from "dayjs/plugin/timezone";
-dayjs.extend(timezone);
-
 function generateRedirectUrl(request: NextRequest, error: string) {
     const clone = request.nextUrl.clone();
     clone.searchParams.set("error", error);
@@ -18,6 +14,7 @@ function generateRedirectUrl(request: NextRequest, error: string) {
 export async function GET(request: NextRequest): Promise<NextResponse> {
     const code = request.nextUrl.searchParams.get("code");
     const error = request.nextUrl.searchParams.get("error");
+    const state = request.nextUrl.searchParams.get("state");
     const session = await withSessionRoute();
 
     if (error) {
@@ -26,6 +23,15 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     if (!code) {
         return generateRedirectUrl(request, "no_code");
+    }
+
+    let timezone = "America/Chicago";
+    if (state != null) {
+        try {
+            timezone = JSON.parse(atob(state)).timezone;
+        } catch (error) {
+            console.error(error);
+        }
     }
 
     const form = {
@@ -49,7 +55,6 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     }
 
     const json = await result.json();
-    console.log(json);
     if (!json.access_token) {
         return generateRedirectUrl(request, "token_error_not_found");
     }
@@ -82,13 +87,15 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         update: {
             name: profile.data.name,
             avatarUrl: profile.data.avatar_url ?? `https://ui-avatars.com/api/?rounded=true&name=${urlEncodedName}&size=51`,
-            authTechnique: "github"
+            authTechnique: "github",
+            timezone
         },
         create: {
             email: profile.data.email,
             name: profile.data.name,
             avatarUrl: profile.data.avatar_url ?? `https://ui-avatars.com/api/?rounded=true&name=${urlEncodedName}&size=51`,
-            authTechnique: "github"
+            authTechnique: "github",
+            timezone
         }
     });
 
@@ -98,7 +105,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         email: user.email,
         avatarUrl: user.avatarUrl,
         role: user.role,
-        timezone: dayjs.tz.guess()
+        timezone
     }
     await session.save();
 

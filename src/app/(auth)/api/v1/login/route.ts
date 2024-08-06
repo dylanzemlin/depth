@@ -4,13 +4,10 @@ import { object, string } from "yup";
 import crypto from "crypto";
 import prisma from "@/lib/prisma";
 
-import dayjs from "dayjs";
-import timezone from "dayjs/plugin/timezone";
-dayjs.extend(timezone);
-
 const schema = object({
     email: string().email().required(),
-    password: string().required()
+    password: string().required(),
+    timezone: string().required()
 })
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
@@ -27,7 +24,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     try {
-        const { email, password } = await schema.validate(json);
+        const { email, password, timezone } = await schema.validate(json);
 
         const user = await prisma.user.findFirst({
             where: {
@@ -50,7 +47,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             email: user.email,
             avatarUrl: user.avatarUrl,
             role: user.role,
-            timezone: dayjs.tz.guess()
+            timezone
         }
         await session.save();
 

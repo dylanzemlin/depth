@@ -1,6 +1,7 @@
 "use client"
 ;
 import { createContext, useContext, useEffect, useState } from "react";
+import { getLocalTimezone } from "./dayjs";
 
 interface User {
     id: string;
@@ -53,9 +54,10 @@ async function logout(): Promise<string | undefined>
 
 async function loginWithEmailAndPassword(email: string, password: string)
 {
+    const timezone = getLocalTimezone();
     const response = await fetch("/api/v1/login", {
         method: "POST",
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, timezone }),
         headers: {
             "Content-Type": "application/json",
         },
@@ -72,12 +74,14 @@ async function loginWithEmailAndPassword(email: string, password: string)
 
 async function loginWithGoogle()
 {
+    const timezone = getLocalTimezone();
     const params = new URLSearchParams({
         client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
         redirect_uri: process.env.NEXT_PUBLIC_GOOGLE_REDIRECT,
         scope: "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email",
         response_type: "code",
-        prompt: "consent"
+        prompt: "consent",
+        state: btoa(JSON.stringify({ timezone })),
     })
 
     const uri = `https://accounts.google.com/o/oauth2/auth?${params.toString()}`;
@@ -88,10 +92,12 @@ async function loginWithGoogle()
 
 async function loginWithGithub()
 {
+    const timezone = getLocalTimezone();
     const params = new URLSearchParams({
         client_id: process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID,
         redirect_uri: process.env.NEXT_PUBLIC_GITHUB_REDIRECT,
         scope: "read:user user:email",
+        state: btoa(JSON.stringify({ timezone })),
     });
 
     const uri = `https://github.com/login/oauth/authorize?${params.toString()}`;
@@ -102,9 +108,10 @@ async function loginWithGithub()
 
 async function signupWithEmailAndPassword(email: string, name: string, password: string)
 {
+    const timezone = getLocalTimezone();
     const response = await fetch("/api/v1/signup", {
         method: "POST",
-        body: JSON.stringify({ email, name, password }),
+        body: JSON.stringify({ email, name, password, timezone }),
         headers: {
             "Content-Type": "application/json",
         },

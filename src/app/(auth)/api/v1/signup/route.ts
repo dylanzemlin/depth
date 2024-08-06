@@ -4,14 +4,11 @@ import { object, string } from "yup";
 import crypto from "crypto";
 import prisma from "@/lib/prisma";
 
-import dayjs from "dayjs";
-import timezone from "dayjs/plugin/timezone";
-dayjs.extend(timezone);
-
 const schema = object({
     email: string().email().required(),
     name: string().required(),
-    password: string().required()
+    password: string().required(),
+    timezone: string().required()
 })
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
@@ -28,7 +25,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     try {
-        const { email, name, password } = await schema.validate(json);
+        const { email, name, password, timezone } = await schema.validate(json);
 
         const salt = crypto.randomBytes(128).toString("hex");
         const hash = crypto.pbkdf2Sync(password, salt, 100000, 64, "sha512").toString("hex");
@@ -42,7 +39,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                 password: hash,
                 passwordIterations: 100000,
                 passwordSalt: salt,
-                authTechnique: "email"
+                authTechnique: "email",
+                timezone
             }
         });
 
@@ -52,7 +50,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             email: user.email,
             avatarUrl: user.avatarUrl,
             role: user.role,
-            timezone: dayjs.tz.guess()
+            timezone
         }
         await session.save();
 
