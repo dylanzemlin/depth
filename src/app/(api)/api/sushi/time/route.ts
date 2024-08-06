@@ -20,9 +20,9 @@ export async function GET(request: NextRequest): Promise<NextResponse>
     const serverNow = dayjs().tz(serverTz);
     const userNow = dayjs().tz(session.user.timezone);
 
-    const isUserAfter = userNow.isAfter(serverNow, "minute");
-    const isUserBefore = userNow.isBefore(serverNow, "minute");
-    const isUserEqual = userNow.isSame(serverNow, "minute");
+    const isUserAfter = userNow.isAfter(serverNow, "day");
+    const isUserBefore = userNow.isBefore(serverNow, "day");
+    const isUserEqual = userNow.isSame(serverNow, "day");
     const diff = userNow.diff(serverNow, 'hour');
 
     return NextResponse.json({
