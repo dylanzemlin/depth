@@ -4,6 +4,10 @@ import { object, string } from "yup";
 import crypto from "crypto";
 import prisma from "@/lib/prisma";
 
+import dayjs from "dayjs";
+import timezone from "dayjs/plugin/timezone";
+dayjs.extend(timezone);
+
 const schema = object({
     email: string().email().required(),
     name: string().required(),
@@ -47,7 +51,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             name: user.name,
             email: user.email,
             avatarUrl: user.avatarUrl,
-            role: user.role
+            role: user.role,
+            timezone: dayjs.tz.guess()
         }
         await session.save();
 

@@ -9,6 +9,7 @@ type IronData = {
         email: string;
         avatarUrl: string;
         role: "ADMIN" | "USER";
+        timezone: string;
     } | null;
 }
 

@@ -2,6 +2,10 @@ import { withSessionRoute } from "@/lib/iron/wrappers";
 import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
+import dayjs from "dayjs";
+import timezone from "dayjs/plugin/timezone";
+dayjs.extend(timezone);
+
 function generateRedirectUrl(request: NextRequest, error: string) {
     const clone = request.nextUrl.clone();
     clone.searchParams.set("error", error);
@@ -90,7 +94,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         name: user.name,
         email: user.email,
         avatarUrl: user.avatarUrl,
-        role: user.role
+        role: user.role,
+        timezone: dayjs.tz.guess()
     }
     await session.save();
 

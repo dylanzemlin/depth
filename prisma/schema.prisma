@@ -1,212 +1,177 @@
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
-    id String @id @default(cuid())
-    name String
-    email String @unique
-    avatarUrl String
-    password String?
-    passwordSalt String?
-    passwordIterations Int?
-    passwordResetToken String?
-    passwordResetTokenExpiresAt DateTime?
-    authTechnique String // email | google | github
-    role Role @default(USER)
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    // Attachments
-    accounts Account[]
-    categories Category[]
-    transactions Transaction[]
-    subscriptions Subscription[]
-    budgets Budget[]
-    transfers Transfer[]
-}
-
-enum Role {
-    ADMIN
-    USER
+  id                          String         @id @default(cuid())
+  name                        String
+  email                       String         @unique
+  authTechnique               String
+  password                    String?
+  passwordResetToken          String?
+  passwordResetTokenExpiresAt DateTime?
+  passwordSalt                String?
+  passwordIterations          Int?
+  avatarUrl                   String
+  createdAt                   DateTime       @default(now())
+  updatedAt                   DateTime       @updatedAt
+  role                        Role           @default(USER)
+  timezone                    String         @default("America/Chicago")
+  accounts                    Account[]
+  budgets                     Budget[]
+  categories                  Category[]
+  subscriptions               Subscription[]
+  transactions                Transaction[]
+  transfers                   Transfer[]
 }
 
 model Account {
-    id String @id @default(cuid())
-    type AccountType
-    name String
-    balance Float
-    pendingBalance Float
-    creditLimit Float?
-    archived Boolean @default(false)
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    // Attachments
-    userId String
-    user User @relation(fields: [userId], references: [id])
-
-    transactions Transaction[]
-    subscriptions Subscription[]
-    transfersFrom Transfer[] @relation("fromAccount")
-    transfersTo Transfer[] @relation("toAccount")
-}
-
-enum AccountType {
-    SAVINGS
-    CHECKINGS
-    CREDIT
-    OTHER
+  id             String         @id @default(cuid())
+  type           AccountType
+  userId         String
+  archived       Boolean        @default(false)
+  balance        Float
+  name           String
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  creditLimit    Float?
+  pendingBalance Float
+  user           User           @relation(fields: [userId], references: [id])
+  subscriptions  Subscription[]
+  transactions   Transaction[]
+  transfersFrom  Transfer[]     @relation("fromAccount")
+  transfersTo    Transfer[]     @relation("toAccount")
 }
 
 model Category {
-    id String @id @default(cuid())
-    title String
-    description String
-    archived Boolean @default(false)
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    // Attachments
-    userId String
-    user User @relation(fields: [userId], references: [id])
-
-    transactions Transaction[]
-    subscriptions Subscription[]
-    budgets Budget[]
-    transfers Transfer[]
+  id            String         @id @default(cuid())
+  userId        String
+  archived      Boolean        @default(false)
+  description   String
+  title         String
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  budgets       Budget[]
+  user          User           @relation(fields: [userId], references: [id])
+  subscriptions Subscription[]
+  transactions  Transaction[]
+  transfers     Transfer[]
 }
 
 model Transaction {
-    id String @id @default(cuid())
-    amount Float
-    description String
-    date DateTime
-    type TransactionType
-    status TransactionStatus
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    // Attachments
-    userId String
-    user User @relation(fields: [userId], references: [id])
-
-    accountId String
-    account Account @relation(fields: [accountId], references: [id])
-
-    categoryId String
-    category Category @relation(fields: [categoryId], references: [id])
-
-    subscriptionId String?
-    subscription Subscription? @relation(fields: [subscriptionId], references: [id])
-
-    transfersFrom Transfer[] @relation("fromAccountTransaction")
-    transfersTo Transfer[] @relation("toAccountTransaction")
-}
-
-enum TransactionStatus {
-    CLEARED
-    PENDING
-    CANCELLED
-}
-
-enum TransactionType {
-    INCOME
-    EXPENSE
+  id             String            @id @default(cuid())
+  amount         Float
+  description    String
+  date           DateTime
+  type           TransactionType
+  userId         String
+  accountId      String
+  categoryId     String
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  status         TransactionStatus
+  subscriptionId String?
+  account        Account           @relation(fields: [accountId], references: [id])
+  category       Category          @relation(fields: [categoryId], references: [id])
+  subscription   Subscription?     @relation(fields: [subscriptionId], references: [id])
+  user           User              @relation(fields: [userId], references: [id])
+  transfersFrom  Transfer[]        @relation("fromAccountTransaction")
+  transfersTo    Transfer[]        @relation("toAccountTransaction")
 }
 
 model Subscription {
-    id String @id @default(cuid())
-    description String
-    startDate DateTime
-    endDate DateTime?
-    amount Float
-    frequency SubscriptionFrequency
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    // Attachments
-    userId String
-    user User @relation(fields: [userId], references: [id])
-
-    categoryId String
-    category Category @relation(fields: [categoryId], references: [id])
-
-    accountId String
-    account Account @relation(fields: [accountId], references: [id])
-
-    transactions Transaction[]
-}
-
-enum SubscriptionFrequency {
-    DAILY
-    WEEKLY
-    BIWEEKLY
-    MONTHLY
-    YEARLY
+  id           String                @id @default(cuid())
+  description  String
+  startDate    DateTime
+  endDate      DateTime?
+  amount       Float
+  frequency    SubscriptionFrequency
+  userId       String
+  categoryId   String
+  accountId    String
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+  account      Account               @relation(fields: [accountId], references: [id])
+  category     Category              @relation(fields: [categoryId], references: [id])
+  user         User                  @relation(fields: [userId], references: [id])
+  transactions Transaction[]
 }
 
 model Budget {
-    id String @id @default(cuid())
-    goal Float
-    amount Float
-    startDate DateTime
-    endDate DateTime?
-    description String
-
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    // Attachments
-    userId String
-    user User @relation(fields: [userId], references: [id])
-
-    categoryId String
-    category Category @relation(fields: [categoryId], references: [id])
+  id          String    @id @default(cuid())
+  amount      Float
+  startDate   DateTime
+  endDate     DateTime?
+  userId      String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  categoryId  String
+  description String
+  goal        Float
+  category    Category  @relation(fields: [categoryId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
 }
 
 model Transfer {
-    id String @id @default(cuid())
-    amount Float
-    description String
-    status TransferStatus
-    date DateTime
+  id                       String         @id @default(cuid())
+  amount                   Float
+  description              String
+  status                   TransferStatus
+  date                     DateTime
+  createdAt                DateTime       @default(now())
+  updatedAt                DateTime       @updatedAt
+  userId                   String
+  fromAccountId            String
+  toAccountId              String
+  fromAccountTransactionId String
+  toAccountTransactionId   String
+  categoryId               String
+  category                 Category       @relation(fields: [categoryId], references: [id])
+  fromAccount              Account        @relation("fromAccount", fields: [fromAccountId], references: [id])
+  fromAccountTransaction   Transaction    @relation("fromAccountTransaction", fields: [fromAccountTransactionId], references: [id])
+  toAccount                Account        @relation("toAccount", fields: [toAccountId], references: [id])
+  toAccountTransaction     Transaction    @relation("toAccountTransaction", fields: [toAccountTransactionId], references: [id])
+  user                     User           @relation(fields: [userId], references: [id])
+}
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+enum Role {
+  ADMIN
+  USER
+}
 
-    // Attachments
-    userId String
-    user User @relation(fields: [userId], references: [id])
+enum AccountType {
+  SAVINGS
+  CHECKINGS
+  CREDIT
+  OTHER
+}
 
-    categoryId String
-    category Category @relation(fields: [categoryId], references: [id])
+enum TransactionStatus {
+  CLEARED
+  PENDING
+  CANCELLED
+}
 
-    fromAccountId String
-    fromAccount Account @relation("fromAccount", fields: [fromAccountId], references: [id])
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
 
-    toAccountId String
-    toAccount Account @relation("toAccount", fields: [toAccountId], references: [id])
-
-    fromAccountTransactionId String
-    fromAccountTransaction Transaction @relation("fromAccountTransaction", fields: [fromAccountTransactionId], references: [id])
-    
-    toAccountTransactionId String
-    toAccountTransaction Transaction @relation("toAccountTransaction", fields: [toAccountTransactionId], references: [id])
+enum SubscriptionFrequency {
+  DAILY
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+  YEARLY
 }
 
 enum TransferStatus {
-    CLEARED
-    PENDING
-    CANCELLED
+  CLEARED
+  PENDING
+  CANCELLED
 }
