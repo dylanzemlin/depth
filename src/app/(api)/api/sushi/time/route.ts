@@ -20,10 +20,21 @@ export async function GET(request: NextRequest): Promise<NextResponse>
     const serverNow = dayjs().tz(serverTz);
     const userNow = dayjs().tz(session.user.timezone);
 
+    const isUserAfter = userNow.isAfter(serverNow);
+    const isUserBefore = userNow.isBefore(serverNow);
+    const isUserEqual = userNow.isSame(serverNow);
+    const diff = userNow.diff(serverNow, 'minute');
+
     return NextResponse.json({
         serverNow: serverNow.format('YYYY-MM-DD HH:mm:ss'),
         serverTz: serverTz,
         userNow: userNow.format('YYYY-MM-DD HH:mm:ss'),
-        userTz: session.user.timezone
+        userTz: session.user.timezone,
+        other: {
+            isUserAfter: isUserAfter,
+            isUserBefore: isUserBefore,
+            isUserEqual: isUserEqual,
+            diff: diff
+        }
     });
 }
