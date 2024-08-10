@@ -2,6 +2,7 @@ import { Account, Category, Transaction, Transfer } from "@prisma/client";
 import { Pagination } from "./pagination";
 import { DateRange } from "../types";
 import { QueryFunctionContext } from "@tanstack/react-query";
+import { DateTime } from "luxon";
 
 export type TransactionType = Transaction & {
     category: Category;
@@ -86,7 +87,7 @@ export type CreateTransactionData = {
     status?: string,
     accountId?: string,
     categoryId?: string,
-    date?: Date
+    date?: DateTime
 }
 
 export async function createTransaction(data: CreateTransactionData): Promise<TransactionType> {
@@ -95,7 +96,10 @@ export async function createTransaction(data: CreateTransactionData): Promise<Tr
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify({
+            ...data,
+            date: data.date?.toISO()
+        })
     });
 
     if (!response.ok) {
@@ -123,7 +127,7 @@ export async function updateTransaction(data: EditTransactionData): Promise<Tran
             status: data.status,
             accountId: data.accountId,
             categoryId: data.categoryId,
-            date: data.date
+            date: data.date?.toISO()
         })
     });
 

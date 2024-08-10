@@ -20,9 +20,9 @@ import DeleteTransactionModal from "@/organisms/transactions/deleteTransactionMo
 import TableFilter from "@/molecules/tables/filter";
 import { Table, TableBody, TableBodyCell, TableFilters, TableFooter, TableHead, TableHeadCell, TableRow } from "@/molecules/table";
 import { useDebounce } from 'use-debounce';
-import dayjs from "dayjs";
 import EditTransferModal from "@/organisms/transfers/editTransferModal";
 import DeleteTransferModal from "@/organisms/transfers/deleteTransferModal";
+import { DateTime } from "luxon";
 
 export default function Transactions() {
     const [page, setPage] = useState(0);
@@ -151,7 +151,7 @@ export default function Transactions() {
                                                     }
                                                 </TableBodyCell>
                                                 <TableBodyCell>
-                                                    {dayjs(transaction.date).format("MMM D, YYYY")}
+                                                    {DateTime.fromJSDate(transaction.date).toLocaleString(DateTime.DATE_MED)}
                                                 </TableBodyCell>
                                                 <TableBodyCell>
                                                     <Menu>

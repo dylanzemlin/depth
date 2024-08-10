@@ -6,9 +6,9 @@ import { getBudgets } from "@/lib/api/budgets";
 import { getHomeData } from "@/lib/api/home";
 import { useQuery } from "@tanstack/react-query";
 import { Card, LineChart, ProgressBar } from "@tremor/react";
-import dayjs from "dayjs";
 import { useId } from "react";
 import { FaArrowDown, FaArrowUp } from "react-icons/fa6";
+import { DateTime } from "luxon";
 
 type BudgetdataProps = {
     value: number;
@@ -20,7 +20,7 @@ type BudgetdataProps = {
 const BudgetData = (props: BudgetdataProps) => {
     const tooltipId = useId();
     const perecent = (props.value / props.max) * 100;
-    const daysUntilEnd = dayjs().daysInMonth() - dayjs().date();
+    const daysUntilEnd = DateTime.local().daysInMonth - DateTime.local().day;
 
     return (
         <>
@@ -92,10 +92,11 @@ export default function Home() {
     const expensesPercentage = homeData?.expenses / (homeData?.income + homeData?.expenses) * 100;
 
     const dayNumToDisplayDate = (dayNum: number) => {
-        return dayjs(new Date(new Date().getFullYear(), new Date().getMonth(), dayNum)).format('MMMM DD');
+        return DateTime.local().set({ day: dayNum }).toFormat('MMMM dd');
     }
 
-    const graphData = Array.from({ length: dayjs().date() }, (_, i) => {
+
+    const graphData = Array.from({ length: DateTime.local().day }, (_, i) => {
         const date = i + 1;
         return {
             date: dayNumToDisplayDate(date),

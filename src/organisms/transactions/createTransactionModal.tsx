@@ -8,6 +8,7 @@ import Modal from "@/molecules/modals/modal";
 import { Account, Category } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { DatePicker, NumberInput, Select, SelectItem, TextInput } from "@tremor/react";
+import { DateTime } from "luxon";
 import toast from "react-hot-toast";
 
 type CreateTransactionModalProps = {
@@ -30,7 +31,7 @@ export default function CreateTransactionModal(props?: CreateTransactionModalPro
         categoryId: props?.defaultCategoryId,
         status: props?.defaultStatus,
         type: props?.defaultType,
-        date: new Date()
+        date: DateTime.local()
     }, invalidateQueries: { queryKey: ["transactions"] } });
 
     const categoriesQuery = useQuery({ queryKey: ["categories"], queryFn: getCategories, enabled: props?.categories == undefined });
@@ -148,7 +149,7 @@ export default function CreateTransactionModal(props?: CreateTransactionModalPro
                     <label htmlFor="Date" className="block text-sm font-medium text-gray-700">
                         Date
                     </label>
-                    <DatePicker id="date" value={createMutation.data.date} onValueChange={(e) => createMutation.setProperty("date", new Date(e?.toString() ?? new Date().toString()))} />
+                    <DatePicker id="date" value={createMutation.data.date?.toJSDate()} onValueChange={(e) => createMutation.setProperty("date", DateTime.fromISO(e?.toISOString() ?? DateTime.local().toISO()))} />
                 </div>
             </Modal>
         </>
