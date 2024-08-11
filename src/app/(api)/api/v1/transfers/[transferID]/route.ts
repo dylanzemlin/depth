@@ -2,10 +2,10 @@ import { updateAccountData } from "@/lib/api/sushi";
 import { withSessionRoute } from "@/lib/iron/wrappers";
 import prisma from "@/lib/prisma";
 import { TransactionType, TransferStatus } from "@prisma/client";
-import dayjs from "dayjs";
 import { NextRequest, NextResponse } from "next/server";
 import { object, string, number, date } from "yup";
 import { createTransferTransactions } from "../shared";
+import { DateTime } from "luxon";
 
 const schema = object({
     description: string().optional(),
@@ -58,7 +58,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { transf
                 toAccountId: toAccountId ?? transfer.toAccountId,
                 fromAccountId: fromAccountId ?? transfer.fromAccountId,
                 categoryId: categoryId ?? transfer.categoryId,
-                date: dayjs(date ?? transfer.date).hour(12).minute(0).second(0).toDate(),
+                date: DateTime.fromJSDate(date ?? transfer.date).toJSDate(),
                 amount: amount ?? transfer.amount,
                 description: description ?? transfer.description,
                 status: status ?? transfer.status,
@@ -84,7 +84,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { transf
                 fromAccountId: fromAccountId ?? transfer.fromAccountId,
                 toAccountId: toAccountId ?? transfer.toAccountId,
                 categoryId: categoryId ?? transfer.categoryId,
-                date: dayjs(date ?? transfer.date).hour(12).minute(0).second(0).toDate(),
+                date: DateTime.fromJSDate(date ?? transfer.date).toJSDate(),
                 status: status ? status as TransferStatus : transfer.status
             }
         });
@@ -99,7 +99,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { transf
                 },
                 data: {
                     amount: amount ?? updatedTransaction.amount,
-                    date: dayjs(date ?? updatedTransaction.date).hour(12).minute(0).second(0).toDate(),
+                    date: DateTime.fromJSDate(date ?? updatedTransaction.date).toJSDate(),
                     status: status ? status as TransferStatus : updatedTransaction.status
                 }
             });

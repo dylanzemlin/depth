@@ -42,7 +42,7 @@ export default function AccountPage({ params }: { params: { accountID: string } 
     const expensesPercentage = dashboardData?.expenses / (dashboardData?.income + dashboardData?.expenses) * 100;
 
     const dayNumToDisplayDate = (dayNum: number) => {
-        return DateTime.local().set({ day: dayNum }).toFormat('MMMM dd');
+        return DateTime.local().set({ day: dayNum }).toFormat('MMMM d');
     }
 
     const graphData = Array.from({ length: DateTime.local().daysInMonth }, (_, i) => {

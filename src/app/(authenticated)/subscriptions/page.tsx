@@ -98,10 +98,10 @@ export default function Subscriptions() {
                                                     {subscription.frequency}
                                                 </TableBodyCell>
                                                 <TableBodyCell>
-                                                    {DateTime.fromJSDate(subscription.startDate).toLocaleString(DateTime.DATE_MED)}
+                                                    {DateTime.fromJSDate(new Date(subscription.startDate)).toLocaleString(DateTime.DATE_MED)}
                                                 </TableBodyCell>
                                                 <TableBodyCell>
-                                                    {subscription.endDate ? DateTime.fromJSDate(subscription.endDate).toLocaleString(DateTime.DATE_MED) : "N/A"}
+                                                    {subscription.endDate ? DateTime.fromJSDate(new Date(subscription.endDate)).toLocaleString(DateTime.DATE_MED) : "N/A"}
                                                 </TableBodyCell>
                                                 <TableBodyCell>
                                                     <Menu>

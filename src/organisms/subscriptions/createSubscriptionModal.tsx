@@ -8,6 +8,7 @@ import Modal from "@/molecules/modals/modal";
 import { Account, Category } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { DatePicker, NumberInput, Select, SelectItem, TextInput } from "@tremor/react";
+import { DateTime } from "luxon";
 import toast from "react-hot-toast";
 
 type CreateSubscriptionModalProps = {
@@ -25,7 +26,7 @@ export default function CreateSubscriptionModal(props?: CreateSubscriptionModalP
     const createMutation = useEditObject<CreateSubscriptionData>({ mutationFn: createSubscription, initialData: {
         accountId: props?.defaultAccountId,
         categoryId: props?.defaultCategoryId,
-        startDate: new Date()
+        startDate: DateTime.local()
     }, invalidateQueries: { queryKey: ["subscriptions"] } });
 
     const categoriesQuery = useQuery({ queryKey: ["categories"], queryFn: getCategories, enabled: props?.categories == undefined });
@@ -135,13 +136,13 @@ export default function CreateSubscriptionModal(props?: CreateSubscriptionModalP
                     <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">
                         Start Date
                     </label>
-                    <DatePicker id="startDate" value={createMutation.data.startDate} onValueChange={(e) => createMutation.setProperty("startDate", new Date(e?.toString() ?? new Date().toString()))} />
+                    <DatePicker id="startDate" placeholder="Start Date" value={createMutation.data.startDate?.toJSDate()} onValueChange={(e) => createMutation.setProperty("startDate", DateTime.fromISO(e?.toISOString() ?? DateTime.local().toISO()))} />
                 </div>
                 <div>
                     <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">
                         End Date
                     </label>
-                    <DatePicker id="endDate" value={createMutation.data.endDate} onValueChange={(e) => createMutation.setProperty("endDate", new Date(e?.toString() ?? new Date().toString()))} />
+                    <DatePicker id="endDate" placeholder="End Date" value={createMutation.data.endDate?.toJSDate()} onValueChange={(e) => createMutation.setProperty("endDate", DateTime.fromISO(e?.toISOString() ?? DateTime.local().toISO()))} />
                 </div>
             </Modal>
         </>

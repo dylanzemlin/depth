@@ -2,7 +2,7 @@ import { updateAccountData } from "@/lib/api/sushi";
 import { withSessionRoute } from "@/lib/iron/wrappers";
 import prisma from "@/lib/prisma";
 import { TransactionStatus, TransactionType } from "@prisma/client";
-import dayjs from "dayjs";
+import { DateTime } from "luxon";
 import { NextRequest, NextResponse } from "next/server";
 import { object, array, string, number, date } from "yup";
 
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                     amount: Math.abs(item.amount),
                     type: item.amount > 0 ? TransactionType.INCOME : TransactionType.EXPENSE,
                     status: item.status as TransactionStatus,
-                    date: dayjs(item.date).hour(12).minute(0).second(0).millisecond(0).toDate(),
+                    date: DateTime.fromJSDate(item.date).toJSDate(),
                     accountId: item.accountId,
                     categoryId: item.categoryId,
                     userId: session.user!.id

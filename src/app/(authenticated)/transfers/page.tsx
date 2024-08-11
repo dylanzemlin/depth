@@ -116,7 +116,7 @@ export default function Transfers() {
                                                     ${transfer.amount.toFixed(2)}
                                                 </TableBodyCell>
                                                 <TableBodyCell>
-                                                    {DateTime.fromJSDate(transfer.date).toFormat("MMM d, yyyy")}
+                                                    {DateTime.fromJSDate(new Date(transfer.date)).toFormat("MMM d, yyyy")}
                                                 </TableBodyCell>
                                                 <TableBodyCell>
                                                     <Menu>

@@ -1,11 +1,11 @@
 import { updateAccountData } from "@/lib/api/sushi";
 import { withSessionRoute } from "@/lib/iron/wrappers";
 import prisma from "@/lib/prisma";
-import { TransactionStatus, TransactionType } from "@prisma/client";
-import dayjs from "dayjs";
+import { TransactionStatus } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { object, string, number, date } from "yup";
 import { createTransferTransactions } from "./shared";
+import { DateTime } from "luxon";
 
 const schema = object({
     description: string().required(),
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                 toAccountId,
                 categoryId,
                 userId: session.user.id,
-                date: dayjs(date).hour(12).minute(0).second(0).toDate(),
+                date: DateTime.fromJSDate(date).toJSDate(),
                 amount,
                 description,
                 status: status as TransactionStatus,

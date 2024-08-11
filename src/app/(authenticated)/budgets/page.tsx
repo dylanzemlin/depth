@@ -90,10 +90,10 @@ export default function Budgets() {
                                                     ${budget.amount.toFixed(2)}
                                                 </TableBodyCell>
                                                 <TableBodyCell>
-                                                    {DateTime.fromJSDate(budget.startDate).toLocaleString(DateTime.DATE_MED)}
+                                                    {DateTime.fromJSDate(new Date(budget.startDate)).toLocaleString(DateTime.DATE_MED)}
                                                 </TableBodyCell>
                                                 <TableBodyCell>
-                                                    {budget.endDate ? DateTime.fromJSDate(budget.endDate).toLocaleString(DateTime.DATE_MED) : "N/A"}
+                                                    {budget.endDate ? DateTime.fromJSDate(new Date(budget.endDate)).toLocaleString(DateTime.DATE_MED) : "N/A"}
                                                 </TableBodyCell>
                                                 <TableBodyCell>
                                                     <Menu>

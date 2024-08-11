@@ -8,9 +8,9 @@ const config: Config = {
     "./src/molecules/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/organisms/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
-    "./node_modules/flowbite/**/*.js",
     "./node_modules/@tremor/**/*.{js,ts,jsx,tsx}"
   ],
+  darkMode: "selector",
   theme: {
     extend: {
       backgroundImage: {
@@ -137,7 +137,6 @@ const config: Config = {
     },
   ],
   plugins: [
-    require("flowbite/plugin"),
     require('@headlessui/tailwindcss'),
     require('@tailwindcss/forms')
   ],
