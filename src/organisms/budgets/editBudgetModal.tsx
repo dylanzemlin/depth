@@ -5,6 +5,7 @@ import Button from "@/molecules/buttons/button";
 import Modal from "@/molecules/modals/modal";
 import { Budget, Category } from "@prisma/client";
 import { DatePicker, NumberInput, Select, SelectItem, TextInput } from "@tremor/react";
+import { DateTime } from "luxon";
 import toast from "react-hot-toast";
 
 type EditBudgetModalProps = {
@@ -16,8 +17,8 @@ type EditBudgetModalProps = {
 export default function EditBudgetModal(props: EditBudgetModalProps) {
     const sw = useSwitch(false);
     const updateMutation = useEditObject<EditBudgetData>({ mutationFn: editBudget, initialData: {
-        startDate: props.budget.startDate,
-        endDate: props.budget.endDate ?? undefined,
+        startDate: DateTime.fromJSDate(new Date(props.budget.startDate)),
+        endDate: props.budget.endDate ? DateTime.fromJSDate(new Date(props.budget.endDate)) : undefined,
         categoryId: props.budget.categoryId,
         description: props.budget.description,
         goal: props.budget.goal,
@@ -26,9 +27,9 @@ export default function EditBudgetModal(props: EditBudgetModalProps) {
 
     const canSave = updateMutation.data?.description != props.budget.description ||
         updateMutation.data?.goal != props.budget.goal ||
-        updateMutation.data?.categoryId != props.budget.categoryId ||
-        updateMutation.data?.startDate != props.budget.startDate ||
-        updateMutation.data?.endDate != props.budget.endDate;
+        updateMutation.data?.categoryId != props.budget.categoryId;
+        // updateMutation.data?.startDate != props.budget.startDate ||
+        // updateMutation.data?.endDate != props.budget.endDate;
     return (
         <>
             {
@@ -91,13 +92,13 @@ export default function EditBudgetModal(props: EditBudgetModalProps) {
                     <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">
                         Start Date
                     </label>
-                    <DatePicker id="startDate" placeholder="Start Date" value={updateMutation.data.startDate == undefined ? undefined : new Date(updateMutation.data.startDate)} onValueChange={(e) => updateMutation.setProperty("startDate", e)} />
+                    <DatePicker id="startDate" placeholder="Start Date" value={updateMutation.data.startDate?.toJSDate()} onValueChange={(e) => updateMutation.setProperty("startDate", DateTime.fromISO(e?.toISOString() ?? DateTime.local().toISO()))} />
                 </div>
                 <div>
                     <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">
                         End Date
                     </label>
-                    <DatePicker id="endDate" placeholder="End Date" value={updateMutation.data.endDate == undefined ? undefined : new Date(updateMutation.data.endDate)} onValueChange={(e) => updateMutation.setProperty("endDate", e)} />
+                    <DatePicker id="endDate" placeholder="End Date" value={updateMutation.data.endDate?.toJSDate()} onValueChange={(e) => updateMutation.setProperty("endDate", DateTime.fromISO(e?.toISOString() ?? DateTime.local().toISO()))} />
                 </div>
             </Modal>
         </>

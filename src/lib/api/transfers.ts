@@ -2,6 +2,7 @@ import { Account, Category, Transfer } from "@prisma/client";
 import { Pagination } from "./pagination";
 import { QueryFunctionContext } from "@tanstack/react-query";
 import { DateRange } from "../types";
+import { DateTime } from "luxon";
 
 export type TransferType = {
     category: Category;
@@ -75,7 +76,7 @@ export type CreateTransferData = {
     description?: string;
     amount?: number;
     categoryId?: string;
-    date?: Date;
+    date?: DateTime;
 }
 
 export async function createTransfer(data: CreateTransferData): Promise<TransferType> {
@@ -84,7 +85,10 @@ export async function createTransfer(data: CreateTransferData): Promise<Transfer
         headers: {
             "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+            ...data,
+            date: data.date?.toISO(),
+        }),
     });
     if (!response.ok) {
         throw new Error("Failed to create transfer");
@@ -109,7 +113,7 @@ export async function updateTransfer(data: EditTransferData): Promise<TransferTy
             amount: data.amount,
             status: data.status,
             categoryId: data.categoryId,
-            date: data.date,
+            date: data.date?.toISO(),
             fromAccountId: data.fromAccountId,
             toAccountId: data.toAccountId
         })

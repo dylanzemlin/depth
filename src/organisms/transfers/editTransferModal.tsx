@@ -8,6 +8,7 @@ import Modal from "@/molecules/modals/modal";
 import { Account, Category, Transfer } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { DatePicker, NumberInput, Select, SelectItem, TextInput } from "@tremor/react";
+import { DateTime } from "luxon";
 import toast from "react-hot-toast";
 import { FaArrowRight } from "react-icons/fa6";
 
@@ -20,7 +21,7 @@ type CreateTransferModalProps = {
 
 export default function EditTransferModal(props: CreateTransferModalProps) {
     const sw = useSwitch(false);
-    const editMutation = useEditObject<EditTransferData>({
+    const updateMutation = useEditObject<EditTransferData>({
         mutationFn: updateTransfer, initialData: {
             fromAccountId: props.transfer.fromAccountId,
             toAccountId: props.transfer.toAccountId,
@@ -28,7 +29,7 @@ export default function EditTransferModal(props: CreateTransferModalProps) {
             status: props.transfer.status,
             description: props.transfer.description,
             amount: props.transfer.amount,
-            date: props.transfer.date,
+            date: DateTime.fromJSDate(new Date(props.transfer.date)),
             id: props.transfer.id
         }, invalidateQueries: { predicate: (query) => query.queryKey[0] == "transfers" || query.queryKey[0] == "transactions" }
     });
@@ -39,7 +40,7 @@ export default function EditTransferModal(props: CreateTransferModalProps) {
     const accounts = props?.accounts ?? accountsQuery.data?.data;
     const categories = props?.categories ?? categoriesQuery.data?.data;
 
-    const canSave = editMutation.data?.fromAccountId != props.transfer.fromAccountId || editMutation.data?.toAccountId != props.transfer.toAccountId || editMutation.data?.categoryId != props.transfer.categoryId || editMutation.data?.status != props.transfer.status || editMutation.data?.description != props.transfer.description || editMutation.data?.amount != props.transfer.amount || editMutation.data?.date != props.transfer.date;
+    const canSave = updateMutation.data?.fromAccountId != props.transfer.fromAccountId || updateMutation.data?.toAccountId != props.transfer.toAccountId || updateMutation.data?.categoryId != props.transfer.categoryId || updateMutation.data?.status != props.transfer.status || updateMutation.data?.description != props.transfer.description || updateMutation.data?.amount != props.transfer.amount;
     return (
         <>
             {
@@ -56,18 +57,18 @@ export default function EditTransferModal(props: CreateTransferModalProps) {
                     <Button color="violet" size="sm" title="Save"
                         onClick={async () => {
                             try {
-                                await editMutation.mutate(true)
+                                await updateMutation.mutate(true)
                                 toast.success("Transfer edited successfully")
                                 sw.setFalse()
                             } catch (error: any) {
                                 toast.error(error.message)
                             }
                         }}
-                        loading={editMutation.isPending}
+                        loading={updateMutation.isPending}
                         disabled={!canSave} />
                     <Button color="slate" size="sm" title="Cancel"
                         onClick={sw.setFalse}
-                        disabled={editMutation.isPending} />
+                        disabled={updateMutation.isPending} />
                 </div>
             }>
                 <div className="w-full flex flex-col">
@@ -75,9 +76,9 @@ export default function EditTransferModal(props: CreateTransferModalProps) {
                         Accounts
                     </label>
                     <div className="flex gap-4 items-center w-full">
-                        <Select id="fromAccount" name="fromAccount" value={editMutation.data.fromAccountId} onValueChange={(e) => editMutation.setProperty("fromAccountId", e)}>
+                        <Select id="fromAccount" name="fromAccount" value={updateMutation.data.fromAccountId} onValueChange={(e) => updateMutation.setProperty("fromAccountId", e)}>
                             {
-                                accounts?.filter(x => x.id != editMutation.data.toAccountId)?.map((account) => {
+                                accounts?.filter(x => x.id != updateMutation.data.toAccountId)?.map((account) => {
                                     return (
                                         <SelectItem key={account.id} value={account.id}>
                                             {account.name} ({account.type})
@@ -87,9 +88,9 @@ export default function EditTransferModal(props: CreateTransferModalProps) {
                             }
                         </Select>
                         <FaArrowRight className="text-4xl text-gray-700" />
-                        <Select id="toAccount" name="toAccount" value={editMutation.data.toAccountId} onValueChange={(e) => editMutation.setProperty("toAccountId", e)}>
+                        <Select id="toAccount" name="toAccount" value={updateMutation.data.toAccountId} onValueChange={(e) => updateMutation.setProperty("toAccountId", e)}>
                             {
-                                accounts?.filter(x => x.id != editMutation.data.fromAccountId)?.map((account) => {
+                                accounts?.filter(x => x.id != updateMutation.data.fromAccountId)?.map((account) => {
                                     return (
                                         <SelectItem key={account.id} value={account.id}>
                                             {account.name} ({account.type})
@@ -104,7 +105,7 @@ export default function EditTransferModal(props: CreateTransferModalProps) {
                     <label htmlFor="category" className="block text-sm font-medium text-gray-700">
                         Category
                     </label>
-                    <Select id="category" name="category" value={editMutation.data.categoryId} onValueChange={(e) => editMutation.setProperty("categoryId", e)}>
+                    <Select id="category" name="category" value={updateMutation.data.categoryId} onValueChange={(e) => updateMutation.setProperty("categoryId", e)}>
                         {
                             categories?.filter(x => !x.archived)?.map((category) => {
                                 return (
@@ -120,7 +121,7 @@ export default function EditTransferModal(props: CreateTransferModalProps) {
                     <label htmlFor="status" className="block text-sm font-medium text-gray-700">
                         Status
                     </label>
-                    <Select id="status" name="status" value={editMutation.data.status} onValueChange={(e) => editMutation.setProperty("status", e)}>
+                    <Select id="status" name="status" value={updateMutation.data.status} onValueChange={(e) => updateMutation.setProperty("status", e)}>
                         <SelectItem value="CLEARED">
                             Cleared
                         </SelectItem>
@@ -136,19 +137,19 @@ export default function EditTransferModal(props: CreateTransferModalProps) {
                     <label htmlFor="description" className="block text-sm font-medium text-gray-700">
                         Description
                     </label>
-                    <TextInput id="description" name="description" placeholder="Description" value={editMutation.data.description} onValueChange={(e) => editMutation.setProperty("description", e)} />
+                    <TextInput id="description" name="description" placeholder="Description" value={updateMutation.data.description} onValueChange={(e) => updateMutation.setProperty("description", e)} />
                 </div>
                 <div>
                     <label htmlFor="amount" className="block text-sm font-medium text-gray-700">
                         Amount
                     </label>
-                    <NumberInput id="amount" name="amount" value={editMutation.data.amount} onValueChange={(e) => editMutation.setProperty("amount", e)} enableStepper={false} placeholder="Amount" />
+                    <NumberInput id="amount" name="amount" value={updateMutation.data.amount} onValueChange={(e) => updateMutation.setProperty("amount", e)} enableStepper={false} placeholder="Amount" />
                 </div>
                 <div>
-                    <label htmlFor="date" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="Date" className="block text-sm font-medium text-gray-700">
                         Date
                     </label>
-                    <DatePicker id="date" value={new Date(editMutation.data.date ?? new Date())} onValueChange={(e) => editMutation.setProperty("date", new Date(e?.toString() ?? new Date().toString()))} />
+                    <DatePicker id="date" value={updateMutation.data.date?.toJSDate()} onValueChange={(e) => updateMutation.setProperty("date", DateTime.fromISO(e?.toISOString() ?? DateTime.local().toISO()))} />
                 </div>
             </Modal>
         </>

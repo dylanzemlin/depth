@@ -1,7 +1,7 @@
 "use client"
 ;
+import { DateTime } from "luxon";
 import { createContext, useContext, useEffect, useState } from "react";
-import { getLocalTimezone } from "./dayjs";
 
 interface User {
     id: string;
@@ -54,7 +54,7 @@ async function logout(): Promise<string | undefined>
 
 async function loginWithEmailAndPassword(email: string, password: string)
 {
-    const timezone = getLocalTimezone();
+    const timezone = DateTime.local().zoneName;
     const response = await fetch("/api/v1/login", {
         method: "POST",
         body: JSON.stringify({ email, password, timezone }),
@@ -74,7 +74,7 @@ async function loginWithEmailAndPassword(email: string, password: string)
 
 async function loginWithGoogle()
 {
-    const timezone = getLocalTimezone();
+    const timezone = DateTime.local().zoneName;
     const params = new URLSearchParams({
         client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
         redirect_uri: process.env.NEXT_PUBLIC_GOOGLE_REDIRECT,
@@ -92,7 +92,7 @@ async function loginWithGoogle()
 
 async function loginWithGithub()
 {
-    const timezone = getLocalTimezone();
+    const timezone = DateTime.local().zoneName;
     const params = new URLSearchParams({
         client_id: process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID,
         redirect_uri: process.env.NEXT_PUBLIC_GITHUB_REDIRECT,
@@ -108,7 +108,7 @@ async function loginWithGithub()
 
 async function signupWithEmailAndPassword(email: string, name: string, password: string)
 {
-    const timezone = getLocalTimezone();
+    const timezone = DateTime.local().zoneName;
     const response = await fetch("/api/v1/signup", {
         method: "POST",
         body: JSON.stringify({ email, name, password, timezone }),

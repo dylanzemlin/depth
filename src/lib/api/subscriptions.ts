@@ -1,6 +1,7 @@
 import { Account, Category, Subscription } from "@prisma/client";
 import { Pagination } from "./pagination";
 import { QueryFunctionContext } from "@tanstack/react-query";
+import { DateTime } from "luxon";
 
 export type SubscriptionType = Subscription & {
     category: Category;
@@ -76,8 +77,8 @@ export type CreateSubscriptionData = {
     frequency?: string;
     accountId?: string;
     categoryId?: string;
-    startDate?: Date;
-    endDate?: Date;
+    startDate?: DateTime;
+    endDate?: DateTime;
 }
 
 export async function createSubscription(data: CreateSubscriptionData): Promise<SubscriptionType> {
@@ -86,7 +87,11 @@ export async function createSubscription(data: CreateSubscriptionData): Promise<
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify({
+            ...data,
+            startDate: data.startDate?.toISO(),
+            endDate: data.endDate?.toISO()
+        })
     });
 
     if (!response.ok) {

@@ -2,7 +2,7 @@ import { updateAccountData } from "@/lib/api/sushi";
 import { withSessionRoute } from "@/lib/iron/wrappers";
 import prisma from "@/lib/prisma";
 import { SubscriptionFrequency } from "@prisma/client";
-import dayjs from "dayjs";
+import { DateTime } from "luxon";
 import { NextRequest, NextResponse } from "next/server";
 import { object, string, number, date } from "yup";
 
@@ -55,8 +55,8 @@ export async function POST(request: NextRequest): Promise<NextResponse>
                 description,
                 amount: Math.abs(amount),
                 frequency: frequency as SubscriptionFrequency,
-                startDate: dayjs(startDate).hour(12).minute(0).second(0).millisecond(0).toDate(),
-                endDate: endDate ? dayjs(endDate).hour(12).minute(0).second(0).millisecond(0).toDate() : null,
+                startDate: DateTime.fromJSDate(startDate).toJSDate(),
+                endDate: endDate != undefined ? DateTime.fromJSDate(endDate).toJSDate() : undefined,
                 account: {
                     connect: {
                         id: accountId

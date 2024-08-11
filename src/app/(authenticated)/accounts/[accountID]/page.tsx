@@ -2,12 +2,12 @@
 
 import { Account, AccountType, Transaction } from "@prisma/client";
 import { Card, LineChart, ProgressBar } from "@tremor/react";
-import dayjs from "dayjs";
 import { useQuery } from "@tanstack/react-query";
 import { getAccountDashboardData, getAccountData } from "@/lib/api/accounts";
 import FullLoading from "@/molecules/feedback/FullLoading";
 import FullError from "@/molecules/feedback/FullError";
 import CreateTransactionModal from "@/organisms/transactions/createTransactionModal";
+import { DateTime } from "luxon";
 
 type AccountDashboardData = {
     income: number;
@@ -42,10 +42,10 @@ export default function AccountPage({ params }: { params: { accountID: string } 
     const expensesPercentage = dashboardData?.expenses / (dashboardData?.income + dashboardData?.expenses) * 100;
 
     const dayNumToDisplayDate = (dayNum: number) => {
-        return dayjs(new Date(new Date().getFullYear(), new Date().getMonth(), dayNum)).format('MMMM DD');
+        return DateTime.local().set({ day: dayNum }).toFormat('MMMM d');
     }
 
-    const graphData = Array.from({ length: dayjs().date() }, (_, i) => {
+    const graphData = Array.from({ length: DateTime.local().daysInMonth }, (_, i) => {
         const date = i + 1;
         return {
             date: dayNumToDisplayDate(date),
@@ -66,7 +66,7 @@ export default function AccountPage({ params }: { params: { accountID: string } 
     }
 
     graphData.sort((a, b) => {
-        return dayjs(a.date).unix() - dayjs(b.date).unix();
+        return DateTime.fromFormat(a.date, 'MMMM dd').toMillis() - DateTime.fromFormat(b.date, 'MMMM dd').toMillis();
     });
 
     return (
@@ -239,7 +239,7 @@ export default function AccountPage({ params }: { params: { accountID: string } 
                                                 ${transaction.amount.toFixed(2)}
                                             </td>
                                             <td className="px-4 py-2 text-xs md:text-sm">
-                                                {dayjs(transaction.date).format('MMM D, YYYY')}
+                                                {DateTime.fromJSDate(new Date(transaction.date)).toFormat('MMM d, yyyy')}
                                             </td>
                                         </tr>
                                     ))

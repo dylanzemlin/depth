@@ -5,6 +5,7 @@ import Button from "@/molecules/buttons/button";
 import Modal from "@/molecules/modals/modal";
 import { Category } from "@prisma/client";
 import { DatePicker, NumberInput, Select, SelectItem, TextInput } from "@tremor/react";
+import { DateTime } from "luxon";
 import toast from "react-hot-toast";
 
 type CreateBudgetModalProps = {
@@ -15,10 +16,9 @@ type CreateBudgetModalProps = {
 export default function CreateBudgetModal(props: CreateBudgetModalProps) {
     const sw = useSwitch(false);
     const createMutation = useEditObject<CreateBudgetData>({ mutationFn: createBudget, initialData: {
-        startDate: new Date()
+        startDate: DateTime.local()
     }, invalidateQueries: { queryKey: ["budgets"] } });
 
-    console.log(createMutation.data);
     const canCreate = createMutation.data?.description != null && (createMutation.data?.goal != null && createMutation.data?.goal > 0) && createMutation.data?.categoryId != null && createMutation.data?.startDate != null
     return (
         <>
@@ -82,13 +82,13 @@ export default function CreateBudgetModal(props: CreateBudgetModalProps) {
                     <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">
                         Start Date
                     </label>
-                    <DatePicker id="startDate" placeholder="Start Date" value={createMutation.data.startDate} onValueChange={(e) => createMutation.setProperty("startDate", e)} />
+                    <DatePicker id="startDate" placeholder="Start Date" value={createMutation.data.startDate?.toJSDate()} onValueChange={(e) => createMutation.setProperty("startDate", DateTime.fromISO(e?.toISOString() ?? DateTime.local().toISO()))} />
                 </div>
                 <div>
                     <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">
                         End Date
                     </label>
-                    <DatePicker id="endDate" placeholder="End Date" value={createMutation.data.endDate} onValueChange={(e) => createMutation.setProperty("endDate", e)} />
+                    <DatePicker id="endDate" placeholder="End Date" value={createMutation.data.endDate?.toJSDate()} onValueChange={(e) => createMutation.setProperty("endDate", DateTime.fromISO(e?.toISOString() ?? DateTime.local().toISO()))} />
                 </div>
             </Modal>
         </>

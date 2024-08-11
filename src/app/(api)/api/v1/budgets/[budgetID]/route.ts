@@ -1,7 +1,7 @@
 import { updateAccountData } from "@/lib/api/sushi";
 import { withSessionRoute } from "@/lib/iron/wrappers";
 import prisma from "@/lib/prisma";
-import dayjs from "dayjs";
+import { DateTime } from "luxon";
 import { NextRequest, NextResponse } from "next/server";
 import { object, string, number, date } from "yup";
 
@@ -34,8 +34,8 @@ export async function PATCH(request: NextRequest, { params }: {  params: { budge
                 description,
                 amount: 0,
                 goal,
-                startDate: dayjs(startDate).hour(12).minute(0).second(0).millisecond(0).toDate(),
-                endDate: endDate != undefined ? dayjs(endDate).hour(12).minute(0).second(0).millisecond(0).toDate() : undefined,
+                startDate: startDate != undefined ? DateTime.fromJSDate(startDate).toJSDate() : undefined,
+                endDate: endDate != undefined ? DateTime.fromJSDate(endDate).toJSDate() : undefined,
                 category: {
                     connect: {
                         id: categoryId

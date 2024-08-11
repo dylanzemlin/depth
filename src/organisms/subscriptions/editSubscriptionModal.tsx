@@ -8,6 +8,7 @@ import Modal from "@/molecules/modals/modal";
 import { Account, Category, Subscription } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { DatePicker, NumberInput, Select, SelectItem, TextInput } from "@tremor/react";
+import { DateTime } from "luxon";
 import toast from "react-hot-toast";
 
 type EditSubscriptionModalProps = {
@@ -19,12 +20,12 @@ type EditSubscriptionModalProps = {
 
 export default function EditSubscriptionModal(props: EditSubscriptionModalProps) {
     const sw = useSwitch(false);
-    const createMutation = useEditObject<EditSubscriptionData>({ mutationFn: editSubscription, initialData: {
+    const updateMutation = useEditObject<EditSubscriptionData>({ mutationFn: editSubscription, initialData: {
         accountId: props.subscription.accountId,
         categoryId: props.subscription.categoryId,
         frequency: props.subscription.frequency,
-        startDate: new Date(props.subscription.startDate),
-        endDate: props.subscription.endDate ? new Date(props.subscription.endDate) : undefined,
+        startDate: DateTime.fromJSDate(new Date(props.subscription.startDate)),
+        endDate: props.subscription.endDate ? DateTime.fromJSDate(new Date(props.subscription.endDate)) : undefined,
         amount: props.subscription.amount,
         description: props.subscription.description,
         id: props.subscription.id
@@ -36,7 +37,7 @@ export default function EditSubscriptionModal(props: EditSubscriptionModalProps)
     const accounts = props?.accounts ?? accountsQuery.data?.data;
     const categories = props?.categories ?? categoriesQuery.data?.data;
 
-    const canSave = createMutation.data?.accountId != props.subscription.accountId || createMutation.data?.categoryId != props.subscription.categoryId || createMutation.data?.frequency != props.subscription.frequency || createMutation.data?.startDate != props.subscription.startDate || createMutation.data?.endDate != props.subscription.endDate || createMutation.data?.amount != props.subscription.amount || createMutation.data?.description != props.subscription.description;
+    const canSave = updateMutation.data?.accountId != props.subscription.accountId || updateMutation.data?.categoryId != props.subscription.categoryId || updateMutation.data?.frequency != props.subscription.frequency || updateMutation.data?.amount != props.subscription.amount || updateMutation.data?.description != props.subscription.description;
     return (
         <>
             {
@@ -53,25 +54,25 @@ export default function EditSubscriptionModal(props: EditSubscriptionModalProps)
                     <Button color="violet" size="sm" title="Save"
                         onClick={async () => {
                             try {
-                                await createMutation.mutate(true)
+                                await updateMutation.mutate(true)
                                 toast.success("Subscription created successfully")
                                 sw.setFalse()
                             } catch (error: any) {
                                 toast.error(error.message)
                             }
                         }}
-                        loading={createMutation.isPending}
+                        loading={updateMutation.isPending}
                         disabled={!canSave} />
                     <Button color="slate" size="sm" title="Cancel"
                         onClick={sw.setFalse}
-                        disabled={createMutation.isPending} />
+                        disabled={updateMutation.isPending} />
                 </div>
             }>
                 <div>
                     <label htmlFor="account" className="block text-sm font-medium text-gray-700">
                         Account
                     </label>
-                    <Select id="account" name="account" value={createMutation.data.accountId} onValueChange={(e) => createMutation.setProperty("accountId", e)}>
+                    <Select id="account" name="account" value={updateMutation.data.accountId} onValueChange={(e) => updateMutation.setProperty("accountId", e)}>
                         {
                             accounts?.map((account) => {
                                 return (
@@ -87,7 +88,7 @@ export default function EditSubscriptionModal(props: EditSubscriptionModalProps)
                     <label htmlFor="category" className="block text-sm font-medium text-gray-700">
                         Category
                     </label>
-                    <Select id="category" name="category" value={createMutation.data.categoryId} onValueChange={(e) => createMutation.setProperty("categoryId", e)}>
+                    <Select id="category" name="category" value={updateMutation.data.categoryId} onValueChange={(e) => updateMutation.setProperty("categoryId", e)}>
                         {
                             categories?.filter(x => !x.archived)?.map((category) => {
                                 return (
@@ -103,7 +104,7 @@ export default function EditSubscriptionModal(props: EditSubscriptionModalProps)
                     <label htmlFor="frequency" className="block text-sm font-medium text-gray-700">
                         Frequency
                     </label>
-                    <Select id="frequency" name="frequency" value={createMutation.data.frequency} onValueChange={(e) => createMutation.setProperty("frequency", e)}>
+                    <Select id="frequency" name="frequency" value={updateMutation.data.frequency} onValueChange={(e) => updateMutation.setProperty("frequency", e)}>
                         <SelectItem value="DAILY">
                             Daily
                         </SelectItem>
@@ -125,25 +126,25 @@ export default function EditSubscriptionModal(props: EditSubscriptionModalProps)
                     <label htmlFor="description" className="block text-sm font-medium text-gray-700">
                         Description
                     </label>
-                    <TextInput id="description" name="description" placeholder="Description" value={createMutation.data.description} onValueChange={(e) => createMutation.setProperty("description", e)} />
+                    <TextInput id="description" name="description" placeholder="Description" value={updateMutation.data.description} onValueChange={(e) => updateMutation.setProperty("description", e)} />
                 </div>
                 <div>
                     <label htmlFor="amount" className="block text-sm font-medium text-gray-700">
                         Amount
                     </label>
-                    <NumberInput id="amount" name="amount" value={createMutation.data.amount} onValueChange={(e) => createMutation.setProperty("amount", e)} enableStepper={false} placeholder="Amount" />
+                    <NumberInput id="amount" name="amount" value={updateMutation.data.amount} onValueChange={(e) => updateMutation.setProperty("amount", e)} enableStepper={false} placeholder="Amount" />
                 </div>
                 <div>
                     <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">
                         Start Date
                     </label>
-                    <DatePicker id="startDate" value={new Date(createMutation.data.startDate ?? new Date())} onValueChange={(e) => createMutation.setProperty("startDate", new Date(e?.toString() ?? new Date().toString()))} />
+                    <DatePicker id="startDate" placeholder="Start Date" value={updateMutation.data.startDate?.toJSDate()} onValueChange={(e) => updateMutation.setProperty("startDate", DateTime.fromISO(e?.toISOString() ?? DateTime.local().toISO()))} />
                 </div>
                 <div>
                     <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">
                         End Date
                     </label>
-                    <DatePicker id="endDate" value={createMutation.data.endDate ? new Date(createMutation.data.endDate) : undefined} onValueChange={(e) => createMutation.setProperty("endDate", new Date(e?.toString() ?? new Date().toString()))} />
+                    <DatePicker id="endDate" placeholder="End Date" value={updateMutation.data.endDate?.toJSDate()} onValueChange={(e) => updateMutation.setProperty("endDate", DateTime.fromISO(e?.toISOString() ?? DateTime.local().toISO()))} />
                 </div>
             </Modal>
         </>

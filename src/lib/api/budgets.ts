@@ -1,5 +1,6 @@
 import { Budget } from "@prisma/client";
 import { Pagination } from "./pagination";
+import { DateTime } from "luxon";
 
 export type BudgetType = Budget & {
     category: {
@@ -63,8 +64,8 @@ export type CreateBudgetData = {
     description?: string;
     goal?: number;
     categoryId?: string;
-    startDate?: Date;
-    endDate?: Date;
+    startDate?: DateTime;
+    endDate?: DateTime;
 }
 
 export async function createBudget(data: CreateBudgetData) {
@@ -73,7 +74,11 @@ export async function createBudget(data: CreateBudgetData) {
         headers: {
             "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+            ...data,
+            startDate: data.startDate?.toISO(),
+            endDate: data.endDate?.toISO(),
+        }),
     });
     if (!response.ok) {
         throw new Error("Failed to create budget");

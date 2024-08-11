@@ -5,6 +5,7 @@ import Button from "@/molecules/buttons/button";
 import Modal from "@/molecules/modals/modal";
 import { Account, Category, Transaction } from "@prisma/client";
 import { DatePicker, NumberInput, Select, SelectItem, TextInput } from "@tremor/react";
+import { DateTime } from "luxon";
 import toast from "react-hot-toast";
 
 type EditTransactionModalProps = {
@@ -16,7 +17,10 @@ type EditTransactionModalProps = {
 
 export default function EditTransactionModal(props: EditTransactionModalProps) {
     const sw = useSwitch(false);
-    const editMutation = useEditObject<EditTransactionData>({ mutationFn: updateTransaction, initialData: props.transaction, invalidateQueries: { queryKey: ["transactions"] } });
+    const editMutation = useEditObject<EditTransactionData>({ mutationFn: updateTransaction, initialData: {
+        ...props.transaction,
+        date: DateTime.fromJSDate(new Date(props.transaction.date))
+    }, invalidateQueries: { queryKey: ["transactions"] } });
 
     return (
         <>
@@ -125,7 +129,7 @@ export default function EditTransactionModal(props: EditTransactionModalProps) {
                     <label htmlFor="Date" className="block text-sm font-medium text-gray-700">
                         Date
                     </label>
-                    <DatePicker id="date" value={new Date(editMutation.data.date ?? new Date())} onValueChange={(e) => editMutation.setProperty("date", new Date(e?.toString() ?? new Date().toString()))} />
+                    <DatePicker id="date" value={editMutation.data.date?.toJSDate()} onValueChange={(e) => editMutation.setProperty("date", DateTime.fromISO(e?.toISOString() ?? DateTime.local().toISO()))} />
                 </div>
             </Modal>
         </>

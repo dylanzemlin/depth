@@ -14,7 +14,6 @@ import { FaArrowsLeftRight, FaEquals, FaGreaterThan, FaLessThan, FaAngleLeft, Fa
 import TableFilter from "@/molecules/tables/filter";
 import { Table, TableBody, TableBodyCell, TableFilters, TableFooter, TableHead, TableHeadCell, TableRow } from "@/molecules/table";
 import { useDebounce } from 'use-debounce';
-import dayjs from "dayjs";
 import CreateSubscriptionModal from "@/organisms/subscriptions/createSubscriptionModal";
 import EditSubscriptionModal from "@/organisms/subscriptions/editSubscriptionModal";
 import DeleteSubscriptionModal from "@/organisms/subscriptions/deleteSubscriptionModal";
@@ -23,6 +22,7 @@ import CreateTransferModal from "@/organisms/transfers/createTransferModal";
 import EditTransferModal from "@/organisms/transfers/editTransferModal";
 import DeleteTransferModal from "@/organisms/transfers/deleteTransferModal";
 import { TransferStatus } from "@prisma/client";
+import { DateTime } from "luxon";
 
 export default function Transfers() {
     const [page, setPage] = useState(0);
@@ -116,7 +116,7 @@ export default function Transfers() {
                                                     ${transfer.amount.toFixed(2)}
                                                 </TableBodyCell>
                                                 <TableBodyCell>
-                                                    {dayjs(transfer.date).format("MMM D, YYYY")}
+                                                    {DateTime.fromJSDate(new Date(transfer.date)).toFormat("MMM d, yyyy")}
                                                 </TableBodyCell>
                                                 <TableBodyCell>
                                                     <Menu>

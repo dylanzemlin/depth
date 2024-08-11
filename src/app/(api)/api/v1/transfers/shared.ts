@@ -1,6 +1,6 @@
 import prisma from "@/lib/prisma"
 import { Transaction, TransactionStatus, TransactionType } from "@prisma/client"
-import dayjs from "dayjs"
+import { DateTime } from "luxon"
 
 export async function createTransferTransactions({
     toAccountId,
@@ -64,7 +64,7 @@ export async function createTransferTransactions({
             accountId: fromAccountId,
             categoryId,
             userId: userId,
-            date: dayjs(date).hour(12).minute(0).second(0).toDate(),
+            date: DateTime.fromJSDate(date).toJSDate(),
             amount: amount,
             description,
             status: status as TransactionStatus,
@@ -78,7 +78,7 @@ export async function createTransferTransactions({
             accountId: toAccountId,
             categoryId,
             userId: userId,
-            date: dayjs(date).hour(12).minute(0).second(0).toDate(),
+            date: DateTime.fromJSDate(date).toJSDate(),
             amount,
             description,
             status: status as TransactionStatus,

@@ -8,6 +8,7 @@ import Modal from "@/molecules/modals/modal";
 import { Account, Category } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { DatePicker, NumberInput, Select, SelectItem, TextInput } from "@tremor/react";
+import { DateTime } from "luxon";
 import toast from "react-hot-toast";
 import { FaArrowRight } from "react-icons/fa6";
 
@@ -27,7 +28,7 @@ export default function CreateTransferModal(props?: CreateTransferModalProps) {
             fromAccountId: props?.defaultFromAccountId,
             toAccountId: props?.defaultToAccountId,
             status: "CLEARED",
-            date: new Date()
+            date: DateTime.local()
         }, invalidateQueries: { queryKey: ["transfers"] }
     });
 
@@ -143,10 +144,10 @@ export default function CreateTransferModal(props?: CreateTransferModalProps) {
                     <NumberInput id="amount" name="amount" value={createMutation.data.amount} onValueChange={(e) => createMutation.setProperty("amount", e)} enableStepper={false} placeholder="Amount" />
                 </div>
                 <div>
-                    <label htmlFor="date" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="Date" className="block text-sm font-medium text-gray-700">
                         Date
                     </label>
-                    <DatePicker id="date" value={createMutation.data.date} onValueChange={(e) => createMutation.setProperty("date", new Date(e?.toString() ?? new Date().toString()))} />
+                    <DatePicker id="date" value={createMutation.data.date?.toJSDate()} onValueChange={(e) => createMutation.setProperty("date", DateTime.fromISO(e?.toISOString() ?? DateTime.local().toISO()))} />
                 </div>
             </Modal>
         </>

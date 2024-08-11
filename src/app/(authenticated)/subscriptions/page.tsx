@@ -15,11 +15,11 @@ import { FaArrowsLeftRight, FaEquals, FaGreaterThan, FaLessThan, FaAngleLeft, Fa
 import TableFilter from "@/molecules/tables/filter";
 import { Table, TableBody, TableBodyCell, TableFilters, TableFooter, TableHead, TableHeadCell, TableRow } from "@/molecules/table";
 import { useDebounce } from 'use-debounce';
-import dayjs from "dayjs";
 import { SubscriptionFilter, getSubscriptions } from "@/lib/api/subscriptions";
 import CreateSubscriptionModal from "@/organisms/subscriptions/createSubscriptionModal";
 import EditSubscriptionModal from "@/organisms/subscriptions/editSubscriptionModal";
 import DeleteSubscriptionModal from "@/organisms/subscriptions/deleteSubscriptionModal";
+import { DateTime } from "luxon";
 
 export default function Subscriptions() {
     const [page, setPage] = useState(0);
@@ -98,10 +98,10 @@ export default function Subscriptions() {
                                                     {subscription.frequency}
                                                 </TableBodyCell>
                                                 <TableBodyCell>
-                                                    {dayjs(subscription.startDate).format("MMM D, YYYY")}
+                                                    {DateTime.fromJSDate(new Date(subscription.startDate)).toLocaleString(DateTime.DATE_MED)}
                                                 </TableBodyCell>
                                                 <TableBodyCell>
-                                                    {subscription.endDate ? dayjs(subscription.endDate).format("MMM D, YYYY") : "N/A"}
+                                                    {subscription.endDate ? DateTime.fromJSDate(new Date(subscription.endDate)).toLocaleString(DateTime.DATE_MED) : "N/A"}
                                                 </TableBodyCell>
                                                 <TableBodyCell>
                                                     <Menu>

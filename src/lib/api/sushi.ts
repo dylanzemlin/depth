@@ -8,12 +8,13 @@ export async function updateAccountData(request: NextRequest, accountId?: string
             url.searchParams.set("target_account", accountId);
         }
         
-        await fetch(url.toString(), {
+        const res = await fetch(url.toString(), {
             method: "POST",
             headers: {
                 Authorization: `Bearer ${process.env.SUSHI_SECRET}`
             }
         });
+        console.log(JSON.stringify(await res.json()));
     } catch (error) {
         console.error("Failed to update account balance", error);
     }

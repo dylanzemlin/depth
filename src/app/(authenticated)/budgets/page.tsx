@@ -16,8 +16,8 @@ import CreateBudgetModal from "@/organisms/budgets/createBudgetModal";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import EditBudgetModal from "@/organisms/budgets/editBudgetModal";
 import { classNames } from "@/lib/classnames";
-import dayjs from "dayjs";
 import DeleteBudgetModal from "@/organisms/budgets/deleteBudgetModal";
+import { DateTime } from "luxon";
 
 export default function Budgets() {
     const [page, setPage] = useState(0);
@@ -90,10 +90,10 @@ export default function Budgets() {
                                                     ${budget.amount.toFixed(2)}
                                                 </TableBodyCell>
                                                 <TableBodyCell>
-                                                    {dayjs(budget.startDate).format("MMM D, YYYY")}
+                                                    {DateTime.fromJSDate(new Date(budget.startDate)).toLocaleString(DateTime.DATE_MED)}
                                                 </TableBodyCell>
                                                 <TableBodyCell>
-                                                    {budget.endDate ? dayjs(budget.endDate).format("MMM D, YYYY") : "N/A"}
+                                                    {budget.endDate ? DateTime.fromJSDate(new Date(budget.endDate)).toLocaleString(DateTime.DATE_MED) : "N/A"}
                                                 </TableBodyCell>
                                                 <TableBodyCell>
                                                     <Menu>

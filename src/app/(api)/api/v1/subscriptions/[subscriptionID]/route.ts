@@ -2,7 +2,7 @@ import { updateAccountData } from "@/lib/api/sushi";
 import { withSessionRoute } from "@/lib/iron/wrappers";
 import prisma from "@/lib/prisma";
 import { SubscriptionFrequency } from "@prisma/client";
-import dayjs from "dayjs";
+import { DateTime } from "luxon";
 import { NextRequest, NextResponse } from "next/server";
 import { object, string, number, date } from "yup";
 
@@ -50,8 +50,8 @@ export async function PATCH(request: NextRequest, { params }: { params: { subscr
                 description: description ?? subscription.description,
                 amount: amount ?? subscription.amount,
                 frequency: frequency ?? subscription.frequency,
-                startDate: dayjs(startDate ?? subscription.startDate).hour(12).minute(0).second(0).millisecond(0).toDate(),
-                endDate: (endDate ?? subscription.endDate) ? dayjs(endDate ?? subscription.endDate).hour(12).minute(0).second(0).millisecond(0).toDate() : undefined,
+                startDate: DateTime.fromJSDate(startDate ?? subscription.startDate).toJSDate(),
+                endDate: endDate || subscription.endDate ? DateTime.fromJSDate(endDate ?? subscription.endDate ?? new Date()).toJSDate() : undefined,
                 account: {
                     connect: {
                         id: accountId ?? subscription.accountId
