@@ -151,7 +151,7 @@ export default function Transactions() {
                                                     }
                                                 </TableBodyCell>
                                                 <TableBodyCell>
-                                                    {DateTime.fromJSDate(transaction.date).toLocaleString(DateTime.DATE_MED)}
+                                                    {DateTime.fromJSDate(new Date(transaction.date)).toLocaleString(DateTime.DATE_MED)}
                                                 </TableBodyCell>
                                                 <TableBodyCell>
                                                     <Menu>

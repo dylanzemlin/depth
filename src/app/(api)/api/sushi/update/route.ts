@@ -14,9 +14,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
     const secret = request.headers.get("Authorization")?.replace("Bearer ", "");
-    if (secret !== process.env.SUSHI_SECRET && process.env.NODE_ENV !== "development") {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    if (secret !== process.env.SUSHI_SECRET) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const start = Date.now();
     const updates: any[] = [];
@@ -155,6 +153,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         }
 
         if (areApproxEqual(total, 0) && areApproxEqual(budget.amount, 0)) {
+            continue;
+        }
+
+        if (areApproxEqual(total, budget.amount)) {
             continue;
         }
 
