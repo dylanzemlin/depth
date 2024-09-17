@@ -17,7 +17,7 @@ jobs:
         url: 'https://depth.dylanzeml.in/api/sushi/update'
         method: 'POST'
         bearerToken: ${{ secrets.SUSHI_API_TOKEN }}
-        timeout 15000
+        timeout: 15000  # Setting the timeout to 15000ms (15 seconds)
 
     - name: Output
       run: |
