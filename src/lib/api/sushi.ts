@@ -2,13 +2,12 @@ import { NextRequest } from "next/server";
 
 export async function updateAccountData(request: NextRequest, accountId?: string) {
     try {
-        const url = request.nextUrl.clone();
-        url.pathname = "/api/sushi/update";
+        const base_url = new URL(`${process.env.NEXT_PUBLIC_APP_URL}/api/sushi/update`);
         if (accountId != undefined) {
-            url.searchParams.set("target_account", accountId);
+            base_url.searchParams.set("target_account", accountId);
         }
         
-        const res = await fetch(url.toString(), {
+        const res = await fetch(base_url.toString(), {
             method: "POST",
             headers: {
                 Authorization: `Bearer ${process.env.SUSHI_SECRET}`

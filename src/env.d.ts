@@ -11,5 +11,7 @@ declare namespace NodeJS {
 
         NEXT_PUBLIC_GITHUB_CLIENT_ID: string;
         NEXT_PUBLIC_GITHUB_REDIRECT: string;
+
+        NEXT_PUBLIC_APP_URL: string;
     }
 }
