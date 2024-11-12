@@ -6,7 +6,7 @@ import { getBudgets } from "@/lib/api/budgets";
 import { getHomeData } from "@/lib/api/home";
 import { useQuery } from "@tanstack/react-query";
 import { Card, LineChart, ProgressBar } from "@tremor/react";
-import { useId } from "react";
+import { useEffect, useId, useState } from "react";
 import { FaArrowDown, FaArrowUp } from "react-icons/fa6";
 import { DateTime } from "luxon";
 
@@ -72,11 +72,20 @@ type HomeData = {
     expenses: number;
     incomeMapByDay: Record<number, number>;
     expenseMapByDay: Record<number, number>;
+    oldestYear: number;
 }
 
 export default function Home() {
-    const homeQuery = useQuery({ queryKey: ["home"], queryFn: getHomeData });
     const budgetQuery = useQuery({ queryKey: ["budgets", { filter: {} }], queryFn: getBudgets });
+    
+    const [year, setYear] = useState<number>(DateTime.local().year);
+    const [month, setMonth] = useState<number>(DateTime.local().month);
+    const homeQuery = useQuery({ queryKey: ["home", { year: year ?? DateTime.local().year, month: month ?? DateTime.local().month }], queryFn: getHomeData });
+
+    useEffect(() => {
+        homeQuery.refetch();
+    }, [year, month]);
+
 
     if (homeQuery.isPending || budgetQuery.isPending) {
         return <FullLoading injectMain />
@@ -92,11 +101,15 @@ export default function Home() {
     const expensesPercentage = homeData?.expenses / (homeData?.income + homeData?.expenses) * 100;
 
     const dayNumToDisplayDate = (dayNum: number) => {
-        return DateTime.local().set({ day: dayNum }).toFormat('MMMM dd');
+        return DateTime.fromObject({ year, month, day: dayNum }).toFormat('MMM dd');
     }
 
+    const daysInMonthFromYearMonth = (year: number, month: number) => {
+        if (year == DateTime.local().year && month == DateTime.local().month) return DateTime.local().day;
+        return DateTime.fromObject({ year, month }).daysInMonth;
+    }
 
-    const graphData = Array.from({ length: DateTime.local().day }, (_, i) => {
+    const graphData = Array.from({ length: daysInMonthFromYearMonth(year, month) ?? 0 }, (_, i) => {
         const date = i + 1;
         return {
             date: dayNumToDisplayDate(date),
@@ -104,7 +117,6 @@ export default function Home() {
             Deposits: homeData?.incomeMapByDay[date] ?? 0
         }
     });
-
     const difference = (homeData?.income ?? 0) - (homeData?.expenses ?? 0)
     return (
         <main className="flex min-h-screen w-full flex-col gap-4 p-4 md:p-12 overflow-hidden overflow-y-auto">
@@ -112,6 +124,35 @@ export default function Home() {
                 <h1 className="scroll-mt-10 text-3xl mb-2">
                     Overview
                 </h1>
+                <div className="w-full mb-8">
+                    <div className="flex flex-row bg-slate-200 rounded-md overflow-hidden rounded-b-none">
+                        {
+                            Array.from({ length: DateTime.local().year - homeData?.oldestYear }, (_, i) => {
+                                return (
+                                    <div className={`p-2 cursor-pointer hover:border-t-2 hover:border-indigo-500 ${year == homeData?.oldestYear + i + 1 ? "border-t-2 border-indigo-500" : "border-t-2 border-transparent"}`} onClick={() => setYear(homeData?.oldestYear + i + 1)}>
+                                        <p className="text-sm">
+                                            {homeData?.oldestYear + i + 1}
+                                        </p>
+                                    </div>
+                                )
+                            }).reverse()
+                        }
+                    </div>
+
+                    <div className="flex flex-row bg-slate-200 rounded-md rounded-t-none overflow-hidden">
+                        {
+                            Array.from({ length: 12 }, (_, i) => {
+                                return (
+                                    <div className={`p-2 cursor-pointer hover:border-t-2 hover:border-indigo-500 ${month == i + 1 ? "border-t-2 border-indigo-500" : "border-t-2 border-transparent"}`} onClick={() => setMonth((i as number) + 1)}>
+                                        <p className="text-sm">
+                                            {DateTime.fromObject({ year, month: i + 1 }).toFormat('MMM')}
+                                        </p>
+                                    </div>
+                                )
+                            })
+                        }
+                    </div>
+                </div>
                 <div className="flex gap-4 flex-wrap">
                     <Card className="max-w-sm flex justify-between">
                         <div>
@@ -119,7 +160,8 @@ export default function Home() {
                                 Total Balance
                             </h4>
                             <p className="font-semibold text-2xl">
-                                ${homeData?.totalBalance.toFixed(2) ?? 0}
+                                {/* ${homeData?.totalBalance.toFixed(2) ?? 0} */}
+                                ${0}
                             </p>
                         </div>
 
@@ -132,6 +174,7 @@ export default function Home() {
                                     difference > 0 ? <FaArrowUp className="text-green-500" /> : <FaArrowDown className="text-red-500" />
                                 }
                                 ${Math.abs(difference).toFixed(2)}
+                                ${0}
                             </p>
                         </div>
                     </Card>
@@ -142,12 +185,14 @@ export default function Home() {
                         <div className="flex gap-2 items-center">
                             <p className="font-semibold text-2xl">
                                 ${homeData?.income.toFixed(2) ?? 0}
+                                ${0}
                             </p>
                             <span className="text-lg">
                                 vs
                             </span>
                             <p className="font-semibold text-2xl">
-                                ${homeData?.expenses.toFixed(2) ?? 0}
+                                {/* ${homeData?.expenses.toFixed(2) ?? 0} */}
+                                ${0}
                             </p>
                         </div>
                         <p className="mt-4 flex items-center justify-between text-tremor-default text-tremor-content dark:text-dark-tremor-content">

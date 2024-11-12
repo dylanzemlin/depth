@@ -4,13 +4,54 @@ import { Account, TransactionType } from "@prisma/client";
 import { DateTime } from "luxon";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(request: NextRequest): Promise<NextResponse>
-{
+export async function GET(request: NextRequest): Promise<NextResponse> {
     const session = await withSessionRoute();
-    if (session.user == null)
-    {
+    if (session.user == null) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    // Get Month/Year params from the request
+    const userMonth = request.nextUrl.searchParams.get("month");
+    const userYear = request.nextUrl.searchParams.get("year");
+
+    let start: DateTime | null = null;
+    let end: DateTime | null = null;
+    const earliestTransaction = await prisma.transaction.findMany({
+        where: {
+            userId: session.user.id
+        },
+        orderBy: {
+            date: "asc"
+        },
+        take: 1
+    });
+
+    if (userMonth != null && userYear != null) {
+        // Parse when the month is in formation 1-12 and year is 4 digits
+        const month = parseInt(userMonth);
+        const year = parseInt(userYear);
+
+        if (isNaN(month) || isNaN(year)) {
+            // They want all time, so get the earliest tarnsaction
+            if (earliestTransaction.length > 0) {
+                start = DateTime.fromJSDate(earliestTransaction[0].date, { zone: "utc" });
+                end = start.endOf("month");
+            }
+        } else {
+            if (month >= 1 && month <= 12 && year >= 1000 && year <= 9999) {
+                start = DateTime.fromObject({ year: year, month: month, day: 1 }, { zone: "utc" });
+                end = start.endOf("month");
+            }
+        }
+    }
+
+    if (start == null || end == null) {
+        start = DateTime.utc().startOf("month");
+        end = start.endOf("month");
+    }
+
+    console.log(start);
+    console.log(end);
 
     const accounts = await prisma.account.findMany({
         where: {
@@ -20,16 +61,17 @@ export async function GET(request: NextRequest): Promise<NextResponse>
 
     // Get total balance
     const totalBalance = accounts.reduce((acc: number, account: Account) => acc + account.balance, 0);
+    
+    // TODO: Get all transactions after the "end" date and adjust the totalBalance
 
     // Calculate total income/expenses for this month
     // Find all transactions for the account for this month
-    const now = DateTime.utc()
     const transactions = await prisma.transaction.findMany({
         where: {
             userId: session.user.id,
             date: {
-                gte: now.startOf("month").toJSDate(),
-                lt: now.endOf("month").toJSDate()
+                gte: start.toJSDate(),
+                lte: end.toJSDate()
             }
         },
         orderBy: {
@@ -61,6 +103,7 @@ export async function GET(request: NextRequest): Promise<NextResponse>
         expenses,
         incomeMapByDay,
         expenseMapByDay,
-        pureTransactions
+        pureTransactions,
+        oldestYear: earliestTransaction.length > 0 ? earliestTransaction[0].date.getFullYear() : DateTime.local().year
     });
 }
