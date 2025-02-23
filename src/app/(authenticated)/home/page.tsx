@@ -5,7 +5,7 @@ import FullLoading from "@/molecules/feedback/FullLoading";
 import { getBudgets } from "@/lib/api/budgets";
 import { getHomeData } from "@/lib/api/home";
 import { useQuery } from "@tanstack/react-query";
-import { Card, LineChart, ProgressBar } from "@tremor/react";
+import { Card, LineChart, ProgressBar, Select, SelectItem } from "@tremor/react";
 import { useEffect, useId, useState } from "react";
 import { FaArrowDown, FaArrowUp } from "react-icons/fa6";
 import { DateTime } from "luxon";
@@ -124,8 +124,31 @@ export default function Home() {
                 <h1 className="scroll-mt-10 text-3xl mb-2">
                     Overview
                 </h1>
-                <div className="w-full mb-8">
-                    <div className="flex flex-row bg-slate-200 rounded-md overflow-hidden rounded-b-none">
+                <div className="w-full mb-8 flex gap-4 flex-row">
+                    <Select value={year.toString()} onValueChange={(e) => setYear(parseInt(e))} className="w-1/2">
+                        {
+                            Array.from({ length: DateTime.local().year - homeData?.oldestYear }, (_, i) => {
+                                return (
+                                    <SelectItem value={`${homeData?.oldestYear + i + 1}`}>
+                                        {homeData?.oldestYear + i + 1}
+                                    </SelectItem>
+                                )
+                            }).reverse()
+                        }
+                    </Select>
+
+                    <Select value={month.toString()} onValueChange={(e) => setMonth(parseInt(e))} className="w-1/2">
+                        {
+                            Array.from({ length: 12 }, (_, i) => {
+                                return (
+                                    <SelectItem value={`${i + 1}`}>
+                                        {DateTime.fromObject({ month: i + 1 }).toFormat('MMMM')}
+                                    </SelectItem>
+                                )
+                            })
+                        }
+                    </Select>
+                    {/* <div className="flex flex-row bg-slate-200 rounded-md overflow-hidden rounded-b-none">
                         {
                             Array.from({ length: DateTime.local().year - homeData?.oldestYear }, (_, i) => {
                                 return (
@@ -151,7 +174,7 @@ export default function Home() {
                                 )
                             })
                         }
-                    </div>
+                    </div> */}
                 </div>
                 <div className="flex gap-4 flex-wrap">
                     <Card className="max-w-sm flex justify-between">
@@ -160,8 +183,7 @@ export default function Home() {
                                 Total Balance
                             </h4>
                             <p className="font-semibold text-2xl">
-                                {/* ${homeData?.totalBalance.toFixed(2) ?? 0} */}
-                                ${0}
+                                ${homeData?.totalBalance.toFixed(2) ?? 0}
                             </p>
                         </div>
 
@@ -174,7 +196,6 @@ export default function Home() {
                                     difference > 0 ? <FaArrowUp className="text-green-500" /> : <FaArrowDown className="text-red-500" />
                                 }
                                 ${Math.abs(difference).toFixed(2)}
-                                ${0}
                             </p>
                         </div>
                     </Card>
@@ -185,14 +206,12 @@ export default function Home() {
                         <div className="flex gap-2 items-center">
                             <p className="font-semibold text-2xl">
                                 ${homeData?.income.toFixed(2) ?? 0}
-                                ${0}
                             </p>
                             <span className="text-lg">
                                 vs
                             </span>
                             <p className="font-semibold text-2xl">
-                                {/* ${homeData?.expenses.toFixed(2) ?? 0} */}
-                                ${0}
+                                ${homeData?.expenses.toFixed(2) ?? 0}
                             </p>
                         </div>
                         <p className="mt-4 flex items-center justify-between text-tremor-default text-tremor-content dark:text-dark-tremor-content">

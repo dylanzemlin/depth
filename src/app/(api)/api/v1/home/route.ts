@@ -60,9 +60,25 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     });
 
     // Get total balance
-    const totalBalance = accounts.reduce((acc: number, account: Account) => acc + account.balance, 0);
+    let totalBalance = accounts.reduce((acc: number, account: Account) => acc + account.balance, 0);
     
     // TODO: Get all transactions after the "end" date and adjust the totalBalance
+    const allTransactionsAfterEnd = await prisma.transaction.findMany({
+        where: {
+            userId: session.user.id,
+            date: {
+                gt: end.toJSDate()
+            }
+        }
+    });
+
+    // For all income transactions, remove it from the total balance
+    const incomeTransactions = allTransactionsAfterEnd.filter(t => t.type == TransactionType.INCOME);
+    totalBalance -= incomeTransactions.reduce((acc, t) => acc + t.amount, 0);
+
+    // For all expense transactions, add it to the total balance
+    const expenseTransactions = allTransactionsAfterEnd.filter(t => t.type == TransactionType.EXPENSE);
+    totalBalance += expenseTransactions.reduce((acc, t) => acc + t.amount, 0);
 
     // Calculate total income/expenses for this month
     // Find all transactions for the account for this month
